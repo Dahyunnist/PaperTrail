@@ -10,6 +10,7 @@ from pathlib import Path
 from .s1_index import database_summary, index_selection, inspect_document, search
 from .retrieval import build_vector_index, retrieve
 from .qa import ask, conversation_history
+from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 
 
 def _print_json(value: object) -> None:
@@ -55,6 +56,29 @@ def _parser() -> argparse.ArgumentParser:
     history_parser = commands.add_parser("history", help="查看本地对话及其已核验证据")
     history_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     history_parser.add_argument("--conversation-id", required=True)
+
+    compare_parser = commands.add_parser("compare", help="跨论文收集可核验原文，等待人工立场标注")
+    compare_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    compare_parser.add_argument("--topic", required=True)
+    compare_parser.add_argument("--claim", required=True)
+    compare_parser.add_argument("--limit-papers", type=int, default=8)
+    compare_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid"], default="bm25")
+
+    label_parser = commands.add_parser("compare-label", help="为比较证据标记支持/反对/条件/背景")
+    label_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    label_parser.add_argument("--evidence-id", required=True)
+    label_parser.add_argument("--label", choices=["supports", "contradicts", "conditions", "context", "unclear"], required=True)
+    label_parser.add_argument("--rationale", default="")
+
+    report_parser = commands.add_parser("compare-report", help="读取跨论文证据对照和标注汇总")
+    report_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    report_parser.add_argument("--comparison-id", required=True)
+
+    gap_parser = commands.add_parser("compare-gap", help="记录待复核的研究空白候选")
+    gap_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    gap_parser.add_argument("--comparison-id", required=True)
+    gap_parser.add_argument("--note", required=True)
+    gap_parser.add_argument("--evidence-id", action="append", default=[])
     return parser
 
 
@@ -98,6 +122,18 @@ def main(argv: list[str] | None = None) -> int:
             _print_json(ask(args.db, args.question, args.conversation_id, args.limit, args.mode))
         elif args.command == "history":
             _print_json(conversation_history(args.db, args.conversation_id))
+        elif args.command == "compare":
+            _print_json(compare_papers(args.db, args.topic, args.claim, args.limit_papers, args.mode))
+        elif args.command == "compare-label":
+            _print_json(label_evidence(args.db, args.evidence_id, args.label, args.rationale))
+        elif args.command == "compare-report":
+            result = comparison_report(args.db, args.comparison_id)
+            if result is None:
+                print("没有找到该比较记录。")
+                return 1
+            _print_json(result)
+        elif args.command == "compare-gap":
+            _print_json(add_gap_candidate(args.db, args.comparison_id, args.note, args.evidence_id))
         return 0
     except (ValueError, OSError) as exc:
         print(f"PaperTrail: {exc}", file=sys.stderr)

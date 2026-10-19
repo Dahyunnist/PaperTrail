@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-S0–S2 已完成；当前执行 S3：受检索证据约束的问答和引用核验。最终产品体验、证据边界与 S0–S5 阶段归属见 [产品契约](docs/product-contract.md)。
+S0–S3 已完成；当前执行 S4：跨论文证据对照和研究空白候选。最终产品体验、证据边界与 S0–S5 阶段归属见 [产品契约](docs/product-contract.md)。
 
 ## 源资料
 
@@ -32,3 +32,5 @@ python -m pytest
 检索命令支持 `--mode bm25|vector|hybrid`；需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。
 
 S3 使用 `python -m papertrail ask --db .local/papertrail.sqlite3 --question "你的问题"` 获取经 SHA、页码和原文校验的摘录；通过返回的 `conversation_id` 传给后续 `ask --conversation-id ...` 保留短上下文，或使用 `history --conversation-id ...` 回顾。当前没有配置生成模型，因此 S3 只给出可核验摘录，不自动撰写综合答案。
+
+S4 使用 `python -m papertrail compare --db .local/papertrail.sqlite3 --topic "主题" --claim "待比较论断"` 收集并列原文；通过 `compare-label` 逐条标记 `supports|contradicts|conditions|context|unclear`，也可通过 `compare-gap` 记录用户提出、待复核的研究空白候选。`compare-report` 汇总标注和证据。
