@@ -6,7 +6,8 @@ import fitz
 import yaml
 
 from papertrail.audit import _hash
-from papertrail.s1_index import _title_from_pdf, database_summary, index_selection, inspect_document, search
+from papertrail.s1_index import _title_from_pdf, database_summary, index_selection, inspect_document, parse_pdf, search
+from papertrail.retrieval import build_vector_index, hybrid_search, vector_search
 
 
 def _pdf(path: Path, second_page: str = "latepagekeyword appears on the second physical page.") -> None:
@@ -74,6 +75,22 @@ def test_s1_indexes_text_pages_notes_versions_and_exact_duplicates(tmp_path):
     doi_hits = search(db, "10.4242/test.1234", limit=5, source_type="original_pdf")
     assert doi_hits and doi_hits[0]["pdf_page"] == 1
     assert "AUC" in search(db, "AUC", limit=5)[0]["text"]
+    artifact = tmp_path / "local" / "vectors.joblib"
+    built = build_vector_index(db, artifact)
+    assert built["chunks"] == 15
+    vector_hits = vector_search(db, "latepagekeyword", limit=3, source_type="original_pdf", artifact=artifact)
+    hybrid_hits = hybrid_search(db, "latepagekeyword", limit=3, source_type="original_pdf", artifact=artifact)
+    assert vector_hits and all(hit["source_type"] == "original_pdf" for hit in vector_hits)
+    assert hybrid_hits and hybrid_hits[0]["rank_score"] > 0
+    incremental_note = root_a / "new-note.md"
+    incremental_note.write_text("# Incremental note\n\nA newly indexed local semantic retrieval marker.\n", encoding="utf-8")
+    selected.append({"root_id": "a", "file_name": incremental_note.name,
+                     "sha256": _hash(incremental_note), "kind": "md", "source_type": "reading_note"})
+    manifest.write_text("".join(json.dumps(row) + "\n" for row in selected), encoding="utf-8")
+    assert index_selection(db, sources, manifest)["added"] == 1
+    refreshed_hits = vector_search(db, "newly indexed local semantic retrieval marker", limit=3,
+                                   source_type="reading_note", artifact=artifact)
+    assert refreshed_hits and "newly indexed" in refreshed_hits[0]["text"]
 
     inspection = inspect_document(db, _hash(original)[:16])
     assert inspection is not None
@@ -88,3 +105,20 @@ def test_pdf_title_ignores_publisher_banner():
     title = _title_from_pdf(path, {"title": "Published as a conference paper at ICLR 2026"},
                             "Published as a conference paper at ICLR 2026\n\nA Useful Scientific Paper Title\n")
     assert title == "A Useful Scientific Paper Title"
+
+
+def test_ocr_fallback_records_unavailable_engine(tmp_path, monkeypatch):
+    path = tmp_path / "short-text.pdf"
+    doc = fitz.open()
+    doc.new_page().insert_text((40, 50), "scan")
+    doc.save(path)
+    doc.close()
+
+    def missing_tesseract(self, **kwargs):
+        raise RuntimeError("Tesseract is not installed")
+
+    monkeypatch.setattr(fitz.Page, "get_textpage_ocr", missing_tesseract, raising=False)
+    parsed = parse_pdf(path, "original_pdf", ocr_fallback=True)
+    assert parsed.low_text_pages == [1]
+    assert not parsed.ocr_pages
+    assert "Tesseract is not installed" in parsed.ocr_errors[0]

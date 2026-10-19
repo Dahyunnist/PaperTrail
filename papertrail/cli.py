@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from .s1_index import database_summary, index_selection, inspect_document, search
+from .retrieval import build_vector_index, retrieve
 
 
 def _print_json(value: object) -> None:
@@ -22,12 +23,19 @@ def _parser() -> argparse.ArgumentParser:
     index_parser.add_argument("--sources", type=Path, required=True)
     index_parser.add_argument("--selection", type=Path, required=True)
     index_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    index_parser.add_argument("--ocr-fallback", action="store_true", help="对低文本 PDF 页尝试本机 Tesseract OCR；OCR 派生文本会单独标记")
 
     search_parser = commands.add_parser("search", help="检索并显示来源、PDF 页码与 BM25 排序分")
     search_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     search_parser.add_argument("--query", required=True)
     search_parser.add_argument("--limit", type=int, default=5)
     search_parser.add_argument("--source-type", choices=["original_pdf", "reading_note"])
+    search_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid"], default="bm25")
+    search_parser.add_argument("--vector-artifact", type=Path)
+
+    vector_parser = commands.add_parser("vector-build", help="建立本地潜在语义向量索引")
+    vector_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    vector_parser.add_argument("--artifact", type=Path)
 
     inspect_parser = commands.add_parser("inspect", help="查看文献版本、解析情况、页码和索引块数量")
     inspect_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
@@ -46,19 +54,26 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
         if args.command == "index":
-            _print_json(index_selection(args.db, args.sources, args.selection))
+            _print_json(index_selection(args.db, args.sources, args.selection, args.ocr_fallback))
         elif args.command == "search":
-            results = search(args.db, args.query, args.limit, args.source_type)
+            results = retrieve(args.db, args.query, args.limit, args.source_type, args.mode, args.vector_artifact)
             if not results:
                 print("没有匹配结果。请确认索引已建立，并检查英文术语/题名关键词。")
                 return 0
             for rank, result in enumerate(results, 1):
                 page = f"PDF 第 {result['pdf_page']} 页" if result["pdf_page"] is not None else "Markdown 笔记"
-                print(f"[{rank}] BM25={result['rank_score']:.5f} | {result['source_type']} | {result['title']} | {page}")
+                print(f"[{rank}] score={result['rank_score']:.5f} | {result['source_type']} | {result['title']} | {page}")
                 print(f"    章节：{result['section']}")
                 print(f"    SHA-256：{result['sha256']}")
+                if result.get("text_origin") == "ocr_derived":
+                    print("    文本来源：OCR 派生文本（仅作检索线索，引用前必须人工核验原页）")
                 print(f"    路径：{result['path']}")
                 print(f"    文本：{result['text'][:500].replace(chr(10), ' ')}")
+                if result.get("retrieval_signals"):
+                    print(f"    信号：{', '.join(result['retrieval_signals'])}")
+        elif args.command == "vector-build":
+            artifact = args.artifact or args.db.with_name(args.db.stem + ".vectors.joblib")
+            _print_json(build_vector_index(args.db, artifact))
         elif args.command == "inspect":
             result = inspect_document(args.db, args.document)
             if result is None:

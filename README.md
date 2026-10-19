@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-S0 已完成；当前执行 S1：文本 PDF/Markdown 解析与 SQLite FTS5 关键词检索。最终产品体验、证据边界与 S0–S5 阶段归属见 [产品契约](docs/product-contract.md)。
+S0–S2 已完成；当前执行 S3：受检索证据约束的问答和引用核验。最终产品体验、证据边界与 S0–S5 阶段归属见 [产品契约](docs/product-contract.md)。
 
 ## 源资料
 
@@ -22,9 +22,11 @@ python -m pytest
 
 1. S0：资料盘点、人工黄金集与基线设计。
 2. S1：文本 PDF/笔记解析与 SQLite FTS5 关键词检索基线。
-3. S2：混合召回、增量索引和 OCR；按黄金集、延迟、成本评测 MQE/HyDE 等候选。
-4. S3：多轮证据问答、claim 级引文核验和拒答。
+3. S2：本地向量候选、BM25/RRF 检索与增量向量索引；OCR 作为可选回退。
+4. S3：证据约束回答、claim 级引文核验和拒答。
 5. S4：跨论文比较、版本谱系与冲突对照。
 6. S5：Web 学习助手、PDF 管理、个人笔记/回顾、进度和学习报告导出。
 
-每阶段提交并等待确认后再进入下一阶段。
+每阶段形成独立 Git 提交，提交 message 使用中文。
+
+检索命令支持 `--mode bm25|vector|hybrid`；需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。

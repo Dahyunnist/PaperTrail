@@ -33,6 +33,7 @@ class ParsedBlock:
     page_number: int | None
     block_index: int
     text: str
+    text_origin: str = "native_text"
 
 
 @dataclass
@@ -45,6 +46,8 @@ class ParsedDocument:
     parse_status: str
     source_type: str
     blocks: list[ParsedBlock]
+    ocr_pages: list[int]
+    ocr_errors: list[str]
 
 
 def _title_from_pdf(path: Path, metadata: dict[str, Any], first_page: str) -> str:
@@ -65,7 +68,7 @@ def _looks_like_heading(text: str, sizes: list[float], bold_flags: list[bool], b
     return numbered or larger or bold or short_unpunctuated
 
 
-def parse_pdf(path: Path, source_type: str) -> ParsedDocument:
+def parse_pdf(path: Path, source_type: str, ocr_fallback: bool = False) -> ParsedDocument:
     with fitz.open(path) as doc:
         page_count = doc.page_count
         page_texts = [page.get_text("text") for page in doc]
@@ -73,13 +76,28 @@ def parse_pdf(path: Path, source_type: str) -> ParsedDocument:
         metadata = doc.metadata or {}
         title = _title_from_pdf(path, metadata, first_page)
         doi_candidates = sorted({m.rstrip(".,;)").casefold() for m in DOI_RE.findall("\n".join(page_texts[:2]))})
-        parseable_pages = [i for i, text in enumerate(page_texts, 1) if len(WORD_RE.findall(text)) >= 12]
-        low_text_pages = [i for i, text in enumerate(page_texts, 1) if len(WORD_RE.findall(text)) < 12]
+        ocr_pages: list[int] = []
+        ocr_errors: list[str] = []
+        ocr_text_by_page: dict[int, Any] = {}
+        if ocr_fallback:
+            for page_no, page in enumerate(doc, 1):
+                if len(WORD_RE.findall(page_texts[page_no - 1])) >= 12:
+                    continue
+                try:
+                    textpage = page.get_textpage_ocr(language="eng", dpi=200, full=True)
+                    recognized = page.get_text("text", textpage=textpage)
+                    if len(WORD_RE.findall(recognized)) >= 12:
+                        page_texts[page_no - 1] = recognized
+                        ocr_pages.append(page_no)
+                        ocr_text_by_page[page_no] = textpage
+                except Exception as exc:
+                    ocr_errors.append(f"PDF 第 {page_no} 页：{type(exc).__name__}: {exc}")
         blocks: list[ParsedBlock] = []
         current_section = "Document"
         block_index = 0
         for page_no, page in enumerate(doc, 1):
-            page_dict = page.get_text("dict", sort=True)
+            origin = "ocr_derived" if page_no in ocr_text_by_page else "native_text"
+            page_dict = page.get_text("dict", textpage=ocr_text_by_page.get(page_no), sort=True)
             spans = [span for block in page_dict.get("blocks", []) if block.get("type") == 0
                      for line in block.get("lines", []) for span in line.get("spans", []) if span.get("text", "").strip()]
             font_sizes = [float(span.get("size", 10.0)) for span in spans]
@@ -103,7 +121,7 @@ def parse_pdf(path: Path, source_type: str) -> ParsedDocument:
                 if _looks_like_heading(text, sizes, bold_flags, body_size):
                     current_section = " ".join(text.split())[:200]
                     # Keep the heading searchable as a short child block.
-                blocks.append(ParsedBlock(current_section, page_no, block_index, text))
+                blocks.append(ParsedBlock(current_section, page_no, block_index, text, origin))
                 block_index += 1
         # Repeated running heads/footers pollute lexical ranking (especially the repeated
         # paper title). Keep the title in metadata, but omit boilerplate blocks from FTS.
@@ -115,6 +133,8 @@ def parse_pdf(path: Path, source_type: str) -> ParsedDocument:
         repetition_threshold = max(2, math.ceil(page_count * 0.25))
         running_matter = {key for key, pages in repeated_pages.items() if len(pages) >= repetition_threshold}
         blocks = [block for block in blocks if normalize_title(block.text) not in running_matter]
+        parseable_pages = [i for i, text in enumerate(page_texts, 1) if len(WORD_RE.findall(text)) >= 12]
+        low_text_pages = [i for i, text in enumerate(page_texts, 1) if len(WORD_RE.findall(text)) < 12]
     if page_count == 0:
         status = "empty_pdf"
     elif not parseable_pages:
@@ -123,7 +143,10 @@ def parse_pdf(path: Path, source_type: str) -> ParsedDocument:
         status = "partial_text"
     else:
         status = "text"
-    return ParsedDocument(title, doi_candidates, page_count, len(parseable_pages), low_text_pages, status, source_type, blocks)
+    if ocr_pages:
+        status = "ocr_text" if not low_text_pages else "partial_ocr_text"
+    return ParsedDocument(title, doi_candidates, page_count, len(parseable_pages), low_text_pages,
+                          status, source_type, blocks, ocr_pages, ocr_errors)
 
 
 def _split_long(text: str, limit: int = MAX_CHUNK_CHARS) -> list[tuple[str, int, int]]:
@@ -177,7 +200,7 @@ def parse_markdown(path: Path, source_type: str) -> ParsedDocument:
     flush()
     blocks = [ParsedBlock(section, None, i, value) for i, (section, value) in enumerate(sections)]
     doi_candidates = sorted({m.rstrip(".,;)").casefold() for m in DOI_RE.findall(text[:250_000])})
-    return ParsedDocument(title, doi_candidates, None, None, [], "text", source_type, blocks)
+    return ParsedDocument(title, doi_candidates, None, None, [], "text", source_type, blocks, [], [])
 
 
 def _identity(title: str, doi_candidates: list[str]) -> tuple[str, str, str]:
@@ -215,6 +238,8 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
             low_text_pages_json TEXT NOT NULL,
             parse_status TEXT NOT NULL,
             doi_candidates_json TEXT NOT NULL,
+            ocr_pages_json TEXT NOT NULL DEFAULT '[]',
+            ocr_errors_json TEXT NOT NULL DEFAULT '[]',
             parser_version TEXT NOT NULL,
             indexed_at TEXT NOT NULL
         );
@@ -253,11 +278,14 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
             char_start INTEGER NOT NULL,
             char_end INTEGER NOT NULL,
             parent_chunk_id TEXT NOT NULL,
+            text_origin TEXT NOT NULL DEFAULT 'native_text',
             body TEXT NOT NULL,
             UNIQUE(version_id, page_number, block_index, piece_index)
         );
         CREATE INDEX IF NOT EXISTS idx_versions_paper ON paper_versions(paper_id);
         CREATE INDEX IF NOT EXISTS idx_chunks_version_page ON chunks(version_id, page_number);
+        CREATE TABLE IF NOT EXISTS app_metadata (key TEXT PRIMARY KEY,value TEXT NOT NULL);
+        INSERT OR IGNORE INTO app_metadata(key,value) VALUES('index_revision','0');
         CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
             chunk_id UNINDEXED, title, section_title, body,
             tokenize='unicode61 remove_diacritics 2'
@@ -265,6 +293,14 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         PRAGMA user_version=1;
         """
     )
+    version_columns = {row[1] for row in conn.execute("PRAGMA table_info(paper_versions)")}
+    if "ocr_pages_json" not in version_columns:
+        conn.execute("ALTER TABLE paper_versions ADD COLUMN ocr_pages_json TEXT NOT NULL DEFAULT '[]'")
+    if "ocr_errors_json" not in version_columns:
+        conn.execute("ALTER TABLE paper_versions ADD COLUMN ocr_errors_json TEXT NOT NULL DEFAULT '[]'")
+    chunk_columns = {row[1] for row in conn.execute("PRAGMA table_info(chunks)")}
+    if "text_origin" not in chunk_columns:
+        conn.execute("ALTER TABLE chunks ADD COLUMN text_origin TEXT NOT NULL DEFAULT 'native_text'")
 
 
 def open_database(path: Path) -> sqlite3.Connection:
@@ -326,11 +362,12 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
         _remove_version_content(conn, version_id)
     stat = path.stat()
     conn.execute(
-        "INSERT OR REPLACE INTO paper_versions(version_id,paper_id,sha256,source_type,file_name,file_size,page_count,parseable_pages,low_text_pages_json,parse_status,doi_candidates_json,parser_version,indexed_at) "
-        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT OR REPLACE INTO paper_versions(version_id,paper_id,sha256,source_type,file_name,file_size,page_count,parseable_pages,low_text_pages_json,parse_status,doi_candidates_json,ocr_pages_json,ocr_errors_json,parser_version,indexed_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (version_id, paper_id, sha256, item["source_type"], path.name, stat.st_size,
          parsed.page_count, parsed.parseable_pages, json.dumps(parsed.low_text_pages), parsed.parse_status,
-         json.dumps(parsed.doi_candidates), PARSER_VERSION, datetime.now(timezone.utc).isoformat()),
+         json.dumps(parsed.doi_candidates), json.dumps(parsed.ocr_pages), json.dumps(parsed.ocr_errors),
+         PARSER_VERSION, datetime.now(timezone.utc).isoformat()),
     )
     conn.execute("INSERT OR IGNORE INTO source_locations(version_id,root_id,absolute_path) VALUES(?,?,?)",
                  (version_id, item["root_id"], str(path)))
@@ -364,10 +401,10 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
         for piece_index, (body, start, end) in enumerate(pieces):
             chunk_id = hashlib.sha256(f"{version_id}|{PARSER_VERSION}|chunk|{block.page_number}|{block.block_index}|{piece_index}".encode("utf-8")).hexdigest()
             conn.execute(
-                "INSERT INTO chunks(chunk_id,version_id,section_id,source_type,title,section_title,page_number,block_index,piece_index,char_start,char_end,parent_chunk_id,body) "
-                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO chunks(chunk_id,version_id,section_id,source_type,title,section_title,page_number,block_index,piece_index,char_start,char_end,parent_chunk_id,text_origin,body) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (chunk_id, version_id, section_id, item["source_type"], parsed.title, block.section_title,
-                 block.page_number, block.block_index, piece_index, start, end, parent_id, body),
+                 block.page_number, block.block_index, piece_index, start, end, parent_id, block.text_origin, body),
             )
             conn.execute("INSERT INTO chunks_fts(chunk_id,title,section_title,body) VALUES(?,?,?,?)",
                          (chunk_id, parsed.title, block.section_title, body))
@@ -375,7 +412,7 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
     return {"added": 1, "duplicate": 0, "sections": len(section_groups), "chunks": child_count}
 
 
-def index_selection(database: Path, sources: Path, selection: Path) -> dict[str, Any]:
+def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback: bool = False) -> dict[str, Any]:
     selected = _selection_rows(selection, sources)
     conn = open_database(database)
     totals = {"selected": len(selected), "added": 0, "duplicates": 0, "sections": 0, "chunks": 0, "low_text_documents": 0}
@@ -392,7 +429,7 @@ def index_selection(database: Path, sources: Path, selection: Path) -> dict[str,
                 continue
             seen_sha.add(item["sha256"])
             try:
-                parsed = parse_pdf(item["path"], item["source_type"]) if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"])
+                parsed = parse_pdf(item["path"], item["source_type"], ocr_fallback) if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"])
                 with conn:
                     counts = _insert_document(conn, item, parsed)
                 totals["added"] += counts["added"]
@@ -402,9 +439,16 @@ def index_selection(database: Path, sources: Path, selection: Path) -> dict[str,
                 if parsed.low_text_pages:
                     totals["low_text_documents"] += 1
                     issues.append({"file_name": item["file_name"], "issue": "low_text_pages", "pages": ",".join(map(str, parsed.low_text_pages))})
+                if parsed.ocr_errors:
+                    issues.append({"file_name": item["file_name"], "issue": "ocr_errors", "details": " | ".join(parsed.ocr_errors)})
+                if parsed.ocr_pages:
+                    issues.append({"file_name": item["file_name"], "issue": "ocr_derived_pages", "pages": ",".join(map(str, parsed.ocr_pages))})
             except Exception as exc:
                 issues.append({"file_name": item["file_name"], "issue": f"{type(exc).__name__}: {exc}"})
         conn.commit()
+        if totals["added"]:
+            conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
+            conn.commit()
     finally:
         conn.close()
     totals["issues"] = issues
@@ -427,7 +471,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
         conn = open_database(database)
         try:
             sql = (
-                "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.body,"
+                "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
                 "p.paper_id,v.sha256,v.parse_status,l.absolute_path FROM version_dois d "
                 "JOIN paper_versions v ON v.version_id=d.version_id JOIN papers p ON p.paper_id=v.paper_id "
                 "JOIN chunks c ON c.version_id=v.version_id JOIN source_locations l ON l.version_id=v.version_id "
@@ -443,7 +487,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
             return [{
                 "paper_id": row["paper_id"], "version_id": row["version_id"], "sha256": row["sha256"],
                 "source_type": row["source_type"], "title": row["title"], "section": row["section_title"],
-                "pdf_page": row["page_number"], "path": row["absolute_path"], "parse_status": row["parse_status"],
+                "pdf_page": row["page_number"], "path": row["absolute_path"], "parse_status": row["parse_status"], "text_origin": row["text_origin"],
                 "rank_score": 1.0, "text": row["body"], "chunk_id": row["chunk_id"],
             } for row in rows[:limit]]
         finally:
@@ -454,7 +498,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
     conn = open_database(database)
     try:
         sql = (
-            "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.body,"
+            "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
             "p.paper_id,p.title_candidate,v.sha256,v.parse_status,l.absolute_path,"
             "bm25(chunks_fts,0,4.0,2.0,1.0) AS bm25_score "
             "FROM chunks_fts JOIN chunks c ON c.chunk_id=chunks_fts.chunk_id "
@@ -481,7 +525,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
             title_terms = [f"%{term}%" for term in terms]
             title_filter = " AND ".join("lower(p.title_candidate) LIKE ?" for _ in title_terms)
             title_sql = (
-                "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.body,"
+                "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
                 "p.paper_id,p.title_candidate,v.sha256,v.parse_status,l.absolute_path "
                 "FROM paper_versions v JOIN papers p ON p.paper_id=v.paper_id "
                 "JOIN chunks c ON c.version_id=v.version_id JOIN source_locations l ON l.version_id=v.version_id "
@@ -497,7 +541,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
             title_results = [{
                 "paper_id": row["paper_id"], "version_id": row["version_id"], "sha256": row["sha256"],
                 "source_type": row["source_type"], "title": row["title"], "section": row["section_title"],
-                "pdf_page": row["page_number"], "path": row["absolute_path"], "parse_status": row["parse_status"],
+                "pdf_page": row["page_number"], "path": row["absolute_path"], "parse_status": row["parse_status"], "text_origin": row["text_origin"],
                 "rank_score": 1.0, "text": row["body"], "chunk_id": row["chunk_id"],
             } for row in title_rows]
             return title_results[:limit]
@@ -512,7 +556,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
                 "paper_id": row["paper_id"], "version_id": row["version_id"], "sha256": row["sha256"],
                 "source_type": row["source_type"], "title": row["title"], "section": row["section_title"],
                 "pdf_page": row["page_number"], "path": row["absolute_path"], "parse_status": row["parse_status"],
-                "rank_score": -float(row["bm25_score"]), "text": row["body"], "chunk_id": row["chunk_id"],
+                "text_origin": row["text_origin"], "rank_score": -float(row["bm25_score"]), "text": row["body"], "chunk_id": row["chunk_id"],
             })
             if len(results) >= limit:
                 break
@@ -538,6 +582,8 @@ def inspect_document(database: Path, identifier: str) -> dict[str, Any] | None:
         result = dict(row)
         result["low_text_pages"] = json.loads(result.pop("low_text_pages_json"))
         result["doi_candidates"] = json.loads(result.pop("doi_candidates_json"))
+        result["ocr_pages"] = json.loads(result.pop("ocr_pages_json"))
+        result["ocr_errors"] = json.loads(result.pop("ocr_errors_json"))
         result["locations"] = locations
         result["sections"] = sections
         result["chunk_count"] = counts["chunks"]
