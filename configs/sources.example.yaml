@@ -1,0 +1,30 @@
+version: 1
+roots:
+  - id: topic_update_papers
+    path: E:\毕设\论文综述与研究方案\2026-10_方向更新\papers
+    kinds: [pdf, md]
+  - id: stage2_task_literature
+    path: E:\毕设\暑期工程实践初步文档\阶段二_任务定义与文献检索
+    kinds: [pdf]
+  - id: stage2_literature_bundle
+    path: E:\毕设\暑期工程实践初步文档\阶段二文献包
+    kinds: [pdf, md]
+  - id: general_literature
+    path: E:\毕设\暑期工程实践初步文档\文献
+    kinds: [pdf]
+  - id: close_reading_pdfs
+    path: E:\毕设\暑期工程实践初步文档\文献精读
+    kinds: [pdf, md]
+  - id: close_reading_notes
+    path: E:\毕设\论文综述与研究方案\2026-10_方向更新\03_逐篇精读
+    kinds: [md]
+bibliography:
+  - id: merged_bib_2026_10
+    path: E:\毕设\论文综述与研究方案\2026-10_方向更新\references_2026-10_merged.bib
+exclude_path_segments:
+  - reproduction
+  - reports
+  - figures
+  - .tmp
+  - output
+  - __pycache__

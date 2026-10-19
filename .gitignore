@@ -1,0 +1,29 @@
+# Local corpus data, extracted text, and generated indexes
+data/
+corpus/
+indexes/
+index/
+cache/
+models/
+*.sqlite
+*.db
+*.parquet
+*.arrow
+*.md.tmp
+.local/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+secrets.*
+
+# Python tooling
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+*.py[cod]
+
+# Local audit intermediates
+*.partial
