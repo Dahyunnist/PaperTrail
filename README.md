@@ -30,3 +30,5 @@ python -m pytest
 每阶段形成独立 Git 提交，提交 message 使用中文。
 
 检索命令支持 `--mode bm25|vector|hybrid`；需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。
+
+S3 使用 `python -m papertrail ask --db .local/papertrail.sqlite3 --question "你的问题"` 获取经 SHA、页码和原文校验的摘录；通过返回的 `conversation_id` 传给后续 `ask --conversation-id ...` 保留短上下文，或使用 `history --conversation-id ...` 回顾。当前没有配置生成模型，因此 S3 只给出可核验摘录，不自动撰写综合答案。

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .s1_index import database_summary, index_selection, inspect_document, search
 from .retrieval import build_vector_index, retrieve
+from .qa import ask, conversation_history
 
 
 def _print_json(value: object) -> None:
@@ -25,7 +26,7 @@ def _parser() -> argparse.ArgumentParser:
     index_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     index_parser.add_argument("--ocr-fallback", action="store_true", help="对低文本 PDF 页尝试本机 Tesseract OCR；OCR 派生文本会单独标记")
 
-    search_parser = commands.add_parser("search", help="检索并显示来源、PDF 页码与 BM25 排序分")
+    search_parser = commands.add_parser("search", help="检索并显示来源、PDF 页码与当前模式排序分")
     search_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     search_parser.add_argument("--query", required=True)
     search_parser.add_argument("--limit", type=int, default=5)
@@ -43,6 +44,17 @@ def _parser() -> argparse.ArgumentParser:
 
     status_parser = commands.add_parser("status", help="查看本机索引计数")
     status_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+
+    ask_parser = commands.add_parser("ask", help="检索并逐条校验原文摘录；证据不足时拒答")
+    ask_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    ask_parser.add_argument("--question", required=True)
+    ask_parser.add_argument("--conversation-id")
+    ask_parser.add_argument("--limit", type=int, default=5)
+    ask_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid"], default="bm25")
+
+    history_parser = commands.add_parser("history", help="查看本地对话及其已核验证据")
+    history_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    history_parser.add_argument("--conversation-id", required=True)
     return parser
 
 
@@ -82,6 +94,10 @@ def main(argv: list[str] | None = None) -> int:
             _print_json(result)
         elif args.command == "status":
             _print_json(database_summary(args.db))
+        elif args.command == "ask":
+            _print_json(ask(args.db, args.question, args.conversation_id, args.limit, args.mode))
+        elif args.command == "history":
+            _print_json(conversation_history(args.db, args.conversation_id))
         return 0
     except (ValueError, OSError) as exc:
         print(f"PaperTrail: {exc}", file=sys.stderr)
