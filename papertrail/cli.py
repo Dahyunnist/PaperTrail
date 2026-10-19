@@ -79,6 +79,13 @@ def _parser() -> argparse.ArgumentParser:
     gap_parser.add_argument("--comparison-id", required=True)
     gap_parser.add_argument("--note", required=True)
     gap_parser.add_argument("--evidence-id", action="append", default=[])
+
+    web_parser = commands.add_parser("web", help="启动仅监听本机的学习助手 Web 界面")
+    web_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    web_parser.add_argument("--upload-root", type=Path)
+    web_parser.add_argument("--sources", type=Path, help="已授权来源目录配置")
+    web_parser.add_argument("--selection", type=Path, help="明确选择的 PDF/笔记清单")
+    web_parser.add_argument("--port", type=int, default=5000)
     return parser
 
 
@@ -134,6 +141,10 @@ def main(argv: list[str] | None = None) -> int:
             _print_json(result)
         elif args.command == "compare-gap":
             _print_json(add_gap_candidate(args.db, args.comparison_id, args.note, args.evidence_id))
+        elif args.command == "web":
+            from .web import create_app
+            create_app(args.db, args.upload_root, args.sources, args.selection).run(host="127.0.0.1", port=args.port,
+                                                       debug=False, threaded=True)
         return 0
     except (ValueError, OSError) as exc:
         print(f"PaperTrail: {exc}", file=sys.stderr)

@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-S0–S3 已完成；当前执行 S4：跨论文证据对照和研究空白候选。最终产品体验、证据边界与 S0–S5 阶段归属见 [产品契约](docs/product-contract.md)。
+S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/product-contract.md)；各阶段记录见 [S0](docs/learning/stage-S0.md)、[S1](docs/learning/stage-S1.md)、[S2](docs/learning/stage-S2.md)、[S3](docs/learning/stage-S3.md)、[S4](docs/learning/stage-S4.md)和 [S5](docs/learning/stage-S5.md)。
 
 ## 源资料
 
@@ -34,3 +34,5 @@ python -m pytest
 S3 使用 `python -m papertrail ask --db .local/papertrail.sqlite3 --question "你的问题"` 获取经 SHA、页码和原文校验的摘录；通过返回的 `conversation_id` 传给后续 `ask --conversation-id ...` 保留短上下文，或使用 `history --conversation-id ...` 回顾。当前没有配置生成模型，因此 S3 只给出可核验摘录，不自动撰写综合答案。
 
 S4 使用 `python -m papertrail compare --db .local/papertrail.sqlite3 --topic "主题" --claim "待比较论断"` 收集并列原文；通过 `compare-label` 逐条标记 `supports|contradicts|conditions|context|unclear`，也可通过 `compare-gap` 记录用户提出、待复核的研究空白候选。`compare-report` 汇总标注和证据。
+
+启动最终工作台：`python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl`，再打开 `http://127.0.0.1:5000`。页面可更新明确选择的授权文献、上传/删除个人 PDF、问答、创建隔离的个人笔记、标注跨论文证据并导出 JSON 学习报告。服务仅监听本机；所有工作数据保存在 `.local/`。
