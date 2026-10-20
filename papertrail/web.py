@@ -16,7 +16,7 @@ import yaml
 from .audit import _hash
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 from .qa import ask, conversation_history
-from .s1_index import index_selection, inspect_document, open_database
+from .s1_index import open_database
 from .jobs import enqueue_index, get_job
 from .workspace import (create_note, dashboard_stats, delete_note, ensure_workspace_schema,
                         library_documents, list_uploads, remove_upload, search_notes, study_report,

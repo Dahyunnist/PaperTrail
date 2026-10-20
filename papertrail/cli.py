@@ -86,6 +86,9 @@ def _parser() -> argparse.ArgumentParser:
     web_parser.add_argument("--sources", type=Path, help="已授权来源目录配置")
     web_parser.add_argument("--selection", type=Path, help="明确选择的 PDF/笔记清单")
     web_parser.add_argument("--port", type=int, default=5000)
+
+    mcp_parser = commands.add_parser("mcp", help="以只读 MCP stdio 服务暴露论文证据")
+    mcp_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     return parser
 
 
@@ -145,6 +148,9 @@ def main(argv: list[str] | None = None) -> int:
             from .web import create_app
             create_app(args.db, args.upload_root, args.sources, args.selection).run(host="127.0.0.1", port=args.port,
                                                        debug=False, threaded=True)
+        elif args.command == "mcp":
+            from .mcp_server import main as mcp_main
+            mcp_main(args.db)
         return 0
     except (ValueError, OSError) as exc:
         print(f"PaperTrail: {exc}", file=sys.stderr)

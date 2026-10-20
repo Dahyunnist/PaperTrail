@@ -304,11 +304,15 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE chunks ADD COLUMN text_origin TEXT NOT NULL DEFAULT 'native_text'")
 
 
-def open_database(path: Path) -> sqlite3.Connection:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
+def open_database(path: Path, readonly: bool = False) -> sqlite3.Connection:
+    if readonly:
+        conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
-    _ensure_schema(conn)
+    if not readonly:
+        _ensure_schema(conn)
     return conn
 
 
@@ -467,14 +471,15 @@ def _query_terms(query: str) -> list[str]:
     return [term for term in terms if term not in seen and not seen.add(term)]
 
 
-def search(database: Path, query: str, limit: int = 5, source_type: str | None = None) -> list[dict[str, Any]]:
+def search(database: Path, query: str, limit: int = 5, source_type: str | None = None,
+           readonly: bool = False) -> list[dict[str, Any]]:
     terms = _query_terms(query)
     if not terms:
         return []
     doi_match = DOI_RE.search(query)
     if doi_match:
         exact_doi = doi_match.group(0).rstrip(".,;)").casefold()
-        conn = open_database(database)
+        conn = open_database(database, readonly=readonly)
         try:
             sql = (
                 "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
@@ -501,7 +506,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
     quoted_terms = ['"' + term.replace('"', '""') + '"' for term in terms]
     and_query = "body : (" + " AND ".join(quoted_terms) + ")"
     or_query = "body : (" + " OR ".join(quoted_terms) + ")"
-    conn = open_database(database)
+    conn = open_database(database, readonly=readonly)
     try:
         sql = (
             "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
