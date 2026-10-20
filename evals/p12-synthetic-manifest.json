@@ -10,13 +10,5 @@
   },
   "gold_sha256": "745f420f7423ae6a2fbe31fbc2b6560183d70321fab0ca75e2fdd92713c75309",
   "verified_evidence_quotes": 5,
-  "index_summary": {
-    "selected": 2,
-    "added": 2,
-    "duplicates": 0,
-    "sections": 3,
-    "chunks": 6,
-    "low_text_documents": 0,
-    "issues": []
-  }
+  "indexed_chunks": 6
 }

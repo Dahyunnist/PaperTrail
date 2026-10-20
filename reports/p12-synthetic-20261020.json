@@ -1,0 +1,703 @@
+{
+  "gold": "p12-synthetic-gold.jsonl",
+  "mode": "bm25",
+  "extractive": {
+    "model_run": false,
+    "questions": 6,
+    "answerable_coverage": 1.0,
+    "complete_answer_rate": null,
+    "partial_answer_count": 0,
+    "gold_page_citation_rate": 1.0,
+    "correct_abstention_rate": 0.5,
+    "false_answer_rate": 0.5,
+    "mean_latency_ms": 11.892666665517027,
+    "median_latency_ms": 10.069749998365296,
+    "citation_precision_at_gold_pages": 0.8571428571428571,
+    "claim_support_acceptance_rate": 1.0,
+    "reviewed_claims": 8,
+    "rejected_claims": 0,
+    "by_question_type": {
+      "cross_paper": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "fact_location": {
+        "total": 3,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "unanswerable": {
+        "total": 2,
+        "answerable_coverage": null,
+        "gold_page_citation_rate": null,
+        "correct_abstention_rate": 0.5
+      }
+    },
+    "api_requests": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_upper_bound_usd": 0,
+    "cases": [
+      {
+        "id": "SYN-01",
+        "type": "fact_location",
+        "question": "What was the median scan-to-door time in Study A, and how many deliveries were simulated?",
+        "expected_answer": "The median scan-to-door time was 18 minutes across 240 simulated deliveries.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "The median scan-to-door time was 18 minutes for 240 simulated deliveries."
+          },
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 2,
+            "quote": "The failure rate was 2.5 percent among 80 simulated shipments.",
+            "claim": "The failure rate was 2.5 percent among 80 simulated shipments."
+          }
+        ],
+        "claims": [
+          "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+          "The failure rate was 2.5 percent among 80 simulated shipments."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 21.227299999736715,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "SYN-02",
+        "type": "fact_location",
+        "question": "What failure rate did cold-chain orders record, and how many simulated shipments were included?",
+        "expected_answer": "The failure rate was 2.5 percent among 80 simulated shipments.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 2,
+            "quote": "The failure rate was 2.5 percent among 80 simulated shipments.",
+            "claim": "The failure rate was 2.5 percent among 80 simulated shipments."
+          },
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 2,
+            "quote": "In Synthetic Study A, cold-chain orders used insulated containers.",
+            "claim": "In Synthetic Study A, cold-chain orders used insulated containers."
+          }
+        ],
+        "claims": [
+          "The failure rate was 2.5 percent among 80 simulated shipments.",
+          "In Synthetic Study A, cold-chain orders used insulated containers."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 9.901899997203145,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "SYN-03",
+        "type": "fact_location",
+        "question": "Which policy changed average depot waiting time, and what were the before and after times?",
+        "expected_answer": "Policy Cedar reduced average depot waiting time from 12 minutes to 9 minutes.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+          }
+        ],
+        "claims": [
+          "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 9.971699997549877,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "SYN-04",
+        "type": "cross_paper",
+        "question": "Compare Study A's median scan-to-door time with Study B's depot waiting-time change.",
+        "expected_answer": "Study A reports a median scan-to-door time of 18 minutes. Study B reports depot waiting time decreasing from 12 to 9 minutes. These are different measures and samples.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "The median scan-to-door time was 18 minutes for 240 simulated deliveries."
+          },
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+          }
+        ],
+        "claims": [
+          "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+          "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 12.013200001092628,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "SYN-05",
+        "type": "unanswerable",
+        "question": "What was the average fuel consumption per delivery in Study A?",
+        "expected_answer": "The synthetic papers do not report fuel consumption per delivery.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 8.07409999833908,
+        "usage": null,
+        "answer": "当前检索范围内没有找到可通过原 PDF 哈希、页码和原文校验的证据，因此暂不作答。"
+      },
+      {
+        "id": "SYN-06",
+        "type": "unanswerable",
+        "question": "Which region had the slowest median delivery time in Study A?",
+        "expected_answer": "The papers do not provide region-specific delivery times.",
+        "abstain_expected": true,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "The median scan-to-door time was 18 minutes for 240 simulated deliveries."
+          }
+        ],
+        "claims": [
+          "The median scan-to-door time was 18 minutes for 240 simulated deliveries."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 10.167799999180716,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      }
+    ]
+  },
+  "model_reviewed": {
+    "model_run": true,
+    "questions": 6,
+    "answerable_coverage": 1.0,
+    "complete_answer_rate": 1.0,
+    "partial_answer_count": 0,
+    "gold_page_citation_rate": 1.0,
+    "correct_abstention_rate": 1.0,
+    "false_answer_rate": 0.0,
+    "mean_latency_ms": 3055.5496499982837,
+    "median_latency_ms": 3159.5438000003924,
+    "citation_precision_at_gold_pages": 1.0,
+    "claim_support_acceptance_rate": 1.0,
+    "reviewed_claims": 9,
+    "rejected_claims": 0,
+    "by_question_type": {
+      "cross_paper": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "fact_location": {
+        "total": 3,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "unanswerable": {
+        "total": 2,
+        "answerable_coverage": null,
+        "gold_page_citation_rate": null,
+        "correct_abstention_rate": 1.0
+      }
+    },
+    "api_requests": 17,
+    "prompt_tokens": 5951,
+    "completion_tokens": 1035,
+    "cost_upper_bound_usd": 0.0030273,
+    "cases": [
+      {
+        "id": "SYN-01",
+        "type": "fact_location",
+        "question": "What was the median scan-to-door time in Study A, and how many deliveries were simulated?",
+        "expected_answer": "The median scan-to-door time was 18 minutes across 240 simulated deliveries.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Study A 的中位 scan-to-door 时间",
+            "Study A 模拟的配送次数"
+          ],
+          "subquestions": [
+            "What was the median scan-to-door time in Study A, and how many deliveries were simulated?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "Study A 的中位 scan-to-door 时间为 18 分钟。"
+          },
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "Study A 模拟了 240 次配送。"
+          }
+        ],
+        "claims": [
+          "Study A 的中位 scan-to-door 时间为 18 分钟。",
+          "Study A 模拟了 240 次配送。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 2942.6954000009573,
+        "usage": {
+          "prompt_eval_count": 992,
+          "eval_count": 201,
+          "total_duration": 0,
+          "estimated_usd": 0.0005388,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Study A 的中位 scan-to-door 时间",
+              "Study A 模拟的配送次数"
+            ],
+            "subquestions": [
+              "What was the median scan-to-door time in Study A, and how many deliveries were simulated?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 3
+        },
+        "answer": "Study A 的中位 scan-to-door 时间为 18 分钟。 Study A 模拟了 240 次配送。"
+      },
+      {
+        "id": "SYN-02",
+        "type": "fact_location",
+        "question": "What failure rate did cold-chain orders record, and how many simulated shipments were included?",
+        "expected_answer": "The failure rate was 2.5 percent among 80 simulated shipments.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "失败率（failure rate）",
+            "模拟运输数量（number of simulated shipments）"
+          ],
+          "subquestions": [
+            "What failure rate did cold-chain orders record, and how many simulated shipments were included?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 2,
+            "quote": "The failure rate was 2.5 percent among 80 simulated shipments.",
+            "claim": "冷链订单的失败率为2.5%。"
+          },
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 2,
+            "quote": "The failure rate was 2.5 percent among 80 simulated shipments.",
+            "claim": "共包含80次模拟运输。"
+          }
+        ],
+        "claims": [
+          "冷链订单的失败率为2.5%。",
+          "共包含80次模拟运输。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 3471.109799997066,
+        "usage": {
+          "prompt_eval_count": 1016,
+          "eval_count": 187,
+          "total_duration": 0,
+          "estimated_usd": 0.0005292,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "失败率（failure rate）",
+              "模拟运输数量（number of simulated shipments）"
+            ],
+            "subquestions": [
+              "What failure rate did cold-chain orders record, and how many simulated shipments were included?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 3
+        },
+        "answer": "冷链订单的失败率为2.5%。 共包含80次模拟运输。"
+      },
+      {
+        "id": "SYN-03",
+        "type": "fact_location",
+        "question": "Which policy changed average depot waiting time, and what were the before and after times?",
+        "expected_answer": "Policy Cedar reduced average depot waiting time from 12 minutes to 9 minutes.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Identify which policy changed average depot waiting time (Policy Cedar)",
+            "State the before time (12 minutes)",
+            "State the after time (9 minutes)"
+          ],
+          "subquestions": [
+            "Which policy changed average depot waiting time, and what were the before and after times?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 3,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "Policy Cedar changed average depot waiting time."
+          },
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "Before the change, average depot waiting time was 12 minutes."
+          },
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "After the change, average depot waiting time was 9 minutes."
+          }
+        ],
+        "claims": [
+          "Policy Cedar changed average depot waiting time.",
+          "Before the change, average depot waiting time was 12 minutes.",
+          "After the change, average depot waiting time was 9 minutes."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 3376.3921999998274,
+        "usage": {
+          "prompt_eval_count": 1050,
+          "eval_count": 251,
+          "total_duration": 0,
+          "estimated_usd": 0.0006162,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Identify which policy changed average depot waiting time (Policy Cedar)",
+              "State the before time (12 minutes)",
+              "State the after time (9 minutes)"
+            ],
+            "subquestions": [
+              "Which policy changed average depot waiting time, and what were the before and after times?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 3,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 3
+        },
+        "answer": "Policy Cedar changed average depot waiting time. Before the change, average depot waiting time was 12 minutes. After the change, average depot waiting time was 9 minutes."
+      },
+      {
+        "id": "SYN-04",
+        "type": "cross_paper",
+        "question": "Compare Study A's median scan-to-door time with Study B's depot waiting-time change.",
+        "expected_answer": "Study A reports a median scan-to-door time of 18 minutes. Study B reports depot waiting time decreasing from 12 to 9 minutes. These are different measures and samples.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Study A's median scan-to-door time value",
+            "Study B's depot waiting-time change value"
+          ],
+          "subquestions": [
+            "What is Study A's median scan-to-door time?",
+            "What is Study B's depot waiting-time change?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "citations": [
+          {
+            "sha256": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+            "page": 1,
+            "quote": "The median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+            "claim": "Study A's median scan-to-door time was 18 minutes for 240 simulated deliveries."
+          },
+          {
+            "sha256": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7",
+            "page": 1,
+            "quote": "Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation.",
+            "claim": "Study B's Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+          }
+        ],
+        "claims": [
+          "Study A's median scan-to-door time was 18 minutes for 240 simulated deliveries.",
+          "Study B's Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 4662.199799997325,
+        "usage": {
+          "prompt_eval_count": 1483,
+          "eval_count": 268,
+          "total_duration": 0,
+          "estimated_usd": 0.0007665,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 2,
+            "evidence_pages": 2,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Study A's median scan-to-door time value",
+              "Study B's depot waiting-time change value"
+            ],
+            "subquestions": [
+              "What is Study A's median scan-to-door time?",
+              "What is Study B's depot waiting-time change?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 4
+        },
+        "answer": "Study A's median scan-to-door time was 18 minutes for 240 simulated deliveries. Study B's Policy Cedar cut average depot waiting time from 12 minutes to 9 minutes in a 60-route simulation."
+      },
+      {
+        "id": "SYN-05",
+        "type": "unanswerable",
+        "question": "What was the average fuel consumption per delivery in Study A?",
+        "expected_answer": "The synthetic papers do not report fuel consumption per delivery.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What was the average fuel consumption per delivery in Study A?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        },
+        "expected_page_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 1936.4795999936177,
+        "usage": {
+          "prompt_eval_count": 704,
+          "eval_count": 64,
+          "total_duration": 0,
+          "estimated_usd": 0.000288,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 0,
+            "evidence_pages": 0,
+            "coverage_complete": null,
+            "coverage_gaps": [],
+            "coverage_requirements": [],
+            "subquestions": [
+              "What was the average fuel consumption per delivery in Study A?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 0,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": "evidence_organization"
+          },
+          "request_count": 2
+        },
+        "answer": "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。"
+      },
+      {
+        "id": "SYN-06",
+        "type": "unanswerable",
+        "question": "Which region had the slowest median delivery time in Study A?",
+        "expected_answer": "The papers do not provide region-specific delivery times.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {
+          "retrieved_pages": 3,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "Which region had the slowest median delivery time in Study A?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        },
+        "expected_page_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 1944.421100000909,
+        "usage": {
+          "prompt_eval_count": 706,
+          "eval_count": 64,
+          "total_duration": 0,
+          "estimated_usd": 0.0002886,
+          "_diagnostics": {
+            "retrieved_pages": 3,
+            "screen_selected_pages": 0,
+            "evidence_pages": 0,
+            "coverage_complete": null,
+            "coverage_gaps": [],
+            "coverage_requirements": [],
+            "subquestions": [
+              "Which region had the slowest median delivery time in Study A?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 0,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": "evidence_organization"
+          },
+          "request_count": 2
+        },
+        "answer": "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。"
+      }
+    ]
+  }
+}

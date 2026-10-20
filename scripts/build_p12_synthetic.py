@@ -49,6 +49,9 @@ def main() -> None:
     selection_path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n"
                                                   for row in selections), encoding="utf-8")
     database = LOCAL_DIR / "papertrail.sqlite3"
+    for path in (database, database.with_name(database.name + "-wal"),
+                 database.with_name(database.name + "-shm")):
+        path.unlink(missing_ok=True)
     indexed = index_selection(database, sources_path, selection_path)
 
     items = load_gold(GOLD_PATH, minimum_questions=6)
@@ -62,7 +65,7 @@ def main() -> None:
         "documents": document_hashes,
         "gold_sha256": sha256(GOLD_PATH),
         "verified_evidence_quotes": verified,
-        "index_summary": indexed,
+        "indexed_chunks": indexed["chunks"],
     }
     MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
                              encoding="utf-8")
