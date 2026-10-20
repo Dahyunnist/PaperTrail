@@ -139,6 +139,29 @@ def hybrid_bge_wide_search(database: Path, query: str, limit: int = 5,
     return _unique_page_rows(candidate_chunks, limit)
 
 
+def hybrid_bge_dense_rerank_search(database: Path, query: str, limit: int = 5,
+                                   source_type: str | None = None,
+                                   artifact: Path | None = None) -> list[dict[str, Any]]:
+    """Rerank the hybrid candidate pool by cached BGE query-to-chunk similarity."""
+    artifact = artifact or database.with_name(database.stem + ".bge.joblib")
+    candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
+    bundle = _load(database, artifact)
+    row_index = {row["chunk_id"]: index for index, row in enumerate(bundle["rows"])}
+    query_vector = _encode([f"为这个句子生成表示以用于检索相关文章：{query}"])[0]
+    vectors = bundle["vectors"]
+    ranked = []
+    for row in candidates:
+        index = row_index.get(row["chunk_id"])
+        if index is None:
+            continue
+        reranked = dict(row)
+        reranked["rank_score"] = float(vectors[index] @ query_vector)
+        reranked["retrieval_signals"] = [*row.get("retrieval_signals", []), "bge_dense_rerank"]
+        ranked.append(reranked)
+    ranked.sort(key=lambda row: row["rank_score"], reverse=True)
+    return _unique_page_rows(ranked, limit)
+
+
 def llm_rerank_search(database: Path, query: str, limit: int = 5,
                       source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
     """Rerank the same hybrid-BGE chunk pool by a hosted model, then return unique pages."""

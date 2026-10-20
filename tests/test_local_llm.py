@@ -57,6 +57,7 @@ def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path
     monkeypatch.setenv("PAPERTRAIL_OPENAI_API_KEY_ENV", "TEST_DEEPSEEK_KEY")
     monkeypatch.setenv("TEST_DEEPSEEK_KEY", "secret-test-key")
     monkeypatch.setenv("PAPERTRAIL_LLM_BUDGET_FILE", str(ledger))
+    monkeypatch.setenv("PAPERTRAIL_LLM_BUDGET_USD", "0.50")
     import papertrail.local_llm as llm
     def mock_open(request, timeout):
         seen["url"] = request.full_url
@@ -72,7 +73,7 @@ def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path
     assert seen["authorization"] == "Bearer secret-test-key"
     assert seen["payload"]["max_tokens"] == 320
     assert "secret-test-key" not in ledger.read_text(encoding="utf-8")
-    ledger.write_text('{"spent_upper_bound_usd": 0.1899, "requests": []}', encoding="utf-8")
+    ledger.write_text('{"spent_upper_bound_usd": 0.4999, "requests": []}', encoding="utf-8")
     seen.clear()
     import pytest
     with pytest.raises(RuntimeError, match="budget cap"):

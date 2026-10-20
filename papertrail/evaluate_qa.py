@@ -40,14 +40,14 @@ def _usage_snapshot() -> tuple[int, float, int, int]:
 
 
 def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
-              model: bool, artifact: Path | None = None) -> dict[str, Any]:
+              model: bool, artifact: Path | None = None, limit: int = 5) -> dict[str, Any]:
     if model and not os.environ.get("PAPERTRAIL_LLM_MODEL"):
         raise ValueError("model run requires PAPERTRAIL_LLM_MODEL")
     cases = []
     for item in items:
         request_count_before, cost_before, prompt_before, completion_before = _usage_snapshot()
         result = ask(database, item["question"], conversation_id=f"p6-{mode}-{item['id']}",
-                     limit=5, mode=mode, generate=model, artifact=artifact)
+                     limit=limit, mode=mode, generate=model, artifact=artifact)
         request_count_after, cost_after, prompt_after, completion_after = _usage_snapshot()
         request_count = request_count_after - request_count_before
         ledger_cost = round(cost_after - cost_before, 8)
@@ -72,6 +72,8 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
         cases.append({"id": item["id"], "type": item["question_type"], "question": item["question"],
                       "expected_answer": item["expected_answer"], "abstain_expected": item["abstain"],
                       "status": result["status"], "answered": bool(result["claims"]),
+                      "coverage_complete": result.get("coverage_complete"),
+                      "diagnostics": (result.get("usage") or {}).get("_diagnostics", {}),
                       "expected_page_cited": bool(expected_pages & cited_pages),
                       "citations": citations, "claims": [row["text"] for row in result["claims"]],
                       "rejected_claims": rejected, "latency_ms": result["latency_ms"],
@@ -101,6 +103,9 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
     accepted_claims = sum(len(row["claims"]) for row in cases)
     return {"model_run": model, "questions": len(cases),
             "answerable_coverage": sum(row["answered"] for row in answerable) / len(answerable) if answerable else None,
+            "complete_answer_rate": (sum(row["coverage_complete"] is True for row in answerable) / len(answerable)
+                                     if model and answerable else None),
+            "partial_answer_count": sum(row["status"] == "generated_partial" for row in answerable),
             "gold_page_citation_rate": sum(row["expected_page_cited"] for row in answerable) / len(answerable) if answerable else None,
             "correct_abstention_rate": sum(not row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "false_answer_rate": sum(row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
@@ -117,7 +122,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
 
 
 def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25",
-               artifact: Path | None = None) -> dict[str, Any]:
+               artifact: Path | None = None, limit: int = 5) -> dict[str, Any]:
     items = load_gold(gold_path)
     baseline_db = output.with_name(output.stem + "-extractive.sqlite3")
     model_db = output.with_name(output.stem + "-model.sqlite3")
@@ -126,12 +131,12 @@ def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25"
     configured_model = os.environ.get("PAPERTRAIL_LLM_MODEL")
     configured_provider = os.environ.get("PAPERTRAIL_LLM_PROVIDER")
     try:
-        baseline = _run_mode(baseline_db, items, mode, False, artifact)
+        baseline = _run_mode(baseline_db, items, mode, False, artifact, limit)
         if configured_model:
             os.environ["PAPERTRAIL_LLM_MODEL"] = configured_model
         if configured_provider:
             os.environ["PAPERTRAIL_LLM_PROVIDER"] = configured_provider
-        model = _run_mode(model_db, items, mode, True, artifact)
+        model = _run_mode(model_db, items, mode, True, artifact, limit)
     finally:
         if configured_model is None:
             os.environ.pop("PAPERTRAIL_LLM_MODEL", None)
@@ -154,8 +159,9 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path(".local/p6-qa-comparison.json"))
     parser.add_argument("--mode", default="bm25")
     parser.add_argument("--vector-artifact", type=Path)
+    parser.add_argument("--limit", type=int, default=5, help="每题最多组织的证据摘录数（1–8）")
     args = parser.parse_args()
-    result = compare_qa(args.db, args.gold, args.out, args.mode, args.vector_artifact)
+    result = compare_qa(args.db, args.gold, args.out, args.mode, args.vector_artifact, args.limit)
     print(json.dumps({key: {k: v for k, v in value.items() if k != "cases"}
                       for key, value in result.items() if isinstance(value, dict)}, indent=2))
 

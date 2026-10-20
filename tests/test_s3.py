@@ -102,7 +102,8 @@ def test_claim_review_tracks_relevance_and_complete_coverage(monkeypatch):
         {"claims": [{"text": "It uses utility metrics.", "evidence_ids": [0]}],
          "_usage": {"eval_count": 4}},
         {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
-         "coverage_complete": False, "_usage": {"eval_count": 5}},
+         "coverage_complete": False, "coverage_requirements": ["required detail"],
+         "coverage_gaps": ["missing detail"], "_usage": {"eval_count": 5}},
     ])
     monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
     evidence = [{"quote": "The method measures utility with downstream tasks.",
@@ -111,6 +112,62 @@ def test_claim_review_tracks_relevance_and_complete_coverage(monkeypatch):
     assert result["claims"][0]["support"] == "supported"
     assert result["claims"][0]["relevant"] is True
     assert result["coverage_complete"] is False
+    assert result["coverage_gaps"] == ["missing detail"]
+    assert result["coverage_requirements"] == ["required detail"]
+
+
+def test_hosted_synthesis_keeps_full_method_sentence(monkeypatch):
+    import json
+    import papertrail.qa as qa
+
+    monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "openai-compatible")
+    quote = ("We proposed an online procedure for label shift adaptation that combines histogram binning, "
+             "online label distribution estimation via Soft-Bayes, and model parameter adaptation via online gradient descent.")
+    outputs = iter([
+        {"claims": [{"text": "It uses online gradient descent.", "evidence_ids": [0]}]},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_complete": True, "coverage_requirements": ["online gradient descent"],
+         "coverage_gaps": []},
+    ])
+    prompts = []
+    def mock_chat(_model, _system, prompt, **_kwargs):
+        prompts.append(json.loads(prompt))
+        return next(outputs)
+    monkeypatch.setattr(qa, "chat_json", mock_chat)
+    qa._synthesize_local("Which method updates model parameters?", [{
+        "quote": quote, "title": "Online label shift", "pdf_page": 8}], "test-model")
+    assert prompts[0]["evidence"][0]["quote"] == quote
+
+
+def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "partial-test")
+    monkeypatch.setattr(qa, "_screen_evidence", lambda *_args: {
+        "relevant_ids": [0], "targeted_query": "", "sufficient": True,
+        "selected_chunk_ids": set(), "usage": {},
+    })
+    monkeypatch.setattr(qa, "_sentences", lambda _text: [
+        "CTGAN evaluates mixed continuous and discrete columns with reliable likelihood and utility measurements."])
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, evidence, _model: {
+        "claims": [{"text": "CTGAN evaluates utility.", "evidence_ids": [0],
+                    "support": "supported", "relevant": True,
+                    "support_method": "test_judge"},
+                   {"text": "Unsupported claim.", "evidence_ids": [0],
+                    "support": "unsupported", "relevant": True,
+                    "support_method": "test_judge"}],
+        "coverage_complete": False, "coverage_requirements": ["required detail"],
+        "coverage_gaps": ["missing detail"], "usage": {},
+    })
+    result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
+    assert result["status"] == "generated_partial", result
+    assert result["claims"][0]["text"] == "CTGAN evaluates utility."
+    assert "部分回答" in result["answer"]
+    assert result["usage"]["_diagnostics"]["refusal_stage"] == "coverage_partial"
+    assert result["usage"]["_diagnostics"]["reviewed_claims"] == 2
+    assert result["usage"]["_diagnostics"]["rejected_claims"] == 1
 
 
 def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):

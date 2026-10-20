@@ -1,0 +1,126 @@
+{
+  "evaluation": "P9 final end-to-end run; local model answers manually checked against cited PDF pages",
+  "run_artifact": "p9-final-reviewed.json",
+  "run_sha256": "9c529b16d6b8b4ba0640a6c1e0ab7e1992042a4bc9cb5a955624cbce01b2fbe6",
+  "gold_manifest_sha256": "ac0f29b9219e1bea0ecbf23ec19d9061719a92ee721edaae9399ccf253dc0f0f",
+  "question_count": 30,
+  "answerable_count": 27,
+  "generated_answer_count": 5,
+  "human_verdict_counts": {
+    "correct": 4,
+    "partial": 1,
+    "incorrect": 0
+  },
+  "unanswerable_correct": 3,
+  "unanswerable_total": 3,
+  "cross_paper_answered": 0,
+  "conflict_answered": 0,
+  "multi_hop_answered": 0,
+  "results": [
+    {
+      "id": "P9-002",
+      "question": "TabDiff 的实验中，Trend 指标相对 TabSyn 的平均提升是多少？",
+      "answer": "在 Trend 指标上，TabDiff 持续优于所有基线，超过 TabSyn 22.6%。",
+      "model_status": "generated_claims_reviewed",
+      "model_coverage_complete": true,
+      "human_verdict": "correct",
+      "human_note": "完整回答 Trend 相对 TabSyn 提升 22.6%，引文直接支持。",
+      "citations": [
+        {
+          "sha256": "9a9d1f722ef6ecb8dec30c4af1cb291518d412a7e0a3f25f2e25bc2d6285d5e2",
+          "pdf_page": 7,
+          "quote": "Regarding the Trend metric, TABDIFF consistently outperforms all baselines and surpasses TABSYN by 22.6%."
+        }
+      ],
+      "gold_page_cited": true
+    },
+    {
+      "id": "P9-003",
+      "question": "TabStruct 的基准报告覆盖多少生成器和数据集？",
+      "answer": "TabStruct 包含 13 种现有的表格数据生成方法。 这 13 种表格数据生成方法分属九个不同类别。（部分回答：证据未覆盖问题的全部要点。）",
+      "model_status": "generated_partial",
+      "model_coverage_complete": false,
+      "human_verdict": "partial",
+      "human_note": "只给出 13 种生成方法，并把九个类别作为额外细节；漏答问题要求的 29 个数据集。引用页也未提供数据集数。",
+      "citations": [
+        {
+          "sha256": "56cb024094f272ad71b288a22bd8aa55ea3773b905be08db2baae72a673bdb5e",
+          "pdf_page": 7,
+          "quote": "TabStruct includes 13 existing tabular data generation methods of nine different categories."
+        },
+        {
+          "sha256": "56cb024094f272ad71b288a22bd8aa55ea3773b905be08db2baae72a673bdb5e",
+          "pdf_page": 7,
+          "quote": "TabStruct includes 13 existing tabular data generation methods of nine different categories."
+        }
+      ],
+      "gold_page_cited": false
+    },
+    {
+      "id": "P9-004",
+      "question": "TabStruct 在真实数据缺少真值 SCM 时用什么指标评估结构保真？",
+      "answer": "TabStruct 使用 global utility 这一无需真值 SCM（SCM-free）的指标来评估结构保真，量化表格数据中因果结构的保留程度。",
+      "model_status": "generated_claims_reviewed",
+      "model_coverage_complete": true,
+      "human_verdict": "correct",
+      "human_note": "说明 global utility 是 SCM-free 指标，并说明其量化因果结构保留，符合问题。",
+      "citations": [
+        {
+          "sha256": "56cb024094f272ad71b288a22bd8aa55ea3773b905be08db2baae72a673bdb5e",
+          "pdf_page": 4,
+          "quote": "these gaps, we introduce TabStruct, a unified evaluation framework, along with global utility, an SCM-free metric that quantifies the preservation of causal structures in tabular data."
+        }
+      ],
+      "gold_page_cited": false
+    },
+    {
+      "id": "P9-009",
+      "question": "TabQueryBench 在 9 个数据集探针上的平均 Kendall W 和成对 Spearman rho 各是多少？",
+      "answer": "数据集层面的平均 Kendall's W 为 0.927。 在三个重生成对上，平均成对 Spearman's ρ 为 0.903。（部分回答：证据未覆盖问题的全部要点。）",
+      "model_status": "generated_partial",
+      "model_coverage_complete": false,
+      "human_verdict": "correct",
+      "human_note": "完整回答 Kendall W=0.927 与 pairwise Spearman rho=0.903；系统的 coverage 标记偏保守。",
+      "citations": [
+        {
+          "sha256": "a541cb07a5d912f13ebdb89c334ef5b104c4bd9c1fa23cd44764d55cd7e4c27a",
+          "pdf_page": 11,
+          "quote": "At the dataset level, the mean Kendall’s 𝑊is 0.927, and the mean pairwise Spearman’s 𝜌is 0.903 across the three regeneration pairs."
+        },
+        {
+          "sha256": "a541cb07a5d912f13ebdb89c334ef5b104c4bd9c1fa23cd44764d55cd7e4c27a",
+          "pdf_page": 11,
+          "quote": "At the dataset level, the mean Kendall’s 𝑊is 0.927, and the mean pairwise Spearman’s 𝜌is 0.903 across the three regeneration pairs."
+        }
+      ],
+      "gold_page_cited": false
+    },
+    {
+      "id": "P9-015",
+      "question": "Jeong 等人的 label-shift 在线适配由哪三部分组成？",
+      "answer": "第一部分是 histogram binning。 第二部分是通过 Soft-Bayes 进行在线标签分布估计（online label distribution estimation via Soft-Bayes）。 第三部分是通过在线梯度下降进行模型参数适配（model parameter adaptation via online gradient descent）。",
+      "model_status": "generated_claims_reviewed",
+      "model_coverage_complete": true,
+      "human_verdict": "correct",
+      "human_note": "完整列出 histogram binning、Soft-Bayes 在线标签分布估计，以及 online gradient descent 参数适配。",
+      "citations": [
+        {
+          "sha256": "e4cc9352e0ded3a862e67845b85427758e5f29ba3fa4dec316e36f4d7c0fe277",
+          "pdf_page": 8,
+          "quote": "We proposed an online procedure for label shift adaptation that combines histogram binning, online label distribution estimation via Soft-Bayes, and model parameter adaptation via online gradient descent."
+        },
+        {
+          "sha256": "e4cc9352e0ded3a862e67845b85427758e5f29ba3fa4dec316e36f4d7c0fe277",
+          "pdf_page": 8,
+          "quote": "We proposed an online procedure for label shift adaptation that combines histogram binning, online label distribution estimation via Soft-Bayes, and model parameter adaptation via online gradient descent."
+        },
+        {
+          "sha256": "e4cc9352e0ded3a862e67845b85427758e5f29ba3fa4dec316e36f4d7c0fe277",
+          "pdf_page": 8,
+          "quote": "We proposed an online procedure for label shift adaptation that combines histogram binning, online label distribution estimation via Soft-Bayes, and model parameter adaptation via online gradient descent."
+        }
+      ],
+      "gold_page_cited": true
+    }
+  ]
+}

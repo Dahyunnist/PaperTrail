@@ -226,7 +226,7 @@ def main() -> None:
     parser.add_argument("--trace-out", type=Path, default=Path(".local/s1-retrieval-trace.json"))
     parser.add_argument("--compare", action="store_true", help="对照 BM25、潜在向量和 RRF 混合检索")
     parser.add_argument("--vector-artifact", type=Path)
-    parser.add_argument("--modes", nargs="+", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_rerank"])
+    parser.add_argument("--modes", nargs="+", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_dense_rerank", "hybrid_bge_rerank"])
     args = parser.parse_args()
     result = compare_modes(args.db, args.gold, args.k,
                            modes=tuple(args.modes) if args.modes else ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),

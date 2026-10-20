@@ -21,7 +21,7 @@ def _print_json(value: object) -> None:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="papertrail", description="PaperTrail S1：只读文献解析与本机关键词检索")
     commands = parser.add_subparsers(dest="command", required=True)
-    retrieval_modes = ["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_rerank"]
+    retrieval_modes = ["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_dense_rerank", "hybrid_bge_rerank"]
 
     index_parser = commands.add_parser("index", help="将配置中明确选择的 PDF/Markdown 建入本地 FTS5 索引")
     index_parser.add_argument("--sources", type=Path, required=True)
