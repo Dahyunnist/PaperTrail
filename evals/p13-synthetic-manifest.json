@@ -1,0 +1,18 @@
+{
+  "benchmark": "PaperTrail P13 synthetic multi-document RAG holdout",
+  "data_policy": "synthetic fixtures only; no local thesis material",
+  "question_count": 26,
+  "answerable_count": 22,
+  "unanswerable_count": 4,
+  "documents": {
+    "study-a.pdf": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+    "study-b.pdf": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+    "study-c.pdf": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+    "study-d.pdf": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404"
+  },
+  "gold_sha256": "339087ae5058aecccd369b13bd9374bd328886b66a41e16add9ec6a29dce3ec9",
+  "verified_evidence_quotes": 27,
+  "indexed_chunks": 23,
+  "exact_overlap_with_earlier_gold_count": 0,
+  "scope": "Single 26-question English synthetic holdout across four one-page PDFs; not production evidence."
+}
