@@ -8,7 +8,7 @@ import secrets
 from pathlib import Path
 from typing import Any
 
-from flask import Flask, abort, flash, make_response, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, jsonify, make_response, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
 
 import yaml
@@ -17,6 +17,7 @@ from .audit import _hash
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 from .qa import ask, conversation_history
 from .s1_index import index_selection, inspect_document, open_database
+from .jobs import enqueue_index, get_job
 from .workspace import (create_note, dashboard_stats, delete_note, ensure_workspace_schema,
                         library_documents, list_uploads, remove_upload, search_notes, study_report,
                         register_upload, update_upload)
@@ -74,14 +75,16 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             flash("没有找到已配置的来源清单。", "warning")
             return redirect(url_for("home") + "#library")
         try:
-            result = index_selection(app.config["DATABASE"], sources_config, selection_manifest)
-            flash(f"配置清单处理完成：新增 {result['added']} 篇，重复 {result['duplicates']} 篇，文本块 {result['chunks']} 个。",
-                  "success" if not result["issues"] else "warning")
-            if result["issues"]:
-                flash(f"有 {len(result['issues'])} 项解析问题，可在文献状态中检查。", "warning")
+            job_id = enqueue_index(app.config["DATABASE"], sources_config, selection_manifest)
+            flash(f"索引任务已排队：{job_id}。可通过 /jobs/{job_id} 查看进度。", "success")
         except (ValueError, OSError) as exc:
             flash(f"读取配置文献失败：{exc}", "warning")
         return redirect(url_for("home") + "#library")
+
+    @app.get("/jobs/<job_id>")
+    def index_job(job_id: str) -> Any:
+        job = get_job(app.config["DATABASE"], job_id)
+        return (jsonify(job), 200) if job else (jsonify({"error": "job_not_found"}), 404)
 
     @app.post("/ask")
     def ask_question() -> Any:
@@ -143,20 +146,12 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             "relative_path": stored_path.name, "sha256": sha256, "kind": "pdf",
             "source_type": "original_pdf"}, ensure_ascii=False) + "\n", encoding="utf-8")
         try:
-            indexed = index_selection(app.config["DATABASE"], root_config, manifest)
-            issue = "; ".join(row.get("issue", "") for row in indexed["issues"])
-            version = inspect_document(app.config["DATABASE"], sha256[:16])
-            version_id = version["version_id"] if version else None
-            state = "indexed" if version and not issue else "needs_attention"
-            update_upload(app.config["DATABASE"], upload_id, state, issue, version_id)
-            flash("PDF 已加入本机文献库。" if state == "indexed" else
-                  f"PDF 已保存，但解析需要检查：{issue or '未建立可检索文本'}", "success" if state == "indexed" else "warning")
+            update_upload(app.config["DATABASE"], upload_id, "queued", "")
+            job_id = enqueue_index(app.config["DATABASE"], root_config, manifest, upload_id)
+            flash(f"PDF 已安全保存，后台索引任务已排队：{job_id}。", "success")
         except Exception as exc:
             update_upload(app.config["DATABASE"], upload_id, "failed", f"{type(exc).__name__}: {exc}")
             flash("PDF 已保存，但索引失败；可以在下方删除后重试。", "warning")
-        finally:
-            manifest.unlink(missing_ok=True)
-            root_config.unlink(missing_ok=True)
         return redirect(url_for("home") + "#library")
 
     @app.post("/uploads/<upload_id>/delete")

@@ -1,6 +1,7 @@
 import io
 import json
 import re
+import time
 from pathlib import Path
 
 import fitz
@@ -32,6 +33,19 @@ def _csrf(response) -> str:
     return match.group(1).decode()
 
 
+def _wait_for_job(client, response) -> dict:
+    match = re.search(r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
+                      response.get_data(as_text=True))
+    assert match
+    for _ in range(100):
+        job_response = client.get(f"/jobs/{match.group(1)}")
+        job = job_response.get_json()
+        if job["state"] in {"succeeded", "succeeded_with_issues", "failed"}:
+            return job
+        time.sleep(0.05)
+    raise AssertionError("索引任务未及时结束")
+
+
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):
     db = tmp_path / "workspace.sqlite3"
     uploads = tmp_path / "uploads"
@@ -57,7 +71,8 @@ def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tm
         response = client.post("/uploads", data={"_csrf": token,
             "pdf": (io.BytesIO(payload), name)}, content_type="multipart/form-data", follow_redirects=True)
         assert response.status_code == 200
-        assert b"indexed" in response.data
+        assert "后台索引任务已排队" in response.get_data(as_text=True)
+        assert _wait_for_job(client, response)["state"] == "succeeded"
         token = _csrf(response)
     assert len(list_uploads(db)) == 2
 
@@ -113,6 +128,8 @@ def test_web_can_index_explicit_authorized_selection(tmp_path):
     page = client.get("/")
     response = client.post("/index-selected", data={"_csrf": _csrf(page)}, follow_redirects=True)
     assert response.status_code == 200
+    assert _wait_for_job(client, response)["state"] == "succeeded"
+    response = client.get("/")
     assert b"Configured Research Paper" in response.data
     response = client.post("/uploads", data={"_csrf": _csrf(response),
         "pdf": (io.BytesIO(source.read_bytes()), "duplicate.pdf")},

@@ -413,20 +413,23 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
     return {"added": 1, "duplicate": 0, "sections": len(section_groups), "chunks": child_count}
 
 
-def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback: bool = False) -> dict[str, Any]:
+def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback: bool = False,
+                    progress_callback: Any | None = None) -> dict[str, Any]:
     selected = _selection_rows(selection, sources)
     conn = open_database(database)
     totals = {"selected": len(selected), "added": 0, "duplicates": 0, "sections": 0, "chunks": 0, "low_text_documents": 0}
     issues: list[dict[str, str]] = []
     seen_sha: set[str] = set()
     try:
-        for item in selected:
+        for item_number, item in enumerate(selected, 1):
             if item["sha256"] in seen_sha:
                 existing = conn.execute("SELECT version_id FROM paper_versions WHERE sha256=?", (item["sha256"],)).fetchone()
                 if existing:
                     conn.execute("INSERT OR IGNORE INTO source_locations(version_id,root_id,absolute_path) VALUES(?,?,?)",
                                  (existing["version_id"], item["root_id"], str(item["path"])))
                 totals["duplicates"] += 1
+                if progress_callback:
+                    progress_callback(item_number, len(selected), item["file_name"])
                 continue
             seen_sha.add(item["sha256"])
             try:
@@ -446,6 +449,8 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                     issues.append({"file_name": item["file_name"], "issue": "ocr_derived_pages", "pages": ",".join(map(str, parsed.ocr_pages))})
             except Exception as exc:
                 issues.append({"file_name": item["file_name"], "issue": f"{type(exc).__name__}: {exc}"})
+            if progress_callback:
+                progress_callback(item_number, len(selected), item["file_name"])
         conn.commit()
         if totals["added"]:
             conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
