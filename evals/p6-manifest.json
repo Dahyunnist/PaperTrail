@@ -1,0 +1,30 @@
+{
+  "freeze_date": "2026-10-20",
+  "gold_file": "p6-gold-20261020.jsonl",
+  "gold_sha256": "044546cf3745edc4eae6ab6c14d8ff73676e2d91bb656fbd6b21ea4ac178f6e1",
+  "question_count": 34,
+  "evidence_pointer_count": 37,
+  "distinct_cited_papers": 10,
+  "question_types": {
+    "conflict": 3,
+    "cross_paper": 2,
+    "fact_location": 20,
+    "method_comparison": 5,
+    "multi_hop": 1,
+    "unanswerable": 3
+  },
+  "corpus_original_pdf_sha256": [
+    "063ec708b4e06857fe42cd7902aacc23182b36ae3603c03ed3af91ab50da7197",
+    "2040625fbca966e4cead4e7c4259e4df5c9225a6b71be42c13b7d8405ca9eaa6",
+    "490899fb963b6281e36a172fef20ea5dcede977a39db523d4a96689972878ba6",
+    "4fc70f55ad6b88bd4e8adc82dd5c9598e59c19c0ec26b5ad96c46b025b1cc174",
+    "56cb024094f272ad71b288a22bd8aa55ea3773b905be08db2baae72a673bdb5e",
+    "6fa5c8b0bf3fce2d72ded6fa01574116018c982a0ae851cd62a7e6f0aebe46a3",
+    "7568b7c4cd16f0078ea354ab05a4598fef32c6b78478f16c9df11c4a71943915",
+    "b7ce2ff1a54b82ae9176dd86675240c70c8da2b180bf28ccdde31c6176154033",
+    "bb8d8f702615d1bd05c8e0e8773d4bdb928466ce1e5e5a9183b266f99552493c",
+    "c7098107796b89bdbc8237005b1043b8846a50d0d27aa0f0e493c4e629e10f75",
+    "d7b6e0c76c8c9bfbb5c67e38e6d7d7f1838563674b8f74f23d05afb2a69a2da9",
+    "e468b4d9f34a872efd99819f5ad5c83677af8857db40525c05a84ec86726feb7"
+  ]
+}

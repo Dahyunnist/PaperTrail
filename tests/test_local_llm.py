@@ -36,3 +36,45 @@ def test_local_chat_client_uses_loopback_ollama_json_api(monkeypatch):
     assert seen["path"] == "/api/chat"
     assert seen["payload"]["model"] == "local-test-model"
     assert seen["payload"]["format"] == "json"
+
+
+def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path, monkeypatch):
+    seen = {}
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def read(self):
+            return json.dumps({"choices": [{"message": {"content": "{\"ok\":true}"}}],
+                               "usage": {"prompt_tokens": 100, "completion_tokens": 20}}).encode()
+
+    ledger = tmp_path / "budget.json"
+    monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "openai-compatible")
+    monkeypatch.setenv("PAPERTRAIL_OPENAI_BASE_URL", "https://api.deepseek.com")
+    monkeypatch.setenv("PAPERTRAIL_OPENAI_API_KEY_ENV", "TEST_DEEPSEEK_KEY")
+    monkeypatch.setenv("TEST_DEEPSEEK_KEY", "secret-test-key")
+    monkeypatch.setenv("PAPERTRAIL_LLM_BUDGET_FILE", str(ledger))
+    import papertrail.local_llm as llm
+    def mock_open(request, timeout):
+        seen["url"] = request.full_url
+        seen["authorization"] = request.get_header("Authorization")
+        seen["payload"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.setattr(llm, "urlopen", mock_open)
+    result = chat_json("deepseek-flash", "system", "prompt")
+    assert result["ok"] is True
+    assert result["_usage"]["prompt_eval_count"] == 100
+    assert seen["url"] == "https://api.deepseek.com/chat/completions"
+    assert seen["authorization"] == "Bearer secret-test-key"
+    assert seen["payload"]["max_tokens"] == 320
+    assert "secret-test-key" not in ledger.read_text(encoding="utf-8")
+    ledger.write_text('{"spent_upper_bound_usd": 0.1899, "requests": []}', encoding="utf-8")
+    seen.clear()
+    import pytest
+    with pytest.raises(RuntimeError, match="budget cap"):
+        chat_json("deepseek-flash", "system", "prompt")
+    assert not seen
