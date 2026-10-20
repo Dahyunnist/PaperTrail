@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import time
@@ -25,31 +26,96 @@ def evaluate(database: Path, gold_path: Path, k: int = 5) -> dict[str, Any]:
         if item["abstain"]:
             continue
         answerable_count += 1
-        results = search(database, item["question"], k)
+        results = search(database, item["question"], max(k * 5, 20), source_type="original_pdf")
         expected_pages = {(e["sha256"], e["pdf_page"]) for e in item["evidence"]}
         expected_hashes = {e["sha256"] for e in item["evidence"]}
-        retrieved_pages = {(r["sha256"], r["pdf_page"]) for r in results if r["pdf_page"] is not None}
-        retrieved_hashes = {r["sha256"] for r in results}
+        chunk_top = results[:k]
+        pages = _unique_pages(results, k)
+        documents = _unique_documents(results, k)
+        retrieved_pages = {(r["sha256"], r["pdf_page"]) for r in pages}
+        retrieved_hashes = {r["sha256"] for r in chunk_top}
         page_hit = bool(expected_pages.intersection(retrieved_pages))
+        chunk_page_hit = bool(expected_pages.intersection(
+            {(r["sha256"], r["pdf_page"]) for r in chunk_top if r["pdf_page"] is not None}))
         document_hit = bool(expected_hashes.intersection(retrieved_hashes))
+        unique_document_hit = bool(expected_hashes.intersection({r["sha256"] for r in documents}))
         all_pages = bool(expected_pages) and expected_pages.issubset(retrieved_pages)
         page_hits += page_hit
         document_hits += document_hit
         complete_multi_page += all_pages
         trace.append({
-            "id": item["id"], "question_type": item["question_type"],
+            "id": item["id"], "question": item["question"], "question_type": item["question_type"],
             "expected_pages": sorted([{"sha256": h, "pdf_page": p} for h, p in expected_pages], key=lambda x: (x["sha256"], x["pdf_page"])),
-            "page_hit_at_k": page_hit, "document_hit_at_k": document_hit, "all_evidence_pages_at_k": all_pages,
-            "results": [{"sha256": r["sha256"], "pdf_page": r["pdf_page"], "rank_score": r["rank_score"], "source_type": r["source_type"], "chunk_id": r["chunk_id"]} for r in results],
+            "page_hit_at_k": page_hit, "chunk_page_hit_at_k": chunk_page_hit,
+            "document_hit_at_k": document_hit, "unique_document_hit_at_k": unique_document_hit,
+            "all_evidence_pages_at_k": all_pages,
+            "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
+                              else "target_document_retrieved_wrong_page"),
+            "chunk_results": [_trace_row(r) for r in chunk_top],
+            "page_results": [_trace_row(r) for r in pages],
         })
+    unanswerable = []
+    for item in load_gold(gold_path):
+        if not item["abstain"]:
+            continue
+        results = search(database, item["question"], k, source_type="original_pdf")
+        unanswerable.append({"id": item["id"], "question_type": item["question_type"],
+                             "retrieval_nonempty": bool(results),
+                             "top_score": results[0]["rank_score"] if results else None,
+                             "distinct_documents": len({r["sha256"] for r in results})})
+    gold_items = load_gold(gold_path)
     return {
         "k": k, "answerable_questions": answerable_count,
         "page_recall_at_k": page_hits / answerable_count if answerable_count else 0.0,
+        "chunk_page_recall_at_k": sum(r["chunk_page_hit_at_k"] for r in trace) / answerable_count if answerable_count else 0.0,
         "document_recall_at_k": document_hits / answerable_count if answerable_count else 0.0,
+        "unique_document_recall_at_k": sum(r["unique_document_hit_at_k"] for r in trace) / answerable_count if answerable_count else 0.0,
         "all_evidence_pages_at_k": complete_multi_page / answerable_count if answerable_count else 0.0,
         "page_hit_count": page_hits, "document_hit_count": document_hits,
-        "trace": trace,
+        "question_types": {kind: {"total": sum(r["question_type"] == kind for r in trace),
+                                   "page_hits": sum(r["question_type"] == kind and r["page_hit_at_k"] for r in trace)}
+                           for kind in sorted({r["question_type"] for r in trace})},
+        "unanswerable_questions": len(unanswerable), "unanswerable_retrieval": unanswerable,
+        "gold_sha256": _file_hash(gold_path), "trace": trace,
     }
+
+
+def _file_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _trace_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {"sha256": row["sha256"], "paper_id": row["paper_id"],
+            "pdf_page": row["pdf_page"], "rank_score": row["rank_score"],
+            "source_type": row["source_type"], "chunk_id": row["chunk_id"],
+            "text_origin": row.get("text_origin", "native_text")}
+
+
+def _unique_pages(results: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    output, seen = [], set()
+    for row in results:
+        if row["pdf_page"] is None:
+            continue
+        identity = (row["sha256"], row["pdf_page"])
+        if identity in seen:
+            continue
+        seen.add(identity)
+        output.append(row)
+        if len(output) >= limit:
+            break
+    return output
+
+
+def _unique_documents(results: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    output, seen = [], set()
+    for row in results:
+        if row["sha256"] in seen:
+            continue
+        seen.add(row["sha256"])
+        output.append(row)
+        if len(output) >= limit:
+            break
+    return output
 
 
 def compare_modes(database: Path, gold_path: Path, k: int = 5,
@@ -58,7 +124,7 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
     items = [item for item in load_gold(gold_path) if not item["abstain"]]
     output: dict[str, Any] = {"k": k, "answerable_questions": len(items), "modes": {}}
     for mode in modes:
-        page_hits = document_hits = complete_hits = 0
+        page_hits = chunk_page_hits = document_hits = unique_document_hits = complete_hits = 0
         reciprocal_ranks: list[float] = []
         ndcgs: list[float] = []
         durations: list[float] = []
@@ -68,15 +134,23 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             expected_pages = {(e["sha256"], e["pdf_page"]) for e in item["evidence"]}
             expected_hashes = {e["sha256"] for e in item["evidence"]}
             started = time.perf_counter()
-            results = retrieve(database, item["question"], k, mode=mode, artifact=artifact)
+            results = retrieve(database, item["question"], max(k * 5, 20),
+                               source_type="original_pdf", mode=mode, artifact=artifact)
             durations.append(time.perf_counter() - started)
-            ranks = [rank for rank, hit in enumerate(results, 1)
+            chunk_top = results[:k]
+            page_top = _unique_pages(results, k)
+            document_top = _unique_documents(results, k)
+            ranks = [rank for rank, hit in enumerate(page_top, 1)
                      if (hit["sha256"], hit["pdf_page"]) in expected_pages]
             page_hit = bool(ranks)
-            document_hit = any(hit["sha256"] in expected_hashes for hit in results)
-            all_pages = expected_pages.issubset({(hit["sha256"], hit["pdf_page"]) for hit in results})
+            chunk_page_hit = any((hit["sha256"], hit["pdf_page"]) in expected_pages for hit in chunk_top)
+            document_hit = any(hit["sha256"] in expected_hashes for hit in chunk_top)
+            unique_document_hit = any(hit["sha256"] in expected_hashes for hit in document_top)
+            all_pages = expected_pages.issubset({(hit["sha256"], hit["pdf_page"]) for hit in page_top})
             page_hits += page_hit
+            chunk_page_hits += chunk_page_hit
             document_hits += document_hit
+            unique_document_hits += unique_document_hit
             complete_hits += all_pages
             reciprocal_ranks.append(1 / ranks[0] if ranks else 0.0)
             dcg = sum(1 / math.log2(rank + 1) for rank in ranks)
@@ -85,17 +159,21 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             group = by_type.setdefault(item["question_type"], {"total": 0, "page_hits": 0})
             group["total"] += 1
             group["page_hits"] += int(page_hit)
-            trace.append({"id": item["id"], "type": item["question_type"],
+            trace.append({"id": item["id"], "question": item["question"], "type": item["question_type"],
                           "expected_pages": sorted([list(page) for page in expected_pages]),
-                          "page_hit": page_hit, "document_hit": document_hit,
+                          "page_hit": page_hit, "chunk_page_hit": chunk_page_hit,
+                          "document_hit": document_hit, "unique_document_hit": unique_document_hit,
+                          "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
+                                            else "target_document_retrieved_wrong_page"),
                           "all_evidence_pages": all_pages,
-                          "results": [{"sha256": hit["sha256"], "pdf_page": hit["pdf_page"],
-                                       "score": hit["rank_score"], "chunk_id": hit["chunk_id"]}
-                                      for hit in results]})
+                          "chunk_results": [_trace_row(hit) for hit in chunk_top],
+                          "page_results": [_trace_row(hit) for hit in page_top]})
         total = len(items)
         output["modes"][mode] = {
             "page_recall_at_k": page_hits / total if total else 0,
+            "chunk_page_recall_at_k": chunk_page_hits / total if total else 0,
             "document_recall_at_k": document_hits / total if total else 0,
+            "unique_document_recall_at_k": unique_document_hits / total if total else 0,
             "all_evidence_pages_at_k": complete_hits / total if total else 0,
             "mrr_at_k": sum(reciprocal_ranks) / total if total else 0,
             "ndcg_at_k": sum(ndcgs) / total if total else 0,
@@ -103,6 +181,13 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             "page_hits": page_hits, "document_hits": document_hits,
             "by_question_type": by_type, "trace": trace,
         }
+        unanswerable_items = [item for item in load_gold(gold_path) if item["abstain"]]
+        unanswerable = []
+        for item in unanswerable_items:
+            results = retrieve(database, item["question"], k, source_type="original_pdf", mode=mode, artifact=artifact)
+            unanswerable.append({"id": item["id"], "retrieval_nonempty": bool(results),
+                                 "top_score": results[0]["rank_score"] if results else None})
+        output["modes"][mode]["unanswerable_retrieval"] = unanswerable
     return output
 
 
