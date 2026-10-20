@@ -11,6 +11,7 @@ from .s1_index import database_summary, index_selection, inspect_document, searc
 from .retrieval import build_vector_index, retrieve
 from .qa import ask, conversation_history
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
+from .reward import export_trajectories, rate_trajectory
 
 
 def _print_json(value: object) -> None:
@@ -89,6 +90,17 @@ def _parser() -> argparse.ArgumentParser:
 
     mcp_parser = commands.add_parser("mcp", help="以只读 MCP stdio 服务暴露论文证据")
     mcp_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+
+    rate_parser = commands.add_parser("trajectory-rate", help="为 QA 轨迹记录人工结果评分")
+    rate_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    rate_parser.add_argument("--turn-id", required=True)
+    rate_parser.add_argument("--rating", choices=["correct", "partially_correct", "incorrect",
+                                                    "abstention_correct", "abstention_wrong"], required=True)
+    rate_parser.add_argument("--note", default="")
+
+    export_parser = commands.add_parser("trajectory-export", help="导出本机 QA 轨迹 JSONL")
+    export_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    export_parser.add_argument("--out", type=Path, required=True)
     return parser
 
 
@@ -151,6 +163,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "mcp":
             from .mcp_server import main as mcp_main
             mcp_main(args.db)
+        elif args.command == "trajectory-rate":
+            _print_json(rate_trajectory(args.db, args.turn_id, args.rating, args.note))
+        elif args.command == "trajectory-export":
+            _print_json({"rows": export_trajectories(args.db, args.out), "path": str(args.out)})
         return 0
     except (ValueError, OSError) as exc:
         print(f"PaperTrail: {exc}", file=sys.stderr)

@@ -31,4 +31,5 @@ def chat_json(model: str, system: str, prompt: str) -> dict[str, Any]:
         raise RuntimeError("本机模型没有返回有效 JSON") from exc
     if not isinstance(content, dict):
         raise RuntimeError("本机模型 JSON 顶层必须是对象")
+    content["_usage"] = {key: result.get(key) for key in ("prompt_eval_count", "eval_count", "total_duration")}
     return content

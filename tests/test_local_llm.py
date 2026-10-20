@@ -31,7 +31,8 @@ def test_local_chat_client_uses_loopback_ollama_json_api(monkeypatch):
     finally:
         server.shutdown()
         thread.join(timeout=2)
-    assert result == {"ok": True}
+    assert result["ok"] is True
+    assert result["_usage"]["eval_count"] is None
     assert seen["path"] == "/api/chat"
     assert seen["payload"]["model"] == "local-test-model"
     assert seen["payload"]["format"] == "json"

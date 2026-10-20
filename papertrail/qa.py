@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import sqlite3
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,6 +45,15 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
         ordinal INTEGER NOT NULL, claim_text TEXT NOT NULL,
         evidence_json TEXT NOT NULL, UNIQUE(turn_id, ordinal)
     );
+    CREATE TABLE IF NOT EXISTS qa_trajectories (
+        turn_id TEXT PRIMARY KEY REFERENCES qa_turns(turn_id) ON DELETE CASCADE,
+        retrieval_json TEXT NOT NULL, evidence_json TEXT NOT NULL,
+        model_name TEXT, usage_json TEXT, prompt_chars INTEGER NOT NULL,
+        latency_ms REAL NOT NULL, answer_status TEXT NOT NULL,
+        total_claims INTEGER NOT NULL, rejected_claims INTEGER NOT NULL,
+        user_rating TEXT, user_note TEXT, reward REAL, reward_json TEXT,
+        created_at TEXT NOT NULL, rated_at TEXT
+    );
     """)
 
 
@@ -66,7 +77,7 @@ def _sentences(text: str) -> list[str]:
             if 35 <= len(part.strip()) <= 500 and re.search(r"[.!?。！？]$", part.strip())]
 
 
-def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str) -> list[dict[str, Any]]:
+def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str) -> dict[str, Any]:
     context_budget = 12_000
     question = question[:2_000]
     sources = []
@@ -105,8 +116,11 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str)
     if not isinstance(results, list):
         raise RuntimeError("支持性审查结果格式错误")
     by_id = {row.get("claim_id"): row.get("supported") for row in results if isinstance(row, dict)}
-    return [{**claim, "support": "supported" if by_id.get(i) is True else "unsupported",
-             "support_method": "local_llm_judge"} for i, claim in enumerate(claims)]
+    usage = {key: (first.get("_usage", {}).get(key) or 0) + (judged.get("_usage", {}).get(key) or 0)
+             for key in ("prompt_eval_count", "eval_count", "total_duration")}
+    return {"claims": [{**claim, "support": "supported" if by_id.get(i) is True else "unsupported",
+                         "support_method": "local_llm_judge"} for i, claim in enumerate(claims)],
+            "usage": usage}
 
 
 def ask(database: Path, question: str, conversation_id: str | None = None,
@@ -116,6 +130,7 @@ def ask(database: Path, question: str, conversation_id: str | None = None,
         raise ValueError("问题不能为空")
     limit = max(1, min(int(limit), 8))
     now = datetime.now(timezone.utc).isoformat()
+    started = time.perf_counter()
     conversation_id = conversation_id or str(uuid.uuid4())
     conn = open_database(database)
     try:
@@ -187,9 +202,14 @@ def ask(database: Path, question: str, conversation_id: str | None = None,
     model = configured_model()
     synthesis_error = None
     generated_claims: list[dict[str, Any]] = []
+    generation_usage: dict[str, Any] | None = None
+    prompt_chars = 0
     if model and evidence:
+        prompt_chars = len(question) + sum(len(item["quote"][:700]) for item in evidence)
         try:
-            generated_claims = _synthesize_local(question, evidence, model)
+            synthesis = _synthesize_local(question, evidence, model)
+            generated_claims = synthesis["claims"]
+            generation_usage = synthesis["usage"]
         except (RuntimeError, ValueError) as exc:
             synthesis_error = str(exc)
     if model:
@@ -241,12 +261,28 @@ def ask(database: Path, question: str, conversation_id: str | None = None,
                       "kind": claim.get("kind")}
             conn.execute("INSERT INTO qa_claims VALUES(?,?,?,?,?)",
                          (str(uuid.uuid4()), turn_id, ordinal, claim["text"], json.dumps(stored, ensure_ascii=False)))
+        latency_ms = (time.perf_counter() - started) * 1000
+        retrieval_trace = [{"chunk_id": row["chunk_id"], "sha256": row["sha256"],
+                            "page": row["pdf_page"], "score": row["rank_score"],
+                            "signals": row.get("retrieval_signals", [])} for row in result_rows]
+        evidence_trace = [{"chunk_id": item["chunk_id"], "sha256": item["sha256"], "page": item["pdf_page"],
+                           "quote_sha256": hashlib.sha256(item["quote"].encode()).hexdigest()}
+                          for item in evidence]
+        conn.execute("INSERT INTO qa_trajectories(turn_id,retrieval_json,evidence_json,model_name,usage_json,"
+                     "prompt_chars,latency_ms,answer_status,total_claims,rejected_claims,created_at) "
+                     "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                     (turn_id, json.dumps(retrieval_trace, ensure_ascii=False),
+                      json.dumps(evidence_trace, ensure_ascii=False), model,
+                      json.dumps(generation_usage, ensure_ascii=False) if generation_usage is not None else None,
+                      prompt_chars, latency_ms, status, len(generated_claims),
+                      sum(item.get("support") != "supported" for item in generated_claims), now))
         conn.commit()
     finally:
         conn.close()
     return {"conversation_id": conversation_id, "turn_id": turn_id, "question": question,
             "answer": answer, "status": status, "retrieval_mode": mode,
-            "context_query": context_query, "claims": claims, "created_at": now}
+            "context_query": context_query, "claims": claims, "created_at": now,
+            "latency_ms": latency_ms, "model_name": model, "usage": generation_usage}
 
 
 def conversation_history(database: Path, conversation_id: str) -> list[dict[str, Any]]:

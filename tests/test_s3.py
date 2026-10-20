@@ -64,12 +64,12 @@ def test_local_llm_claims_require_verified_citations_and_support_review(tmp_path
 
     db, _ = _indexed_db(tmp_path)
     monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "local-test")
-    monkeypatch.setattr(qa, "_synthesize_local", lambda question, evidence, model: [
+    monkeypatch.setattr(qa, "_synthesize_local", lambda question, evidence, model: {"claims": [
         {"text": "CTGAN evaluates column utility.", "evidence_ids": [0], "support": "supported",
          "support_method": "local_llm_judge"},
         {"text": "CTGAN proves universal privacy.", "evidence_ids": [0], "support": "unsupported",
          "support_method": "local_llm_judge"},
-    ])
+    ], "usage": {"eval_count": 12}})
     result = ask(db, "What does CTGAN evaluate?")
     assert result["status"] == "generated_claims_reviewed"
     assert [claim["text"] for claim in result["claims"]] == ["CTGAN evaluates column utility."]
@@ -77,6 +77,7 @@ def test_local_llm_claims_require_verified_citations_and_support_review(tmp_path
     claim_evidence = history[0]["claims"][0]["evidence"]
     assert claim_evidence["support"] == "supported"
     assert claim_evidence["support_method"] == "local_llm_judge"
+    assert result["usage"]["eval_count"] == 12
 
 
 def test_qa_conversations_do_not_share_follow_up_memory(tmp_path):
