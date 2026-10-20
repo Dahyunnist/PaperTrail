@@ -80,6 +80,68 @@ def test_local_llm_claims_require_verified_citations_and_support_review(tmp_path
     assert result["usage"]["eval_count"] == 12
 
 
+def test_evidence_screen_returns_relevant_ids_and_focused_query(monkeypatch):
+    import papertrail.qa as qa
+
+    monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: {
+        "relevant_ids": [1], "targeted_query": "utility under label noise", "sufficient": False,
+        "_usage": {"eval_count": 8},
+    })
+    rows = [{"title": "Paper", "pdf_page": 2, "text": "Snippet"},
+            {"title": "Paper", "pdf_page": 7, "text": "Relevant snippet"}]
+    result = qa._screen_evidence("What changes under label noise?", rows, "test-model")
+    assert result["relevant_ids"] == [1]
+    assert result["targeted_query"] == "utility under label noise"
+    assert result["sufficient"] is False
+
+
+def test_claim_review_tracks_relevance_and_complete_coverage(monkeypatch):
+    import papertrail.qa as qa
+
+    outputs = iter([
+        {"claims": [{"text": "It uses utility metrics.", "evidence_ids": [0]}],
+         "_usage": {"eval_count": 4}},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_complete": False, "_usage": {"eval_count": 5}},
+    ])
+    monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
+    evidence = [{"quote": "The method measures utility with downstream tasks.",
+                 "title": "Paper", "pdf_page": 3}]
+    result = qa._synthesize_local("How does it evaluate utility?", evidence, "test-model")
+    assert result["claims"][0]["support"] == "supported"
+    assert result["claims"][0]["relevant"] is True
+    assert result["coverage_complete"] is False
+
+
+def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.retrieval import retrieve as real_retrieve
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "screen-test")
+    queries = []
+    def tracked_retrieve(database, query, *args, **kwargs):
+        queries.append(query)
+        return real_retrieve(database, query, *args, **kwargs)
+    monkeypatch.setattr(qa, "retrieve", tracked_retrieve)
+    screens = iter([
+        {"relevant_ids": [0], "targeted_query": "continuous and discrete columns",
+         "sufficient": False, "usage": {}},
+        {"relevant_ids": [0], "targeted_query": "", "sufficient": True, "usage": {}},
+    ])
+    monkeypatch.setattr(qa, "_screen_evidence", lambda *_args: next(screens))
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, _evidence, _model: {
+        "claims": [{"text": "CTGAN evaluates utility.", "evidence_ids": [0],
+                    "support": "supported", "relevant": True,
+                    "support_method": "test_judge"}],
+        "coverage_complete": True, "usage": {},
+    })
+    result = ask(db, "What does CTGAN evaluate?", mode="bm25")
+    assert len(queries) == 2
+    assert "continuous and discrete columns" in queries[1]
+    assert result["status"] == "generated_claims_reviewed"
+
+
 def test_qa_conversations_do_not_share_follow_up_memory(tmp_path):
     db, _ = _indexed_db(tmp_path)
     first = ask(db, "What does CTGAN evaluate?", conversation_id="conversation-one")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import uuid
 import json
 import os
 from functools import lru_cache
@@ -170,12 +171,14 @@ def llm_rerank_search(database: Path, query: str, limit: int = 5,
         order = list(range(len(pages)))
     order = order + [index for index in range(len(pages)) if index not in order]
     candidate_pages = [{"sha256": row["sha256"], "pdf_page": row["pdf_page"]} for row in pages]
+    rerank_call_id = str(uuid.uuid4())
     output = []
     for rank, index in enumerate(order[:limit], 1):
         row = dict(pages[index])
         row["rank_score"] = 1 / rank
         row["retrieval_signals"] = ["bm25", "bge", "llm_rerank"] if error is None else ["bm25", "bge", "rerank_fallback"]
         row["rerank_usage"] = response.get("_usage", {})
+        row["rerank_call_id"] = rerank_call_id
         row["rerank_candidate_pages"] = candidate_pages
         row["rerank_error"] = error
         output.append(row)

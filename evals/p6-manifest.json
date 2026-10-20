@@ -1,5 +1,6 @@
 {
   "freeze_date": "2026-10-20",
+  "role": "development_set_only_after_P6_model_outputs_were_reviewed",
   "gold_file": "p6-gold-20261020.jsonl",
   "gold_sha256": "044546cf3745edc4eae6ab6c14d8ff73676e2d91bb656fbd6b21ea4ac178f6e1",
   "question_count": 34,

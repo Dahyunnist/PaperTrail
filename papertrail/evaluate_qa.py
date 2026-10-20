@@ -29,16 +29,33 @@ def _copy_database(source: Path, destination: Path) -> None:
         dst.close()
 
 
+def _usage_snapshot() -> tuple[int, float, int, int]:
+    path = Path(os.environ.get("PAPERTRAIL_LLM_BUDGET_FILE", ".local/p6-api-usage.json"))
+    if not path.exists():
+        return 0, 0.0, 0, 0
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return (len(data.get("requests", [])), float(data.get("spent_upper_bound_usd", 0.0)),
+            sum(int(row.get("prompt_tokens") or 0) for row in data.get("requests", [])),
+            sum(int(row.get("completion_tokens") or 0) for row in data.get("requests", [])))
+
+
 def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
-              model: bool) -> dict[str, Any]:
-    if not model:
-        os.environ.pop("PAPERTRAIL_LLM_MODEL", None)
-    else:
-        if not os.environ.get("PAPERTRAIL_LLM_MODEL"):
-            raise ValueError("model run requires PAPERTRAIL_LLM_MODEL")
+              model: bool, artifact: Path | None = None) -> dict[str, Any]:
+    if model and not os.environ.get("PAPERTRAIL_LLM_MODEL"):
+        raise ValueError("model run requires PAPERTRAIL_LLM_MODEL")
     cases = []
     for item in items:
-        result = ask(database, item["question"], conversation_id=f"p6-{mode}-{item['id']}", limit=5, mode=mode)
+        request_count_before, cost_before, prompt_before, completion_before = _usage_snapshot()
+        result = ask(database, item["question"], conversation_id=f"p6-{mode}-{item['id']}",
+                     limit=5, mode=mode, generate=model, artifact=artifact)
+        request_count_after, cost_after, prompt_after, completion_after = _usage_snapshot()
+        request_count = request_count_after - request_count_before
+        ledger_cost = round(cost_after - cost_before, 8)
+        if request_count:
+            result["usage"] = {**(result.get("usage") or {}), "estimated_usd": ledger_cost,
+                               "request_count": request_count,
+                               "prompt_eval_count": prompt_after - prompt_before,
+                               "eval_count": completion_after - completion_before}
         citations = []
         for claim in result["claims"]:
             for ref in claim.get("support_evidence") or [claim.get("evidence", {})]:
@@ -93,12 +110,14 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
             "claim_support_acceptance_rate": accepted_claims / reviewed_claims if reviewed_claims else None,
             "reviewed_claims": reviewed_claims, "rejected_claims": reviewed_claims - accepted_claims,
             "by_question_type": by_type,
+            "api_requests": sum(int((row["usage"] or {}).get("request_count") or 0) for row in cases),
             "prompt_tokens": sum(int(row.get("prompt_eval_count") or 0) for row in usage_rows),
             "completion_tokens": sum(int(row.get("eval_count") or 0) for row in usage_rows),
             "cost_upper_bound_usd": round(total_cost, 8), "cases": cases}
 
 
-def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25") -> dict[str, Any]:
+def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25",
+               artifact: Path | None = None) -> dict[str, Any]:
     items = load_gold(gold_path)
     baseline_db = output.with_name(output.stem + "-extractive.sqlite3")
     model_db = output.with_name(output.stem + "-model.sqlite3")
@@ -107,12 +126,12 @@ def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25"
     configured_model = os.environ.get("PAPERTRAIL_LLM_MODEL")
     configured_provider = os.environ.get("PAPERTRAIL_LLM_PROVIDER")
     try:
-        baseline = _run_mode(baseline_db, items, mode, False)
+        baseline = _run_mode(baseline_db, items, mode, False, artifact)
         if configured_model:
             os.environ["PAPERTRAIL_LLM_MODEL"] = configured_model
         if configured_provider:
             os.environ["PAPERTRAIL_LLM_PROVIDER"] = configured_provider
-        model = _run_mode(model_db, items, mode, True)
+        model = _run_mode(model_db, items, mode, True, artifact)
     finally:
         if configured_model is None:
             os.environ.pop("PAPERTRAIL_LLM_MODEL", None)
@@ -134,8 +153,9 @@ def main() -> None:
     parser.add_argument("--gold", type=Path, default=Path("evals/p6-gold-20261020.jsonl"))
     parser.add_argument("--out", type=Path, default=Path(".local/p6-qa-comparison.json"))
     parser.add_argument("--mode", default="bm25")
+    parser.add_argument("--vector-artifact", type=Path)
     args = parser.parse_args()
-    result = compare_qa(args.db, args.gold, args.out, args.mode)
+    result = compare_qa(args.db, args.gold, args.out, args.mode, args.vector_artifact)
     print(json.dumps({key: {k: v for k, v in value.items() if k != "cases"}
                       for key, value in result.items() if isinstance(value, dict)}, indent=2))
 
