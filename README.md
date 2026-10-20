@@ -33,6 +33,8 @@ python -m pytest
 
 只读 MCP stdio 服务可用 `python -m papertrail mcp --db .local/papertrail.sqlite3` 启动。提供 `search_papers`、`get_evidence`、文献元数据资源和原文页资源；证据调用会重新校验 PDF SHA-256。个人笔记不会进入 MCP 搜索。
 
+可选本机生成需先启动本机 Ollama 并准备模型，再设置 `PAPERTRAIL_LLM_MODEL`；服务只连接 `PAPERTRAIL_OLLAMA_URL`（默认 loopback `http://127.0.0.1:11434`），没有云端回退。生成 claim 会引用已校验的原文页，并经本机模型逐条审查；模型不可用或没有支持证据时拒答。请把 LLM 支持性判断视为审查信号，不等同于人工核验。
+
 S3 使用 `python -m papertrail ask --db .local/papertrail.sqlite3 --question "你的问题"` 获取经 SHA、页码和原文校验的摘录；通过返回的 `conversation_id` 传给后续 `ask --conversation-id ...` 保留短上下文，或使用 `history --conversation-id ...` 回顾。当前没有配置生成模型，因此 S3 只给出可核验摘录，不自动撰写综合答案。
 
 S4 使用 `python -m papertrail compare --db .local/papertrail.sqlite3 --topic "主题" --claim "待比较论断"` 收集并列原文；通过 `compare-label` 逐条标记 `supports|contradicts|conditions|context|unclear`，也可通过 `compare-gap` 记录用户提出、待复核的研究空白候选。`compare-report` 汇总标注和证据。
