@@ -1,0 +1,22 @@
+{
+  "benchmark": "PaperTrail P12 synthetic RAG holdout",
+  "data_policy": "synthetic fixtures only; no local thesis material",
+  "question_count": 6,
+  "answerable_count": 4,
+  "unanswerable_count": 2,
+  "documents": {
+    "study-a.pdf": "cbbac5dcf040178497db974b4f2eebfd47e31676c7398ebeb8b94d8ea11e320d",
+    "study-b.pdf": "5f8d46cc564aded96a992023c5d56910c35e55912a36ad909bf7a3303acb6fc7"
+  },
+  "gold_sha256": "745f420f7423ae6a2fbe31fbc2b6560183d70321fab0ca75e2fdd92713c75309",
+  "verified_evidence_quotes": 5,
+  "index_summary": {
+    "selected": 2,
+    "added": 2,
+    "duplicates": 0,
+    "sections": 3,
+    "chunks": 6,
+    "low_text_documents": 0,
+    "issues": []
+  }
+}
