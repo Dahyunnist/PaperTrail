@@ -1,0 +1,26 @@
+{
+  "freeze_date": "2026-10-20",
+  "dataset_id": "P10-small-complex-question-holdout",
+  "role": "independent_nonblind_holdout",
+  "gold_file": "p10-gold-20261020.jsonl",
+  "gold_sha256": "d446e7ec2320340123dbdfb6a22195c9d07f62dc53124d4055ae1ee980a56344",
+  "question_count": 12,
+  "evidence_pointer_count": 20,
+  "question_types": {
+    "fact_location": 3,
+    "method_comparison": 2,
+    "cross_paper": 3,
+    "multi_hop": 2,
+    "conflict": 1,
+    "unanswerable": 1
+  },
+  "topic_coverage": [
+    "calibration",
+    "dataset_shift",
+    "synthetic_tabular_evaluation",
+    "cross_paper_comparison",
+    "multi_hop",
+    "metric_conflict",
+    "unanswerable"
+  ]
+}
