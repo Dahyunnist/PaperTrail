@@ -75,6 +75,8 @@ def test_s1_indexes_text_pages_notes_versions_and_exact_duplicates(tmp_path):
     doi_hits = search(db, "10.4242/test.1234", limit=5, source_type="original_pdf")
     assert doi_hits and doi_hits[0]["pdf_page"] == 1
     assert "AUC" in search(db, "AUC", limit=5)[0]["text"]
+    inflection_hits = search(db, "appear physical page", limit=12, source_type="original_pdf")
+    assert any(hit["pdf_page"] == 2 and "appears" in hit["text"] for hit in inflection_hits)
     artifact = tmp_path / "local" / "vectors.joblib"
     built = build_vector_index(db, artifact)
     assert built["chunks"] == 15

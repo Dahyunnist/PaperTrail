@@ -41,3 +41,20 @@ def test_qa_evaluation_compares_extractive_and_reviewed_modes(tmp_path, monkeypa
     assert result["extractive"]["questions"] == 1
     assert result["model_reviewed"]["by_question_type"]["fact_location"]["total"] == 1
     assert result["model_reviewed"]["completion_tokens"] == 5
+
+
+def test_expected_page_metrics_require_all_pages_for_multi_source_answers():
+    from papertrail.evaluate_qa import _gold_page_coverage
+
+    expected = {("paper-a", 1), ("paper-b", 2)}
+    one_citation = [{"sha256": "paper-a", "page": 1}]
+    both_citations = one_citation + [{"sha256": "paper-b", "page": 2}]
+
+    assert _gold_page_coverage(expected, one_citation) == {
+        "covered_pages": 1, "expected_pages": 2, "coverage": 0.5,
+        "all_expected_pages_cited": False,
+    }
+    assert _gold_page_coverage(expected, both_citations) == {
+        "covered_pages": 2, "expected_pages": 2, "coverage": 1.0,
+        "all_expected_pages_cited": True,
+    }

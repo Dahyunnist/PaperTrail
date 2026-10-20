@@ -326,7 +326,7 @@ def test_qa_keeps_initial_evidence_when_focused_search_returns_nothing(tmp_path,
 
     monkeypatch.setattr(qa, "retrieve", retrieve_once)
     monkeypatch.setattr(qa, "_screen_evidence", lambda *_args: {
-        "relevant_ids": [1], "targeted_query": "missing phrase", "sufficient": False, "usage": {},
+        "relevant_ids": [0], "targeted_query": "missing phrase", "sufficient": False, "usage": {},
     })
     monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
     monkeypatch.setattr(qa, "_synthesize_local", lambda _question, evidence, _model: {

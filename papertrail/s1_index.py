@@ -505,7 +505,10 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
             conn.close()
     quoted_terms = ['"' + term.replace('"', '""') + '"' for term in terms]
     and_query = "body : (" + " AND ".join(quoted_terms) + ")"
-    or_query = "body : (" + " OR ".join(quoted_terms) + ")"
+    fallback_terms = [('"' + term.replace('"', '""') + '"*'
+                       if term.isascii() and term.isalpha() and len(term) >= 4 else
+                       '"' + term.replace('"', '""') + '"') for term in terms]
+    or_query = "body : (" + " OR ".join(fallback_terms) + ")"
     conn = open_database(database, readonly=readonly)
     try:
         sql = (

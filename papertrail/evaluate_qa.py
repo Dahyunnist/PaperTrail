@@ -39,6 +39,14 @@ def _usage_snapshot() -> tuple[int, float, int, int]:
             sum(int(row.get("completion_tokens") or 0) for row in data.get("requests", [])))
 
 
+def _gold_page_coverage(expected_pages: set[tuple[str, int]], citations: list[dict[str, Any]]) -> dict[str, Any]:
+    cited_pages = {(item.get("sha256"), item.get("page")) for item in citations}
+    covered_pages = expected_pages & cited_pages
+    return {"covered_pages": len(covered_pages), "expected_pages": len(expected_pages),
+            "coverage": len(covered_pages) / len(expected_pages) if expected_pages else None,
+            "all_expected_pages_cited": bool(expected_pages) and expected_pages.issubset(cited_pages)}
+
+
 def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
               model: bool, artifact: Path | None = None, limit: int = 5) -> dict[str, Any]:
     if model and not os.environ.get("PAPERTRAIL_LLM_MODEL"):
@@ -63,6 +71,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                   "quote": ref.get("quote"), "claim": claim["text"]})
         expected_pages = {(row["sha256"], row["pdf_page"]) for row in item["evidence"]}
         cited_pages = {(ref["sha256"], ref["page"]) for ref in citations}
+        page_coverage = _gold_page_coverage(expected_pages, citations)
         trace = open_database(database)
         try:
             rejected = trace.execute("SELECT rejected_claims FROM qa_trajectories WHERE turn_id=?",
@@ -75,6 +84,10 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                       "coverage_complete": result.get("coverage_complete"),
                       "diagnostics": (result.get("usage") or {}).get("_diagnostics", {}),
                       "expected_page_cited": bool(expected_pages & cited_pages),
+                      "expected_pages_cited": page_coverage["covered_pages"],
+                      "expected_page_count": page_coverage["expected_pages"],
+                      "expected_page_coverage": page_coverage["coverage"],
+                      "all_expected_pages_cited": page_coverage["all_expected_pages_cited"],
                       "citations": citations, "claims": [row["text"] for row in result["claims"]],
                       "rejected_claims": rejected, "latency_ms": result["latency_ms"],
                       "usage": result["usage"], "answer": result["answer"]})
@@ -93,6 +106,8 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                                  if group_answerable else None),
                          "gold_page_citation_rate": (sum(row["expected_page_cited"] for row in group_answerable) / len(group_answerable)
                                                      if group_answerable else None),
+                         "all_expected_pages_cited_rate": (sum(row["all_expected_pages_cited"] for row in group_answerable) / len(group_answerable)
+                                                           if group_answerable else None),
                          "correct_abstention_rate": (sum(not row["answered"] for row in group_unanswerable) / len(group_unanswerable)
                                                      if group_unanswerable else None)}
     citations = [citation for row in answerable for citation in row["citations"]]
@@ -107,6 +122,11 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                      if model and answerable else None),
             "partial_answer_count": sum(row["status"] == "generated_partial" for row in answerable),
             "gold_page_citation_rate": sum(row["expected_page_cited"] for row in answerable) / len(answerable) if answerable else None,
+            "all_expected_pages_cited_rate": (sum(row["all_expected_pages_cited"] for row in answerable) / len(answerable)
+                                              if answerable else None),
+            "gold_page_coverage": (sum(row["expected_pages_cited"] for row in answerable) /
+                                   sum(row["expected_page_count"] for row in answerable)
+                                   if sum(row["expected_page_count"] for row in answerable) else None),
             "correct_abstention_rate": sum(not row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "false_answer_rate": sum(row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "mean_latency_ms": statistics.mean(latencies) if latencies else 0,
