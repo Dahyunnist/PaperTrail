@@ -29,7 +29,7 @@ python -m pytest
 
 每阶段形成独立 Git 提交，提交 message 使用中文。
 
-检索命令支持 `--mode bm25|vector|hybrid`；需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。
+检索命令支持 `--mode bm25|vector|hybrid|bge|hybrid_bge|hybrid_bge_wide|hybrid_bge_rerank`；LLM rerank 需要配置 OpenAI-compatible model。页面排序实验可用 `python -m papertrail.evaluate --compare --modes hybrid_bge_wide hybrid_bge_rerank ...`。当前保持默认 `bm25`。需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本 PDF 页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。
 
 只读 MCP stdio 服务可用 `python -m papertrail mcp --db .local/papertrail.sqlite3` 启动。提供 `search_papers`、`get_evidence`、文献元数据资源和原文页资源；证据调用会重新校验 PDF SHA-256。个人笔记不会进入 MCP 搜索。
 

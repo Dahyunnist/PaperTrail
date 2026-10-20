@@ -21,6 +21,7 @@ def _print_json(value: object) -> None:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="papertrail", description="PaperTrail S1：只读文献解析与本机关键词检索")
     commands = parser.add_subparsers(dest="command", required=True)
+    retrieval_modes = ["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_rerank"]
 
     index_parser = commands.add_parser("index", help="将配置中明确选择的 PDF/Markdown 建入本地 FTS5 索引")
     index_parser.add_argument("--sources", type=Path, required=True)
@@ -33,7 +34,7 @@ def _parser() -> argparse.ArgumentParser:
     search_parser.add_argument("--query", required=True)
     search_parser.add_argument("--limit", type=int, default=5)
     search_parser.add_argument("--source-type", choices=["original_pdf", "reading_note"])
-    search_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge"], default="bm25")
+    search_parser.add_argument("--mode", choices=retrieval_modes, default="bm25")
     search_parser.add_argument("--vector-artifact", type=Path)
 
     vector_parser = commands.add_parser("vector-build", help="建立本地潜在语义向量索引")
@@ -52,7 +53,7 @@ def _parser() -> argparse.ArgumentParser:
     ask_parser.add_argument("--question", required=True)
     ask_parser.add_argument("--conversation-id")
     ask_parser.add_argument("--limit", type=int, default=5)
-    ask_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge"], default="bm25")
+    ask_parser.add_argument("--mode", choices=retrieval_modes, default="bm25")
 
     history_parser = commands.add_parser("history", help="查看本地对话及其已核验证据")
     history_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
@@ -63,7 +64,7 @@ def _parser() -> argparse.ArgumentParser:
     compare_parser.add_argument("--topic", required=True)
     compare_parser.add_argument("--claim", required=True)
     compare_parser.add_argument("--limit-papers", type=int, default=8)
-    compare_parser.add_argument("--mode", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge"], default="bm25")
+    compare_parser.add_argument("--mode", choices=retrieval_modes, default="bm25")
 
     label_parser = commands.add_parser("compare-label", help="为比较证据标记支持/反对/条件/背景")
     label_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))

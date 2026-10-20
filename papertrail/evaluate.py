@@ -85,10 +85,19 @@ def _file_hash(path: Path) -> str:
 
 
 def _trace_row(row: dict[str, Any]) -> dict[str, Any]:
-    return {"sha256": row["sha256"], "paper_id": row["paper_id"],
-            "pdf_page": row["pdf_page"], "rank_score": row["rank_score"],
-            "source_type": row["source_type"], "chunk_id": row["chunk_id"],
-            "text_origin": row.get("text_origin", "native_text")}
+    result = {"sha256": row["sha256"], "paper_id": row["paper_id"],
+              "pdf_page": row["pdf_page"], "rank_score": row["rank_score"],
+              "source_type": row["source_type"], "chunk_id": row["chunk_id"],
+              "text_origin": row.get("text_origin", "native_text")}
+    if row.get("retrieval_signals"):
+        result["retrieval_signals"] = row["retrieval_signals"]
+    if row.get("rerank_usage"):
+        result["rerank_usage"] = row["rerank_usage"]
+    if row.get("rerank_candidate_pages"):
+        result["rerank_candidate_pages"] = row["rerank_candidate_pages"]
+    if row.get("rerank_error"):
+        result["rerank_error"] = row["rerank_error"]
+    return result
 
 
 def _unique_pages(results: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
@@ -124,7 +133,7 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
     items = [item for item in load_gold(gold_path) if not item["abstain"]]
     output: dict[str, Any] = {"k": k, "answerable_questions": len(items), "modes": {}}
     for mode in modes:
-        page_hits = chunk_page_hits = document_hits = unique_document_hits = complete_hits = 0
+        page_hits = chunk_page_hits = document_hits = unique_document_hits = complete_hits = candidate_page_hits = 0
         reciprocal_ranks: list[float] = []
         ndcgs: list[float] = []
         durations: list[float] = []
@@ -134,8 +143,18 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             expected_pages = {(e["sha256"], e["pdf_page"]) for e in item["evidence"]}
             expected_hashes = {e["sha256"] for e in item["evidence"]}
             started = time.perf_counter()
-            results = retrieve(database, item["question"], max(k * 5, 20),
-                               source_type="original_pdf", mode=mode, artifact=artifact)
+            rerank_error = None
+            try:
+                results = retrieve(database, item["question"], max(k * 5, 20),
+                                   source_type="original_pdf", mode=mode, artifact=artifact)
+                if mode == "hybrid_bge_rerank":
+                    rerank_error = next((row.get("rerank_error") for row in results if row.get("rerank_error")), None)
+            except RuntimeError as exc:
+                if mode != "hybrid_bge_rerank":
+                    raise
+                rerank_error = str(exc)
+                results = retrieve(database, item["question"], max(k * 5, 20),
+                                   source_type="original_pdf", mode="hybrid_bge", artifact=artifact)
             durations.append(time.perf_counter() - started)
             chunk_top = results[:k]
             page_top = _unique_pages(results, k)
@@ -147,11 +166,15 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             document_hit = any(hit["sha256"] in expected_hashes for hit in chunk_top)
             unique_document_hit = any(hit["sha256"] in expected_hashes for hit in document_top)
             all_pages = expected_pages.issubset({(hit["sha256"], hit["pdf_page"]) for hit in page_top})
+            candidate_pages = {(page["sha256"], page["pdf_page"])
+                               for hit in results for page in hit.get("rerank_candidate_pages", [])}
+            candidate_hit = bool(expected_pages.intersection(candidate_pages))
             page_hits += page_hit
             chunk_page_hits += chunk_page_hit
             document_hits += document_hit
             unique_document_hits += unique_document_hit
             complete_hits += all_pages
+            candidate_page_hits += int(candidate_hit)
             reciprocal_ranks.append(1 / ranks[0] if ranks else 0.0)
             dcg = sum(1 / math.log2(rank + 1) for rank in ranks)
             ideal = sum(1 / math.log2(rank + 1) for rank in range(1, min(len(expected_pages), k) + 1))
@@ -166,8 +189,11 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
                           "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
                                             else "target_document_retrieved_wrong_page"),
                           "all_evidence_pages": all_pages,
+                          "rerank_candidate_hit": candidate_hit if mode == "hybrid_bge_rerank" else None,
                           "chunk_results": [_trace_row(hit) for hit in chunk_top],
-                          "page_results": [_trace_row(hit) for hit in page_top]})
+                          "page_results": [_trace_row(hit) for hit in page_top],
+                          "rerank_succeeded": rerank_error is None if mode == "hybrid_bge_rerank" else None,
+                          "rerank_error": rerank_error})
         total = len(items)
         output["modes"][mode] = {
             "page_recall_at_k": page_hits / total if total else 0,
@@ -175,6 +201,7 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             "document_recall_at_k": document_hits / total if total else 0,
             "unique_document_recall_at_k": unique_document_hits / total if total else 0,
             "all_evidence_pages_at_k": complete_hits / total if total else 0,
+            "rerank_candidate_page_recall": candidate_page_hits / total if mode == "hybrid_bge_rerank" and total else None,
             "mrr_at_k": sum(reciprocal_ranks) / total if total else 0,
             "ndcg_at_k": sum(ndcgs) / total if total else 0,
             "mean_query_ms": sum(durations) * 1000 / total if total else 0,
@@ -199,8 +226,11 @@ def main() -> None:
     parser.add_argument("--trace-out", type=Path, default=Path(".local/s1-retrieval-trace.json"))
     parser.add_argument("--compare", action="store_true", help="对照 BM25、潜在向量和 RRF 混合检索")
     parser.add_argument("--vector-artifact", type=Path)
+    parser.add_argument("--modes", nargs="+", choices=["bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_rerank"])
     args = parser.parse_args()
-    result = compare_modes(args.db, args.gold, args.k, artifact=args.vector_artifact) if args.compare else evaluate(args.db, args.gold, args.k)
+    result = compare_modes(args.db, args.gold, args.k,
+                           modes=tuple(args.modes) if args.modes else ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),
+                           artifact=args.vector_artifact) if args.compare else evaluate(args.db, args.gold, args.k)
     args.trace_out.parent.mkdir(parents=True, exist_ok=True)
     args.trace_out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.compare:

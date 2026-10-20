@@ -14,7 +14,7 @@ from pathlib import Path
 _BUDGET_LOCK = threading.Lock()
 _FLASH_PEAK_INPUT_PER_M = 0.30
 _FLASH_PEAK_OUTPUT_PER_M = 1.20
-_MAX_PROMPT_CHARS = 1_800
+_MAX_PROMPT_CHARS = 2_400
 _MAX_OUTPUT_TOKENS = 320
 _MAX_BUDGET_USD = 0.19
 _MAX_TOKENS_PER_CHAR = 4
@@ -24,9 +24,9 @@ def configured_model() -> str | None:
     return os.environ.get("PAPERTRAIL_LLM_MODEL") or None
 
 
-def chat_json(model: str, system: str, prompt: str) -> dict[str, Any]:
+def chat_json(model: str, system: str, prompt: str, *, thinking: bool | None = None) -> dict[str, Any]:
     if os.environ.get("PAPERTRAIL_LLM_PROVIDER", "ollama") == "openai-compatible":
-        return _openai_compatible_json(model, system, prompt)
+        return _openai_compatible_json(model, system, prompt, thinking=thinking)
     base = os.environ.get("PAPERTRAIL_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
     payload = json.dumps({"model": model, "stream": False, "format": "json",
                           "messages": [{"role": "system", "content": system},
@@ -79,11 +79,12 @@ def _record_usage(model: str, prompt_chars: int, usage: dict[str, Any], reserved
                 "estimated_usd": round(cost, 8)}
 
 
-def _openai_compatible_json(model: str, system: str, prompt: str) -> dict[str, Any]:
+def _openai_compatible_json(model: str, system: str, prompt: str,
+                            *, thinking: bool | None = None) -> dict[str, Any]:
     system = system + "\nReturn a valid JSON object only."
     prompt_chars = len(system) + len(prompt)
     if prompt_chars > _MAX_PROMPT_CHARS:
-        raise RuntimeError("Hosted prompt exceeds 1,800-character safety limit")
+        raise RuntimeError("Hosted prompt exceeds 2,400-character safety limit")
     reserved = _max_request_cost(prompt_chars)
     cap = min(_MAX_BUDGET_USD, float(os.environ.get("PAPERTRAIL_LLM_BUDGET_USD", _MAX_BUDGET_USD)))
     path = _budget_file()
@@ -102,7 +103,9 @@ def _openai_compatible_json(model: str, system: str, prompt: str) -> dict[str, A
     payload = json.dumps({"model": model, "stream": False, "max_tokens": _MAX_OUTPUT_TOKENS,
                           "response_format": {"type": "json_object"},
                           "messages": [{"role": "system", "content": system},
-                                       {"role": "user", "content": prompt}]}, ensure_ascii=False).encode()
+                                       {"role": "user", "content": prompt}],
+                          **({"thinking": {"type": "disabled" if not thinking else "enabled"}}
+                             if thinking is not None else {})}, ensure_ascii=False).encode()
     request = Request(base + "/chat/completions", data=payload,
                       headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}, method="POST")
     try:
@@ -124,9 +127,15 @@ def _openai_compatible_json(model: str, system: str, prompt: str) -> dict[str, A
     usage = result.get("usage", {})
     cost_data = _record_usage(model, prompt_chars, usage, reserved)
     try:
-        content = json.loads(result["choices"][0]["message"]["content"])
+        choice = result["choices"][0]
+        raw_content = choice["message"]["content"]
+        if not isinstance(raw_content, str):
+            raise TypeError("content is not text")
+        content = json.loads(raw_content)
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
-        raise RuntimeError("Hosted model did not return valid JSON") from exc
+        reason = result.get("choices", [{}])[0].get("finish_reason", "unknown") if result.get("choices") else "no_choice"
+        length = len(raw_content) if "raw_content" in locals() and isinstance(raw_content, str) else 0
+        raise RuntimeError(f"Hosted model did not return valid JSON (finish_reason={reason}, chars={length})") from exc
     if not isinstance(content, dict):
         raise RuntimeError("Hosted model JSON top-level must be an object")
     content["_usage"] = cost_data

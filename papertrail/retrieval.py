@@ -144,8 +144,10 @@ def retrieve(database: Path, query: str, limit: int = 5,
         return vector_search(database, query, limit, source_type, artifact)
     if mode == "hybrid":
         return hybrid_search(database, query, limit, source_type, artifact=artifact)
-    if mode in {"bge", "hybrid_bge"}:
-        from .semantic import bge_search, hybrid_bge_search
-        fn = bge_search if mode == "bge" else hybrid_bge_search
+    if mode in {"bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_rerank"}:
+        from .semantic import bge_search, hybrid_bge_search, hybrid_bge_wide_search, llm_rerank_search
+        fn = {"bge": bge_search, "hybrid_bge": hybrid_bge_search,
+              "hybrid_bge_wide": hybrid_bge_wide_search,
+              "hybrid_bge_rerank": llm_rerank_search}[mode]
         return fn(database, query, limit, source_type, artifact)
     raise ValueError(f"未知检索模式：{mode}")
