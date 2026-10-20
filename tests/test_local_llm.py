@@ -80,3 +80,29 @@ def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path
     with pytest.raises(RuntimeError, match="budget cap"):
         chat_json("deepseek-flash", "system", "prompt")
     assert not seen
+
+
+def test_one_qa_turn_blocks_model_call_17_before_network(monkeypatch):
+    import pytest
+    import papertrail.local_llm as llm
+
+    monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "ollama")
+    with llm.model_turn_budget() as budget:
+        for _ in range(16):
+            llm._reserve_turn_call("system", "prompt")
+        with pytest.raises(RuntimeError, match="QA turn model-call budget"):
+            llm._reserve_turn_call("system", "prompt")
+    assert budget["calls"] == 16
+
+
+def test_one_hosted_qa_turn_reserves_peak_cost_before_call(monkeypatch):
+    import pytest
+    import papertrail.local_llm as llm
+
+    monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "openai-compatible")
+    with llm.model_turn_budget() as budget:
+        for _ in range(13):
+            llm._reserve_turn_call("s" * 100, "p" * 2_200)
+        with pytest.raises(RuntimeError, match="QA turn model-cost budget"):
+            llm._reserve_turn_call("s" * 100, "p" * 2_200)
+    assert budget["reserved_usd"] <= 0.05

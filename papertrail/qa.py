@@ -19,7 +19,7 @@ from .audit import _hash
 from .gold import _normalize_excerpt
 from .retrieval import retrieve
 from .s1_index import open_database
-from .local_llm import chat_json, configured_model
+from .local_llm import chat_json, configured_model, model_turn_budget
 
 QUESTION_STOPWORDS = {"a", "an", "and", "are", "as", "at", "be", "does", "for", "from",
                       "how", "in", "is", "it", "of", "on", "or", "the", "their", "this",
@@ -364,7 +364,7 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str,
             "generation_retry_used": generation_retry_used, "usage": usage}
 
 
-def ask(database: Path, question: str, conversation_id: str | None = None,
+def _ask(database: Path, question: str, conversation_id: str | None = None,
         limit: int = 5, mode: str = "bm25", generate: bool = True,
         artifact: Path | None = None) -> dict[str, Any]:
     question = question.strip()
@@ -724,6 +724,15 @@ def ask(database: Path, question: str, conversation_id: str | None = None,
             "coverage_complete": coverage_complete if coverage_assessed else None,
             "created_at": now,
             "latency_ms": latency_ms, "model_name": model, "usage": generation_usage}
+
+
+def ask(database: Path, question: str, conversation_id: str | None = None,
+        limit: int = 5, mode: str = "bm25", generate: bool = True,
+        artifact: Path | None = None) -> dict[str, Any]:
+    with model_turn_budget() as budget:
+        result = _ask(database, question, conversation_id, limit, mode, generate, artifact)
+        result["model_budget"] = {**budget, "reserved_usd": round(budget["reserved_usd"], 8)}
+        return result
 
 
 def _add_usage(left: dict[str, Any] | None, right: dict[str, Any] | None) -> dict[str, Any]:

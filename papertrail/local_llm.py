@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import os
 import threading
+from contextvars import ContextVar
+from contextlib import contextmanager
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from typing import Any
@@ -18,6 +20,37 @@ _MAX_PROMPT_CHARS = 2_400
 _MAX_OUTPUT_TOKENS = 800
 _MAX_BUDGET_USD = 0.50
 _MAX_TOKENS_PER_CHAR = 4
+_TURN_MAX_CALLS = 16
+_TURN_MAX_COST_USD = 0.05
+_turn_budget: ContextVar[dict[str, Any] | None] = ContextVar("papertrail_turn_budget", default=None)
+
+
+@contextmanager
+def model_turn_budget():
+    """Bound all model calls made while answering one question."""
+    budget = {"calls": 0, "reserved_usd": 0.0, "max_calls": _TURN_MAX_CALLS,
+              "max_reserved_usd": _TURN_MAX_COST_USD}
+    token = _turn_budget.set(budget)
+    try:
+        yield budget
+    finally:
+        _turn_budget.reset(token)
+
+
+def _reserve_turn_call(system: str, prompt: str) -> None:
+    budget = _turn_budget.get()
+    if budget is None:
+        return
+    calls = budget["calls"]
+    if calls >= _TURN_MAX_CALLS:
+        raise RuntimeError("QA turn model-call budget reached; request blocked before sending")
+    hosted = os.environ.get("PAPERTRAIL_LLM_PROVIDER") == "openai-compatible"
+    reserve = (_max_request_cost(len(system) + len(prompt) + len("\nReturn a valid JSON object only."))
+               if hosted else 0.0)
+    if budget["reserved_usd"] + reserve > _TURN_MAX_COST_USD:
+        raise RuntimeError("QA turn model-cost budget reached; request blocked before sending")
+    budget["calls"] += 1
+    budget["reserved_usd"] = round(budget["reserved_usd"] + reserve, 8)
 
 
 def configured_model() -> str | None:
@@ -25,6 +58,7 @@ def configured_model() -> str | None:
 
 
 def chat_json(model: str, system: str, prompt: str, *, thinking: bool | None = None) -> dict[str, Any]:
+    _reserve_turn_call(system, prompt)
     if os.environ.get("PAPERTRAIL_LLM_PROVIDER", "ollama") == "openai-compatible":
         return _openai_compatible_json(model, system, prompt, thinking=thinking)
     base = os.environ.get("PAPERTRAIL_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
