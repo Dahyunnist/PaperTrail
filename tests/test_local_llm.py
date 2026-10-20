@@ -71,7 +71,7 @@ def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path
     assert result["_usage"]["prompt_eval_count"] == 100
     assert seen["url"] == "https://api.deepseek.com/chat/completions"
     assert seen["authorization"] == "Bearer secret-test-key"
-    assert seen["payload"]["max_tokens"] == 320
+    assert seen["payload"]["max_tokens"] == 800
     assert "secret-test-key" not in ledger.read_text(encoding="utf-8")
     ledger.write_text('{"spent_upper_bound_usd": 0.4999, "requests": []}', encoding="utf-8")
     seen.clear()

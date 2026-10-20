@@ -29,7 +29,7 @@ def _normalize_excerpt(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
-def load_gold(path: Path) -> list[dict[str, Any]]:
+def load_gold(path: Path, minimum_questions: int = 30) -> list[dict[str, Any]]:
     items = []
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
@@ -58,8 +58,8 @@ def load_gold(path: Path) -> list[dict[str, Any]]:
             if pointer["pdf_page"] < 1 or len(pointer["sha256"]) != 64:
                 raise ValueError(f"{item['id']}: 页码或 SHA-256 格式错误")
         items.append(item)
-    if len(items) < 30:
-        raise ValueError(f"黄金集至少需要 30 题，当前为 {len(items)}")
+    if len(items) < minimum_questions:
+        raise ValueError(f"黄金集至少需要 {minimum_questions} 题，当前为 {len(items)}")
     ids = [item["id"] for item in items]
     if len(ids) != len(set(ids)):
         raise ValueError("黄金集 id 重复")
@@ -103,8 +103,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources", type=Path, required=True)
     parser.add_argument("--gold", type=Path, required=True)
+    parser.add_argument("--minimum-questions", type=int, default=30)
     args = parser.parse_args()
-    items = load_gold(args.gold)
+    items = load_gold(args.gold, minimum_questions=args.minimum_questions)
     verified = verify_quotes(items, args.sources)
     types = sorted({item["question_type"] for item in items})
     print(f"questions={len(items)} types={','.join(types)} evidence_quotes_verified={verified}")

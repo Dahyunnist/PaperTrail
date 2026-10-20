@@ -139,6 +139,80 @@ def test_hosted_synthesis_keeps_full_method_sentence(monkeypatch):
     assert prompts[0]["evidence"][0]["quote"] == quote
 
 
+def test_empty_generation_gets_one_cited_retry(monkeypatch):
+    import papertrail.qa as qa
+
+    outputs = iter([
+        {"claims": [], "_usage": {"prompt_eval_count": 10}},
+        {"claims": [{"text": "The method uses calibration.", "evidence_ids": [0]}],
+         "_usage": {"prompt_eval_count": 12}},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_complete": True, "coverage_requirements": ["calibration"], "coverage_gaps": [],
+         "_usage": {"prompt_eval_count": 14}},
+    ])
+    monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
+    result = qa._synthesize_local("What does the method use?", [{
+        "quote": "The method uses calibration to assess uncertainty.",
+        "title": "Paper", "pdf_page": 1}], "test-model")
+    assert result["generation_retry_used"] is True
+    assert result["claims"][0]["support"] == "supported"
+    assert result["usage"]["prompt_eval_count"] == 36
+
+
+def test_complex_synthesis_requires_supported_claim_for_each_subquestion(monkeypatch):
+    import json
+    import papertrail.qa as qa
+
+    outputs = iter([
+        {"claims": [{"text": "Paper A uses method X.", "evidence_ids": [0],
+                     "subquestion_ids": [0]}]},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_requirements": ["Paper A method", "Paper B method"],
+         "covered_subquestions": [0, 1], "coverage_complete": True, "coverage_gaps": []},
+    ])
+    monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
+    result = qa._synthesize_local("Compare Papers A and B.", [{
+        "quote": "Paper A uses method X to synthesize tabular data.",
+        "title": "Paper A", "pdf_page": 1, "subquestion_ids": [0]}],
+        "test-model", ["What does Paper A use?", "What does Paper B use?"])
+    assert result["claims"][0]["subquestion_ids"] == [0]
+    assert result["coverage_complete"] is False
+    assert any("子问题 2 未覆盖" in gap for gap in result["coverage_gaps"])
+
+
+def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.retrieval import retrieve as real_retrieve
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "complex-test")
+    queries = []
+    def plan(_question, _model):
+        return {"subquestions": ["What method does Paper A use?", "What result does Paper B report?"],
+                "usage": {}}
+    def tracked_retrieve(database, query, *args, **kwargs):
+        queries.append(query)
+        return real_retrieve(database, "What does CTGAN evaluate?", *args, **kwargs)
+    monkeypatch.setattr(qa, "_plan_subquestions", plan)
+    monkeypatch.setattr(qa, "retrieve", tracked_retrieve)
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": [0], "targeted_query": "", "sufficient": True, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_sentences", lambda _text: [
+        "CTGAN evaluates mixed continuous and discrete columns with reliable likelihood and utility measurements."])
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+    monkeypatch.setattr(qa, "_synthesize_local", lambda *_args: {
+        "claims": [{"text": "Paper A uses CTGAN.", "evidence_ids": [0], "subquestion_ids": [0],
+                    "support": "supported", "relevant": True, "support_method": "test_judge"}],
+        "coverage_complete": False, "coverage_requirements": ["Paper A method", "Paper B result"],
+        "coverage_gaps": ["Paper B evidence missing"], "generation_retry_used": False, "usage": {},
+    })
+    result = qa.ask(db, "Compare Papers A and B.", mode="bm25")
+    assert queries == ["What method does Paper A use?", "What result does Paper B report?"]
+    assert result["status"] == "generated_partial"
+    assert result["claims"][0]["subquestion_ids"] == [0]
+
+
 def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeypatch):
     import papertrail.qa as qa
 

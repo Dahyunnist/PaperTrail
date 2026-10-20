@@ -122,8 +122,10 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
 
 
 def compare_qa(database: Path, gold_path: Path, output: Path, mode: str = "bm25",
-               artifact: Path | None = None, limit: int = 5) -> dict[str, Any]:
-    items = load_gold(gold_path)
+               artifact: Path | None = None, limit: int = 5,
+               minimum_questions: int = 30) -> dict[str, Any]:
+    items = (load_gold(gold_path, minimum_questions=minimum_questions)
+             if minimum_questions != 30 else load_gold(gold_path))
     baseline_db = output.with_name(output.stem + "-extractive.sqlite3")
     model_db = output.with_name(output.stem + "-model.sqlite3")
     _copy_database(database, baseline_db)
@@ -160,8 +162,10 @@ def main() -> None:
     parser.add_argument("--mode", default="bm25")
     parser.add_argument("--vector-artifact", type=Path)
     parser.add_argument("--limit", type=int, default=5, help="每题最多组织的证据摘录数（1–8）")
+    parser.add_argument("--minimum-questions", type=int, default=30)
     args = parser.parse_args()
-    result = compare_qa(args.db, args.gold, args.out, args.mode, args.vector_artifact, args.limit)
+    result = compare_qa(args.db, args.gold, args.out, args.mode, args.vector_artifact,
+                        args.limit, args.minimum_questions)
     print(json.dumps({key: {k: v for k, v in value.items() if k != "cases"}
                       for key, value in result.items() if isinstance(value, dict)}, indent=2))
 

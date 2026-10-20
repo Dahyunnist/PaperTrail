@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hmac
 import json
+import os
 import secrets
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,9 @@ from .workspace import (create_note, dashboard_stats, delete_note, ensure_worksp
                         library_documents, list_uploads, remove_upload, search_notes, study_report,
                         register_upload, update_upload)
 
+WEB_RETRIEVAL_MODES = {"bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_bge_wide",
+                       "hybrid_bge_dense_rerank", "hybrid_bge_rerank"}
+
 
 def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                upload_root: Path | str | None = None,
@@ -32,9 +36,17 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     project_root = Path(__file__).resolve().parent.parent
     sources_config = Path(sources_config).resolve() if sources_config else project_root / "configs" / "sources.example.yaml"
     selection_manifest = Path(selection_manifest).resolve() if selection_manifest else project_root / "configs" / "s1-pilot.jsonl"
+    try:
+        qa_limit = min(8, max(1, int(os.environ.get("PAPERTRAIL_EVIDENCE_LIMIT", "5"))))
+    except ValueError:
+        qa_limit = 5
     app = Flask(__name__)
     app.config.update(SECRET_KEY=secrets.token_hex(32), MAX_CONTENT_LENGTH=100 * 1024 * 1024,
-                      DATABASE=database, UPLOAD_ROOT=upload_root, CSRF_ENABLED=True)
+                      DATABASE=database, UPLOAD_ROOT=upload_root, CSRF_ENABLED=True,
+                      QA_MODE=os.environ.get("PAPERTRAIL_RETRIEVAL_MODE", "bm25"),
+                      QA_LIMIT=qa_limit)
+    if app.config["QA_MODE"] not in WEB_RETRIEVAL_MODES:
+        app.config["QA_MODE"] = "bm25"
 
     @app.before_request
     def csrf_guard() -> None:
@@ -91,7 +103,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
         try:
             result = ask(app.config["DATABASE"], request.form.get("question", ""),
                          request.form.get("conversation_id") or None,
-                         limit=5, mode="bm25")
+                         limit=app.config["QA_LIMIT"], mode=app.config["QA_MODE"])
             flash("已保存本轮问题与逐条核验的原文摘录。" if result["claims"] else
                   "未找到通过文件版本和页码核验的证据，系统已拒答。", "success" if result["claims"] else "warning")
             return redirect(url_for("home", conversation_id=result["conversation_id"]) + "#assistant")

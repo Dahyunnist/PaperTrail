@@ -142,3 +142,22 @@ def test_web_can_index_explicit_authorized_selection(tmp_path):
     assert response.status_code == 200
     assert len(library_documents(tmp_path / "workspace.sqlite3")) == 1
     assert search(tmp_path / "workspace.sqlite3", "configured paper", source_type="original_pdf")
+
+
+def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeypatch):
+    import papertrail.web as web
+
+    seen = {}
+    def fake_ask(database, question, conversation_id, *, limit, mode):
+        seen.update(database=database, question=question, conversation_id=conversation_id,
+                    limit=limit, mode=mode)
+        return {"claims": [{}], "conversation_id": "demo-conversation"}
+    monkeypatch.setattr(web, "ask", fake_ask)
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True, QA_MODE="hybrid_bge_wide", QA_LIMIT=8)
+    client = app.test_client()
+    page = client.get("/")
+    response = client.post("/ask", data={"_csrf": _csrf(page), "question": "How does the method work?"})
+    assert response.status_code == 302
+    assert seen["mode"] == "hybrid_bge_wide"
+    assert seen["limit"] == 8
