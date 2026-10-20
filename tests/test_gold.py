@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from papertrail.gold import load_gold, verify_quotes
+from papertrail.gold import _normalize_excerpt, load_gold, verify_quotes
 
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -30,3 +30,8 @@ def test_gold_rejects_unanswerable_questions_with_supporting_quotes(tmp_path):
         pass
     else:
         raise AssertionError("invalid unanswerable evidence was accepted")
+
+
+def test_quote_normalization_joins_hyphenated_line_wraps():
+    assert _normalize_excerpt("membership in- ference attack") == \
+        _normalize_excerpt("membership inference attack")

@@ -95,6 +95,18 @@ def test_evidence_screen_returns_relevant_ids_and_focused_query(monkeypatch):
     assert result["sufficient"] is False
 
 
+def test_candidate_excerpt_keeps_relevant_sentence_after_long_prefix():
+    import papertrail.qa as qa
+
+    text = ("This paper introduces a broad experimental framework and provides general background "
+            "for evaluation across several research settings. "
+            "For tabular data, the method uses online gradient descent to adapt parameters under label noise.")
+    excerpt = qa._candidate_excerpt("How does the method adapt parameters under label noise?", text)
+
+    assert "online gradient descent" in excerpt
+    assert len(excerpt) <= 480
+
+
 def test_claim_review_tracks_relevance_and_complete_coverage(monkeypatch):
     import papertrail.qa as qa
 
@@ -137,6 +149,32 @@ def test_hosted_synthesis_keeps_full_method_sentence(monkeypatch):
     qa._synthesize_local("Which method updates model parameters?", [{
         "quote": quote, "title": "Online label shift", "pdf_page": 8}], "test-model")
     assert prompts[0]["evidence"][0]["quote"] == quote
+
+
+def test_hosted_prompt_budget_compacts_candidates_before_provider_call():
+    import papertrail.qa as qa
+
+    system = "screening system prompt"
+    payload = {"question": "Which result is reported?", "candidates": [
+        {"id": index, "title": f"Paper {index}", "text": (f"Evidence sentence {index}. " * 20),
+         "page": index + 1}
+        for index in range(12)
+    ]}
+
+    prompt = qa._hosted_json_prompt(system, payload)
+
+    assert len(system) + len(prompt) <= qa._HOSTED_PROMPT_TARGET
+    assert 1 <= len(payload["candidates"]) < 12
+    assert all(candidate["text"] for candidate in payload["candidates"])
+
+
+def test_exact_serial_question_requires_a_cited_serial_value():
+    import papertrail.qa as qa
+
+    question = "What exact GPU serial number did the authors report?"
+    assert qa._exact_serial_not_found(question, [{"quote": "All experiments used NVIDIA T4 16GB GPUs."}])
+    assert not qa._exact_serial_not_found(question, [{"quote": "GPU serial number: SN-48219."}])
+    assert not qa._exact_serial_not_found("Which GPU model did they use?", [])
 
 
 def test_empty_generation_gets_one_cited_retry(monkeypatch):
@@ -271,6 +309,36 @@ def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypat
     assert len(queries) == 2
     assert "continuous and discrete columns" in queries[1]
     assert result["status"] == "generated_claims_reviewed"
+
+
+def test_qa_keeps_initial_evidence_when_focused_search_returns_nothing(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.retrieval import retrieve as real_retrieve
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "screen-fallback-test")
+    calls = 0
+
+    def retrieve_once(database, query, *args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return real_retrieve(database, "What does CTGAN evaluate?", *args, **kwargs) if calls == 1 else []
+
+    monkeypatch.setattr(qa, "retrieve", retrieve_once)
+    monkeypatch.setattr(qa, "_screen_evidence", lambda *_args: {
+        "relevant_ids": [1], "targeted_query": "missing phrase", "sufficient": False, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, evidence, _model: {
+        "claims": [{"text": "CTGAN evaluates utility.", "evidence_ids": [0],
+                    "support": "supported", "relevant": True, "support_method": "test_judge"}],
+        "coverage_complete": True, "usage": {},
+    })
+
+    result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
+
+    assert calls == 2
+    assert result["status"] == "generated_claims_reviewed", result
 
 
 def test_qa_conversations_do_not_share_follow_up_memory(tmp_path):

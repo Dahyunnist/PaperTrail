@@ -101,6 +101,7 @@ def _openai_compatible_json(model: str, system: str, prompt: str,
     if base != "https://api.deepseek.com" or model != "deepseek-flash":
         raise RuntimeError("P6 budget profile only permits DeepSeek deepseek-flash at api.deepseek.com")
     payload = json.dumps({"model": model, "stream": False, "max_tokens": _MAX_OUTPUT_TOKENS,
+                          "temperature": 0.0,
                           "response_format": {"type": "json_object"},
                           "messages": [{"role": "system", "content": system},
                                        {"role": "user", "content": prompt}],

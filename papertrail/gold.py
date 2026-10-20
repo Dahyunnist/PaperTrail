@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import unicodedata
 from pathlib import Path
 from typing import Any
@@ -25,7 +26,8 @@ def _sha256(path: Path) -> str:
 
 def _normalize_excerpt(text: str) -> str:
     # PyMuPDF may split a word at a printed line break; normalize ligatures as well.
-    text = unicodedata.normalize("NFKC", text.replace("-\n", ""))
+    text = unicodedata.normalize("NFKC", text)
+    text = re.sub(r"(?<=[A-Za-z0-9])-\s+(?=[a-z])", "", text)
     return " ".join(text.split()).casefold()
 
 
