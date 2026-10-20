@@ -1,0 +1,2 @@
+# Optional local semantic retrieval runtime. Use a separate conda/venv environment.
+sentence-transformers>=5,<6

@@ -119,7 +119,7 @@ def _unique_documents(results: list[dict[str, Any]], limit: int) -> list[dict[st
 
 
 def compare_modes(database: Path, gold_path: Path, k: int = 5,
-                  modes: tuple[str, ...] = ("bm25", "vector", "hybrid"),
+                  modes: tuple[str, ...] = ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),
                   artifact: Path | None = None) -> dict[str, Any]:
     items = [item for item in load_gold(gold_path) if not item["abstain"]]
     output: dict[str, Any] = {"k": k, "answerable_questions": len(items), "modes": {}}

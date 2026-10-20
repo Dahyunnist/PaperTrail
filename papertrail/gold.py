@@ -9,7 +9,6 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-import fitz
 import yaml
 
 QUESTION_TYPES = {"fact_location", "method_comparison", "cross_paper", "multi_hop", "conflict", "unanswerable"}
@@ -68,6 +67,8 @@ def load_gold(path: Path) -> list[dict[str, Any]]:
 
 
 def verify_quotes(items: list[dict[str, Any]], sources_path: Path) -> int:
+    import fitz
+
     config = yaml.safe_load(sources_path.read_text(encoding="utf-8"))
     roots = {root["id"]: Path(root["path"]) for root in config.get("roots", [])}
     cache: dict[str, fitz.Document] = {}

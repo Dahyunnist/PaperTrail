@@ -12,7 +12,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import fitz
 import yaml
 
 DOI_RE = re.compile(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.I)
@@ -67,6 +66,8 @@ def inspect_file(path: Path, root_id: str, kind: str) -> dict[str, Any]:
         "quality_notes": [],
     }
     if kind == "pdf":
+        import fitz
+
         try:
             with fitz.open(path) as doc:
                 metadata = doc.metadata or {}

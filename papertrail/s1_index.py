@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-import fitz
 import yaml
 
 from .audit import _candidate_title, _hash, normalize_title
@@ -69,6 +68,8 @@ def _looks_like_heading(text: str, sizes: list[float], bold_flags: list[bool], b
 
 
 def parse_pdf(path: Path, source_type: str, ocr_fallback: bool = False) -> ParsedDocument:
+    import fitz
+
     with fitz.open(path) as doc:
         page_count = doc.page_count
         page_texts = [page.get_text("text") for page in doc]
