@@ -6,16 +6,25 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-import joblib
-import numpy as np
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import normalize
-
 from .s1_index import open_database, search as bm25_search
 
 VECTOR_INDEX_FORMAT = 2
 _BUNDLE_CACHE: dict[str, tuple[int, dict[str, Any]]] = {}
+
+
+def _vector_dependencies():
+    """Load dependencies used only by latent-vector retrieval."""
+    try:
+        import joblib
+        import numpy as np
+        from sklearn.decomposition import TruncatedSVD
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.preprocessing import normalize
+    except ImportError as exc:
+        raise RuntimeError(
+            "向量检索需要安装 requirements-dev.txt 中的 numpy、joblib 和 scikit-learn"
+        ) from exc
+    return joblib, np, TruncatedSVD, TfidfVectorizer, normalize
 
 
 def _rows(database: Path) -> list[dict[str, Any]]:
@@ -41,6 +50,7 @@ def _revision(database: Path) -> int:
 
 
 def build_vector_index(database: Path, artifact: Path) -> dict[str, Any]:
+    joblib, np, TruncatedSVD, TfidfVectorizer, normalize = _vector_dependencies()
     rows = _rows(database)
     if len(rows) < 2:
         raise ValueError("建立向量索引至少需要两个文本块")
@@ -67,6 +77,7 @@ def build_vector_index(database: Path, artifact: Path) -> dict[str, Any]:
 
 
 def _load_index(database: Path, artifact: Path) -> dict[str, Any]:
+    joblib, _, _, _, _ = _vector_dependencies()
     cache_key = str(artifact.resolve())
     revision = _revision(database)
     cached = _BUNDLE_CACHE.get(cache_key)
@@ -95,6 +106,7 @@ def vector_search(database: Path, query: str, limit: int = 5,
                   artifact: Path | None = None) -> list[dict[str, Any]]:
     if not query.strip():
         return []
+    _, np, _, _, normalize = _vector_dependencies()
     artifact = artifact or database.with_name(database.stem + ".vectors.joblib")
     bundle = _load_index(database, artifact)
     query_vector = bundle["reducer"].transform(bundle["vectorizer"].transform([query]))

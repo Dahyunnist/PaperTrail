@@ -10,7 +10,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
 
 from .retrieval import _revision, _rows, bm25_search
@@ -45,6 +44,8 @@ def _encode(texts: list[str]) -> np.ndarray:
 
 
 def build_bge_index(database: Path, artifact: Path) -> dict[str, Any]:
+    import joblib
+
     rows = _rows(database)
     if not rows:
         raise ValueError("建立 BGE 索引至少需要一个文本块")
@@ -60,6 +61,8 @@ def build_bge_index(database: Path, artifact: Path) -> dict[str, Any]:
 
 
 def _load(database: Path, artifact: Path) -> dict[str, Any]:
+    import joblib
+
     key = str(artifact.resolve())
     revision = _revision(database)
     cached = _INDEX_CACHE.get(key)
