@@ -1,0 +1,230 @@
+{
+  "dataset_id": "P10-small-complex-question-holdout",
+  "review_date": "2026-10-20",
+  "scoring": "人工逐题审阅；answerable 题拒答记 refusal；不可回答题正确拒答也记 refusal，并单列 refusal_correct。",
+  "counts": {
+    "correct": 1,
+    "partial": 0,
+    "incorrect": 1,
+    "refusal": 10
+  },
+  "answerable_count": 11,
+  "correct_answerable": 1,
+  "correct_abstentions": 1,
+  "cases": [
+    {
+      "id": "P10-001",
+      "question_type": "fact_location",
+      "question": "CoMedBench 将 ICU 多变量时间序列转成什么形式，供后续合成和评估？",
+      "expected_answer": "按每次住院汇总成特征向量，例如首值、最小值、最大值、均值和标准差。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 2,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答且冻结金标准有有效证据；检索未找到表示形式，属于错误拒答。"
+    },
+    {
+      "id": "P10-002",
+      "question_type": "fact_location",
+      "question": "Jeong 等人的在线流程每轮先估计什么量，再对基础分类器做什么更新？",
+      "expected_answer": "先用批次样本更新标签边际分布估计，再按更新后的估计对模型参数执行一次梯度步。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可由论文回答，但模型返回空 claims；检索到了相关证据页。"
+    },
+    {
+      "id": "P10-003",
+      "question_type": "fact_location",
+      "question": "ECE 论文摘要指出，常见的 binned ECE 在实验中与哪个平滑指标走势接近？",
+      "expected_answer": "Logit-Smoothed ECE（LS-ECE）。",
+      "model_status": "generated_partial",
+      "model_answer": "给定证据只报告了 ECE 与 LS-ECE、ECE 与 smECE 的平均绝对差，但没有说明常见 binned ECE 与哪一个平滑指标走势接近。（部分回答：证据未覆盖问题的全部要点。）",
+      "model_claims": [
+        "给定证据只报告了 ECE 与 LS-ECE、ECE 与 smECE 的平均绝对差，但没有说明常见 binned ECE 与哪一个平滑指标走势接近。"
+      ],
+      "citations": [
+        {
+          "sha256": "7c991b22bc597c9954e681813fe0e8f42e14cccb84505b70c4e28abee7cb210b",
+          "page": 9,
+          "quote": "Mean absolute difference between ECE and LS-ECE, as well as ECE and smECE, on ImageNet-1K-val over all models considered in Section 6.2.2, with one standard deviation error bounds marked using the shaded region.",
+          "claim": "给定证据只报告了 ECE 与 LS-ECE、ECE 与 smECE 的平均绝对差，但没有说明常见 binned ECE 与哪一个平滑指标走势接近。"
+        }
+      ],
+      "rejected_claim_count": 0,
+      "human_verdict": "incorrect",
+      "refusal_correct": false,
+      "human_rationale": "错误：模型声称摘要没有说明关系；摘要明确写出 binned ECE closely tracks LS-ECE。引用页原文有效，但页9图注不能支持该否定判断。"
+    },
+    {
+      "id": "P10-004",
+      "question_type": "method_comparison",
+      "question": "Beta calibration 与 Park 等人的 covariate-shift calibration 分别针对哪类问题，核心手段各是什么？",
+      "expected_answer": "Beta calibration 扩展校准映射族以适应类条件分数偏离正态的情况；Park 等人处理训练与目标输入分布变化，以重要性加权修正。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（Hosted model did not return valid JSON (finish_reason=length, chars=0)）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答；综合输出因 finish_reason=length 且空内容失败，未生成答案。"
+    },
+    {
+      "id": "P10-005",
+      "question_type": "cross_paper",
+      "question": "TabStruct 的 global utility 与 TabQueryBench 的 query-centric fidelity，评估视角有什么区别？",
+      "expected_answer": "Global utility 用下游/结构效用评价合成数据；TabQueryBench 用 SQL 形状分析查询作为结构评估器，检查查询结果保真。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（Hosted model did not return valid JSON (finish_reason=length, chars=495)）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答；综合 JSON 被截断，未生成答案。"
+    },
+    {
+      "id": "P10-006",
+      "question_type": "cross_paper",
+      "question": "Covariate shift 与 label shift 下，哪一种条件分布保持不变，哪一种边际分布发生变化？",
+      "expected_answer": "Covariate shift 假设条件标签分布不变；label shift 指标签边际比例变化。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（模型 claim 缺少有效证据引用）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答；模型 claim 未提供有效证据引用，审查按约束拒绝。"
+    },
+    {
+      "id": "P10-007",
+      "question_type": "multi_hop",
+      "question": "CoMedBench 的公开表格任务为 20 对、ICU 时间序列任务为 17 对。两类相差多少对？各占 37 对总量约多少？",
+      "expected_answer": "相差 3 对；公开表格约 54.1%，ICU 时间序列约 45.9%。",
+      "model_status": "generated_claims_reviewed",
+      "model_answer": "CoMedBench 的公开表格任务为 20 对。 CoMedBench 的 ICU 时间序列任务为 17 对。 两类任务相差 3 对（20 - 17 = 3）。 按 37 对总量计算，公开表格任务约占 54.1%（20/37）。 按 37 对总量计算，ICU 时间序列任务约占 45.9%（17/37）。",
+      "model_claims": [
+        "CoMedBench 的公开表格任务为 20 对。",
+        "CoMedBench 的 ICU 时间序列任务为 17 对。",
+        "两类任务相差 3 对（20 - 17 = 3）。",
+        "按 37 对总量计算，公开表格任务约占 54.1%（20/37）。",
+        "按 37 对总量计算，ICU 时间序列任务约占 45.9%（17/37）。"
+      ],
+      "citations": [
+        {
+          "sha256": "023e20859793edb6ec6f57dce1feaad563923f2bf5a801fc0dd4b2c7570448d9",
+          "page": 2,
+          "quote": "37 dataset-task pairs-20 static tabular and 17 temporal ICU time-series from seven public sources, each evaluated on statistical fidelity and downstream utility.",
+          "claim": "CoMedBench 的公开表格任务为 20 对。"
+        },
+        {
+          "sha256": "023e20859793edb6ec6f57dce1feaad563923f2bf5a801fc0dd4b2c7570448d9",
+          "page": 2,
+          "quote": "37 dataset-task pairs-20 static tabular and 17 temporal ICU time-series from seven public sources, each evaluated on statistical fidelity and downstream utility.",
+          "claim": "CoMedBench 的 ICU 时间序列任务为 17 对。"
+        },
+        {
+          "sha256": "023e20859793edb6ec6f57dce1feaad563923f2bf5a801fc0dd4b2c7570448d9",
+          "page": 2,
+          "quote": "37 dataset-task pairs-20 static tabular and 17 temporal ICU time-series from seven public sources, each evaluated on statistical fidelity and downstream utility.",
+          "claim": "两类任务相差 3 对（20 - 17 = 3）。"
+        },
+        {
+          "sha256": "023e20859793edb6ec6f57dce1feaad563923f2bf5a801fc0dd4b2c7570448d9",
+          "page": 2,
+          "quote": "37 dataset-task pairs-20 static tabular and 17 temporal ICU time-series from seven public sources, each evaluated on statistical fidelity and downstream utility.",
+          "claim": "按 37 对总量计算，公开表格任务约占 54.1%（20/37）。"
+        },
+        {
+          "sha256": "023e20859793edb6ec6f57dce1feaad563923f2bf5a801fc0dd4b2c7570448d9",
+          "page": 2,
+          "quote": "37 dataset-task pairs-20 static tabular and 17 temporal ICU time-series from seven public sources, each evaluated on statistical fidelity and downstream utility.",
+          "claim": "按 37 对总量计算，ICU 时间序列任务约占 45.9%（17/37）。"
+        }
+      ],
+      "rejected_claim_count": 1,
+      "human_verdict": "correct",
+      "refusal_correct": false,
+      "human_rationale": "正确：逐项给出 20、17、差值 3、占比 54.1% 和 45.9%；均与原文及计算一致。五条引用均指向 SHA 匹配 PDF 第 2 页，短引文有效。"
+    },
+    {
+      "id": "P10-008",
+      "question_type": "multi_hop",
+      "question": "Robust Detection 摘要说 table adaptation 额外提高 7 个 accuracy points。Table 2 的无适配/有适配 accuracy 与 AUC 变化是否支持这句话？",
+      "expected_answer": "支持 accuracy 的说法：0.59 到 0.66，增加 0.07；AUC 是 0.67 到 0.69，增加 0.02，不能把两种指标混为一谈。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（Hosted model did not return valid JSON (finish_reason=length, chars=403)）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可由摘要和 Table 2 联合回答；综合 JSON 被截断。"
+    },
+    {
+      "id": "P10-009",
+      "question_type": "conflict",
+      "question": "Robust Detection 摘要的“额外 7 accuracy points”与 Table 2 中 AUC 只增加 0.02 相互矛盾吗？",
+      "expected_answer": "不矛盾。摘要说的是 accuracy，从 0.59 到 0.66，恰增 0.07；AUC 从 0.67 到 0.69，增 0.02。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（Hosted model did not return valid JSON (finish_reason=length, chars=210)）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可由摘要和 Table 2 联合回答；规划了子问题，但综合 JSON 被截断。"
+    },
+    {
+      "id": "P10-010",
+      "question_type": "unanswerable",
+      "question": "CoMedBench 的 PDF 是否披露任一 MIMIC-IV 患者的姓名及病案号？",
+      "expected_answer": "没有。该论文未提供可识别的患者姓名或病案号。",
+      "model_status": "abstained",
+      "model_answer": "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": true,
+      "human_rationale": "正确拒答：题目问 PDF 是否披露个人身份信息；未披露，系统在证据组织阶段拒答。"
+    },
+    {
+      "id": "P10-011",
+      "question_type": "method_comparison",
+      "question": "ECE 论文怎样解释噪声对 ECE 连续性的影响？这与 LS-ECE 提案的关系是什么？",
+      "expected_answer": "论文指出加入噪声可使 ECE 连续，并提出 LS-ECE 作为连续且易估计的指标。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（Hosted model did not return valid JSON (finish_reason=length, chars=0)）",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 0,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答；综合输出因 finish_reason=length 且空内容失败。"
+    },
+    {
+      "id": "P10-012",
+      "question_type": "cross_paper",
+      "question": "CoMedBench 与 TabQueryBench 分别以什么方式评估合成医疗数据与合成表格？",
+      "expected_answer": "CoMedBench 评估医疗数据保真和下游效用；TabQueryBench 用 SQL 形状分析查询评估合成表格保真。",
+      "model_status": "abstained",
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。",
+      "model_claims": [],
+      "citations": [],
+      "rejected_claim_count": 3,
+      "human_verdict": "refusal",
+      "refusal_correct": false,
+      "human_rationale": "拒答：题目可回答；模型提出覆盖缺口并拒绝生成答案。"
+    }
+  ]
+}
