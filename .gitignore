@@ -23,7 +23,20 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+.ruff_cache/
+.mypy_cache/
 *.py[cod]
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
 
 # Local audit intermediates
 *.partial
+docs/corpus-audit.md
+reports/*raw*.jsonl
