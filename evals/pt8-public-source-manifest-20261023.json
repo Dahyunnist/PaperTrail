@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "group_id": "pt8-public-development-20261023",
+  "status": "development_sources_and_gold_frozen",
+  "license": "CC BY 4.0",
+  "dataset_role": "development",
+  "gold_file": "evals/pt8-development-gold-20261023.jsonl",
+  "gold_sha256": "9a4aa48523bf01f9fb12b9a514ebeffc41f69f49cf583c768f59f695834c30dd",
+  "question_count": 4,
+  "group_note": "三篇 PT5/PT6/PT7 之外的新许可明确论文；开发诊断组，含不可回答题，不用于独立测试。",
+  "sources": [
+    {
+      "title": "Ten simple rules for using public biological data for your research",
+      "doi": "10.1371/journal.pcbi.1010749",
+      "source_version": "版本记录；2023-01-05",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010749",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010749",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010749&type=printable",
+      "local_pdf": "evals/fixtures/pt8-development/public-biological-data.pdf",
+      "local_pdf_sha256": "91f24205d15596227407fc5ade92c71d37c86dd1fc589b8dc1d64d7c7dd38ed0",
+      "benchmark_group": "pt8-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten simple rules to host an inclusive conference",
+      "doi": "10.1371/journal.pcbi.1010164",
+      "source_version": "版本记录；2022-07-21",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010164",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010164",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010164&type=printable",
+      "local_pdf": "evals/fixtures/pt8-development/inclusive-conference.pdf",
+      "local_pdf_sha256": "98d6d1458eac6b88fc8f8fd8e376ad1707e053f205db2b71e4a35ecdc2f09f4e",
+      "benchmark_group": "pt8-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten simple rules for open human health research",
+      "doi": "10.1371/journal.pcbi.1007846",
+      "source_version": "版本记录；2020-09-03",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007846",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007846",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1007846&type=printable",
+      "local_pdf": "evals/fixtures/pt8-development/open-human-health-research.pdf",
+      "local_pdf_sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+      "benchmark_group": "pt8-public-development-20261023",
+      "benchmark_role": "development"
+    }
+  ]
+}

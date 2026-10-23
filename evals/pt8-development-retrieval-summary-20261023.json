@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "group_id": "pt8-public-development-20261023",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "9a4aa48523bf01f9fb12b9a514ebeffc41f69f49cf583c768f59f695834c30dd",
+  "index": {
+    "papers": 3,
+    "pdf_pages": 45,
+    "chunks": 587,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4"
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前锁定测试环境缺少 sentence_transformers 与 torch；未下载运行依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {"recall_at_k": 0.6667, "mrr_at_k": 0.5, "all_evidence_pages": 0.6667, "complete_evidence_coverage": 0.6667, "evidence_item_recall": 0.6667},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.7333, "all_evidence_pages": 1.0, "complete_evidence_coverage": 1.0, "evidence_item_recall": 1.0},
+      "hybrid": {"recall_at_k": 0.6667, "mrr_at_k": 0.6667, "all_evidence_pages": 0.6667, "complete_evidence_coverage": 0.6667, "evidence_item_recall": 0.6667}
+    },
+    "k10": {
+      "bm25": {"recall_at_k": 0.6667, "mrr_at_k": 0.5, "all_evidence_pages": 0.6667, "complete_evidence_coverage": 0.6667, "evidence_item_recall": 0.6667},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.7333, "all_evidence_pages": 1.0, "complete_evidence_coverage": 1.0, "evidence_item_recall": 1.0},
+      "hybrid": {"recall_at_k": 0.6667, "mrr_at_k": 0.6667, "all_evidence_pages": 0.6667, "complete_evidence_coverage": 0.6667, "evidence_item_recall": 0.6667}
+    }
+  },
+  "by_paper_at_k10": {
+    "public_biological_data": {"bm25_complete": true, "vector_complete": true, "hybrid_complete": true},
+    "inclusive_conference": {"bm25_complete": true, "vector_complete": true, "hybrid_complete": true},
+    "open_human_health_research": {"bm25_target_document_wrong_page": true, "vector_complete": true, "hybrid_target_document_wrong_page": true}
+  },
+  "qa_evidence_path": {
+    "answerable_questions": 3,
+    "model_calls": 0,
+    "verified_excerpt_status": 3,
+    "gold_evidence_pages_cited": 1,
+    "gold_evidence_pages_total": 3,
+    "exact_gold_quotes_cited": 0,
+    "exact_gold_quotes_total": 3,
+    "unanswerable_question_retrieval_nonempty": true
+  },
+  "limitations": [
+    "PT8 是开发诊断组，三道可回答题不能支持泛化结论。",
+    "不可回答题只检查了检索是否返回候选，没有运行生成或拒答判定。",
+    "向量检索的页级覆盖没有传递到最终摘录引用路径。"
+  ]
+}
