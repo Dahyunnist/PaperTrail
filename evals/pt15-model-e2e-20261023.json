@@ -1,0 +1,647 @@
+{
+  "schema_version": 1,
+  "status": "incomplete_once_human_review_pending",
+  "dataset_role": "final_paper_disjoint_holdout",
+  "preregistration": "pt15-model-e2e-prereg-20261023.json",
+  "gold_sha256": "ca3f6a9cf6533b0755fd9402f3ed0ab0327f74ed758615d98ebc592825e9bc30",
+  "database_sha256": "a93863be3298b786110fa4a1c85b57c2b0f23ad0a18351d1a8e6a0bee0c1610e",
+  "locked_config": {
+    "provider": "openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "temperature": 0.0,
+    "max_output_tokens": 800,
+    "retrieval_mode": "bm25",
+    "evidence_limit": 5,
+    "generate": true,
+    "runtime_support_scorer": "same-model support/coverage review inside _synthesize_local; not independent",
+    "independent_scorer": "frozen deterministic PDF-hash/page/quote matching; does not judge answer semantics",
+    "independent_human_review_required": true,
+    "post_evaluation_tuning": false
+  },
+  "metrics": {
+    "questions_total": 6,
+    "questions_attempted": 5,
+    "questions_completed_with_generation_or_refusal": 4,
+    "questions_budget_blocked_before_generation": 1,
+    "questions_not_started": 1,
+    "answerable_questions_total": 5,
+    "unanswerable_questions_total": 1,
+    "completed_gold_evidence_pages": 3,
+    "completed_gold_pages_cited": 3,
+    "completed_gold_phrases_contained": 3,
+    "completed_exact_gold_quotes": 2,
+    "completed_generated_claims": 7,
+    "completed_unanswerable_abstentions": 1,
+    "all_completed_displayed_citations_source_valid": true
+  },
+  "human_review": {
+    "status": "pending_independent_human_review",
+    "same_model_support_review_is_not_independent": true
+  },
+  "model_usage": {
+    "api_calls": 20,
+    "summed_request_reserves_usd": 0.0635928,
+    "charged_upper_bound_usd": 0.00499806,
+    "master_spent_after_usd": 0.43356528,
+    "master_remaining_after_usd": 0.06643472,
+    "evaluation_peak_reserve_cap_usd": 0.065
+  },
+  "failure": "预算保护拦截请求：PT15 单次评测峰值预留上限将被超过；请求未发送",
+  "results": [
+    {
+      "id": "PT15-01",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "作者建议在数据收集开始前安排15–30分钟的非结构化互动时间。",
+        "作者预期这种安排虽然会增加会话时间，但通过减少退出和重新收集需求来降低总体研究成本。"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 1,
+      "displayed_citations": 2,
+      "all_displayed_citations_source_valid": true,
+      "citation_validation_results": [
+        true,
+        true
+      ],
+      "qa_diagnostics": {
+        "retrieved_pages": 23,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "建议安排的非结构化互动时长（15–30分钟）",
+          "安排该互动的时间点（数据收集开始前）",
+          "作者预期的收益（减少退出和重新收集需求，从而降低总体研究成本）"
+        ],
+        "subquestions": [
+          "How much unstructured interaction time do the authors suggest scheduling before data collection, and what benefit do they expect?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 2,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "turn_model_calls": 4,
+      "turn_reserved_usd": 0.0120648,
+      "usage": {
+        "prompt_eval_count": 1960,
+        "eval_count": 257,
+        "total_duration": 0,
+        "estimated_usd": 0.0009272400000000001,
+        "_diagnostics": {
+          "retrieved_pages": 23,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "建议安排的非结构化互动时长（15–30分钟）",
+            "安排该互动的时间点（数据收集开始前）",
+            "作者预期的收益（减少退出和重新收集需求，从而降低总体研究成本）"
+          ],
+          "subquestions": [
+            "How much unstructured interaction time do the authors suggest scheduling before data collection, and what benefit do they expect?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "model_answer": "作者建议在数据收集开始前安排15–30分钟的非结构化互动时间。 作者预期这种安排虽然会增加会话时间，但通过减少退出和重新收集需求来降低总体研究成本。",
+      "model_status": "generated_claims_reviewed",
+      "claims_with_citations": [
+        {
+          "text": "作者建议在数据收集开始前安排15–30分钟的非结构化互动时间。",
+          "citations": [
+            {
+              "title": "Ten simple rules for research with humans",
+              "pdf_page": 3,
+              "sha256": "2ac2337b4a485c4c3b54bde3f25498bcbe24f09194de77aec4468a0d4d7c9c42",
+              "quote": "Schedule 15–30 min of unstructured interaction time before data collection begins.",
+              "text_origin": "native_text"
+            }
+          ]
+        },
+        {
+          "text": "作者预期这种安排虽然会增加会话时间，但通过减少退出和重新收集需求来降低总体研究成本。",
+          "citations": [
+            {
+              "title": "Ten simple rules for research with humans",
+              "pdf_page": 3,
+              "sha256": "2ac2337b4a485c4c3b54bde3f25498bcbe24f09194de77aec4468a0d4d7c9c42",
+              "quote": "While this increases session time, this investment reduces overall study costs through decreased dropout and re-collection needs.",
+              "text_origin": "native_text"
+            }
+          ]
+        }
+      ],
+      "usage_diagnostics": {
+        "prompt_eval_count": 1960,
+        "eval_count": 257,
+        "total_duration": 0,
+        "estimated_usd": 0.0009272400000000001,
+        "_diagnostics": {
+          "retrieved_pages": 23,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "建议安排的非结构化互动时长（15–30分钟）",
+            "安排该互动的时间点（数据收集开始前）",
+            "作者预期的收益（减少退出和重新收集需求，从而降低总体研究成本）"
+          ],
+          "subquestions": [
+            "How much unstructured interaction time do the authors suggest scheduling before data collection, and what benefit do they expect?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "execution_state": "complete"
+    },
+    {
+      "id": "PT15-02",
+      "question_type": "unanswerable",
+      "gold_abstain": true,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 0,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 0,
+      "all_displayed_citations_source_valid": null,
+      "citation_validation_results": [],
+      "qa_diagnostics": {
+        "retrieved_pages": 23,
+        "screen_selected_pages": 0,
+        "evidence_pages": 0,
+        "coverage_complete": null,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "How many participants did the authors recruit into an original experiment reported in this article?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": "evidence_organization"
+      },
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.007362,
+      "usage": {
+        "prompt_eval_count": 1170,
+        "eval_count": 64,
+        "total_duration": 0,
+        "estimated_usd": 0.00043548,
+        "_diagnostics": {
+          "retrieved_pages": 23,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "How many participants did the authors recruit into an original experiment reported in this article?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      },
+      "model_answer": "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。",
+      "model_status": "abstained",
+      "claims_with_citations": [],
+      "usage_diagnostics": {
+        "prompt_eval_count": 1170,
+        "eval_count": 64,
+        "total_duration": 0,
+        "estimated_usd": 0.00043548,
+        "_diagnostics": {
+          "retrieved_pages": 23,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "How many participants did the authors recruit into an original experiment reported in this article?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      },
+      "execution_state": "complete"
+    },
+    {
+      "id": "PT15-03",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "5.4% of the 2166 supplemental data links were no longer available."
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 2,
+      "all_displayed_citations_source_valid": true,
+      "citation_validation_results": [
+        true,
+        true
+      ],
+      "qa_diagnostics": {
+        "retrieved_pages": 20,
+        "screen_selected_pages": 2,
+        "evidence_pages": 2,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "Percentage of supplemental data links no longer available"
+        ],
+        "subquestions": [
+          "What percentage of the supplemental data links in the study were no longer available?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 1,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.0083916,
+      "usage": {
+        "prompt_eval_count": 1407,
+        "eval_count": 133,
+        "total_duration": 0,
+        "estimated_usd": 0.0005976600000000001,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Percentage of supplemental data links no longer available"
+          ],
+          "subquestions": [
+            "What percentage of the supplemental data links in the study were no longer available?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 1,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "model_answer": "5.4% of the 2166 supplemental data links were no longer available.",
+      "model_status": "generated_claims_reviewed",
+      "claims_with_citations": [
+        {
+          "text": "5.4% of the 2166 supplemental data links were no longer available.",
+          "citations": [
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 8,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "In total, 118 (5.4%) of the 2166 supplemental links were no longer available.",
+              "text_origin": "native_text"
+            },
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 1,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "After testing, 5.4% the 2166 sup- plemental data links were found to be no longer available.",
+              "text_origin": "native_text"
+            }
+          ]
+        }
+      ],
+      "usage_diagnostics": {
+        "prompt_eval_count": 1407,
+        "eval_count": 133,
+        "total_duration": 0,
+        "estimated_usd": 0.0005976600000000001,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Percentage of supplemental data links no longer available"
+          ],
+          "subquestions": [
+            "What percentage of the supplemental data links in the study were no longer available?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 1,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "execution_state": "complete"
+    },
+    {
+      "id": "PT15-04",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "DOIs were the type of shared link that was least likely to disappear.",
+        "The loss rate of DOIs, the least-likely-to-disappear link type, was 1.7%.",
+        "URL loss was 5.9% averaged over time.",
+        "The DOI loss rate (1.7%) was 4.2 percentage points lower than the URL loss rate (5.9%)."
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 1,
+      "displayed_citations": 1,
+      "all_displayed_citations_source_valid": true,
+      "citation_validation_results": [
+        true
+      ],
+      "qa_diagnostics": {
+        "retrieved_pages": 27,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "Identify the link type least likely to disappear (DOIs).",
+          "State the loss rate of that link type (1.7%).",
+          "State the loss rate of URLs (5.9% averaged over time).",
+          "Compare the two loss rates, including the difference (4.2 percentage points lower)."
+        ],
+        "subquestions": [
+          "Which link type was least likely to disappear?",
+          "What was the loss rate of that least-likely-to-disappear link type?",
+          "What was the loss rate of URLs?",
+          "How did the loss rate of that least-likely-to-disappear link type compare with the loss rate of URLs?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": true,
+        "reviewed_claims": 4,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "turn_model_calls": 9,
+      "turn_reserved_usd": 0.030174,
+      "usage": {
+        "prompt_eval_count": 5350,
+        "eval_count": 803,
+        "total_duration": 0,
+        "estimated_usd": 0.00266496,
+        "_diagnostics": {
+          "retrieved_pages": 27,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Identify the link type least likely to disappear (DOIs).",
+            "State the loss rate of that link type (1.7%).",
+            "State the loss rate of URLs (5.9% averaged over time).",
+            "Compare the two loss rates, including the difference (4.2 percentage points lower)."
+          ],
+          "subquestions": [
+            "Which link type was least likely to disappear?",
+            "What was the loss rate of that least-likely-to-disappear link type?",
+            "What was the loss rate of URLs?",
+            "How did the loss rate of that least-likely-to-disappear link type compare with the loss rate of URLs?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "model_answer": "DOIs were the type of shared link that was least likely to disappear. The loss rate of DOIs, the least-likely-to-disappear link type, was 1.7%. URL loss was 5.9% averaged over time. The DOI loss rate (1.7%) was 4.2 percentage points lower than the URL loss rate (5.9%).",
+      "model_status": "generated_claims_reviewed",
+      "claims_with_citations": [
+        {
+          "text": "DOIs were the type of shared link that was least likely to disappear.",
+          "citations": [
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 1,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "DOIs were the type of shared link that was least likely to disappear with a 1.7% loss, with URL loss at 5.9% averaged over time.",
+              "text_origin": "native_text"
+            }
+          ]
+        },
+        {
+          "text": "The loss rate of DOIs, the least-likely-to-disappear link type, was 1.7%.",
+          "citations": [
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 1,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "DOIs were the type of shared link that was least likely to disappear with a 1.7% loss, with URL loss at 5.9% averaged over time.",
+              "text_origin": "native_text"
+            }
+          ]
+        },
+        {
+          "text": "URL loss was 5.9% averaged over time.",
+          "citations": [
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 1,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "DOIs were the type of shared link that was least likely to disappear with a 1.7% loss, with URL loss at 5.9% averaged over time.",
+              "text_origin": "native_text"
+            }
+          ]
+        },
+        {
+          "text": "The DOI loss rate (1.7%) was 4.2 percentage points lower than the URL loss rate (5.9%).",
+          "citations": [
+            {
+              "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+              "pdf_page": 1,
+              "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+              "quote": "DOIs were the type of shared link that was least likely to disappear with a 1.7% loss, with URL loss at 5.9% averaged over time.",
+              "text_origin": "native_text"
+            }
+          ]
+        }
+      ],
+      "usage_diagnostics": {
+        "prompt_eval_count": 5350,
+        "eval_count": 803,
+        "total_duration": 0,
+        "estimated_usd": 0.00266496,
+        "_diagnostics": {
+          "retrieved_pages": 27,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Identify the link type least likely to disappear (DOIs).",
+            "State the loss rate of that link type (1.7%).",
+            "State the loss rate of URLs (5.9% averaged over time).",
+            "Compare the two loss rates, including the difference (4.2 percentage points lower)."
+          ],
+          "subquestions": [
+            "Which link type was least likely to disappear?",
+            "What was the loss rate of that least-likely-to-disappear link type?",
+            "What was the loss rate of URLs?",
+            "How did the loss rate of that least-likely-to-disappear link type compare with the loss rate of URLs?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      },
+      "execution_state": "complete"
+    },
+    {
+      "id": "PT15-05",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 0,
+      "all_displayed_citations_source_valid": null,
+      "citation_validation_results": [],
+      "qa_diagnostics": {
+        "retrieved_pages": 20,
+        "screen_selected_pages": 2,
+        "evidence_pages": 2,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "What should someone clarify before jumping into an unfamiliar codebase?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": "PT15 单次评测峰值预留上限将被超过；请求未发送",
+        "refusal_stage": "synthesis_or_review"
+      },
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.0056004,
+      "usage": {
+        "prompt_eval_count": 582,
+        "eval_count": 38,
+        "total_duration": 0,
+        "estimated_usd": 0.00022476,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What should someone clarify before jumping into an unfamiliar codebase?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": "PT15 单次评测峰值预留上限将被超过；请求未发送",
+          "refusal_stage": "synthesis_or_review"
+        }
+      },
+      "model_answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。（PT15 单次评测峰值预留上限将被超过；请求未发送）",
+      "model_status": "abstained",
+      "claims_with_citations": [],
+      "usage_diagnostics": {
+        "prompt_eval_count": 582,
+        "eval_count": 38,
+        "total_duration": 0,
+        "estimated_usd": 0.00022476,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What should someone clarify before jumping into an unfamiliar codebase?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": "PT15 单次评测峰值预留上限将被超过；请求未发送",
+          "refusal_stage": "synthesis_or_review"
+        }
+      },
+      "execution_state": "budget_blocked_before_generation"
+    }
+  ],
+  "execution_summary": {
+    "complete_ids": [
+      "PT15-01",
+      "PT15-02",
+      "PT15-03",
+      "PT15-04"
+    ],
+    "blocked_ids": [
+      "PT15-05"
+    ],
+    "not_started_ids": [
+      "PT15-06"
+    ],
+    "accounting_note": "冻结运行器将预算拦截后的 PT15-05 记录为问答结果。审计时发现该题只有规划/筛选请求，生成请求在发送前被门禁拦截；本报告将其归入部分尝试，不计作模型答案或拒答。PT15-06 未发送。原模型输出、问答状态与费用未改。"
+  }
+}
