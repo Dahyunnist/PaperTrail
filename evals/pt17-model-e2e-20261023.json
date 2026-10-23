@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "status": "completed_once_human_review_pending",
+  "dataset_role": "final_paper_disjoint_holdout",
+  "preregistration": "pt17-model-e2e-prereg-20261023.json",
+  "locked_hashes": {
+    "gold_sha256": "ac5817348de4d6f797e533be12c81d922bb161420f53f7ef5d392782e7b4933f",
+    "source_manifest_sha256": "1d842e3724242d73a1fe9fb624f2fa5b427d5f36b8092f9ccac418ee39ec8f7e",
+    "source_config_sha256": "b5a6aa47cf5a71507cc887116083a00a4e215a19d3c62f8fdd9b323d7633cc33",
+    "selection_sha256": "cc8f13b84aef1ece6747a5eca652116293dac4033286d122e15bca9f93005682",
+    "database_sha256": "96f85883a55d7e11b1be65740b7ee8a1e3a8bb9419f8f5d31f80691e3b0971f5",
+    "runner_sha256": "042946a387763b9da14efaa5ec09ee83748c9a6b7d751964602063c72b4534d7",
+    "prompt_sha256": "09fb7c0431d52ed11082db33025f17d3272f840737e317bd8ffab825838a7fa8",
+    "qa_sha256": "b3453194763b858f0bb67e3908bde0b4d6607225bc358b376cf33c6ea85d7878",
+    "local_llm_sha256": "bd634caf59099971ee361ac5e8e81316c9553c287ec1d04844cf374aecd1503f",
+    "retrieval_sha256": "249b4f0086e9e7851e9793bf4131e5290140fe04ee4285bd093e16c496cbd8e3",
+    "index_sha256": "dd85e778211001675905583c98a79ba888abaacb3ee57ab9b7b16de7b897fe83"
+  },
+  "metrics": {
+    "questions_total": 5,
+    "questions_completed": 5,
+    "answerable_questions": 4,
+    "unanswerable_questions": 1,
+    "gold_evidence_slots": 7,
+    "gold_pages_cited": 1,
+    "gold_phrases_contained": 0,
+    "exact_gold_quotes": 0,
+    "unanswerable_abstentions": 1,
+    "all_displayed_citations_source_valid": true
+  },
+  "limitations": [
+    "3 篇公开论文、5 题，小样本，不代表总体准确率。",
+    "运行时同模型审查不独立；模型语义结果待人工复核。",
+    "仅发送检索到的短摘录和问题；不发送整篇 PDF、金标或私人资料。",
+    "禁止重跑和按结果调参。"
+  ],
+  "human_review": {
+    "status": "pending_independent_human_review",
+    "runtime_model_review_is_not_independent": true
+  },
+  "model_usage": {
+    "api_calls": 16,
+    "summed_request_reserves_usd": 0.0495804,
+    "charged_upper_bound_usd": 0.00356484,
+    "master_spent_after_usd": 0.44007762,
+    "master_remaining_after_usd": 0.05992238,
+    "stage_cap_usd": 0.05
+  },
+  "failure": null,
+  "results": [
+    {
+      "id": "PT17-01",
+      "question_type": "multi_hop",
+      "gold_abstain": false,
+      "status": "generated_partial",
+      "claims": [
+        "The authors recommend following the Good Research Code Handbook [22]."
+      ],
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "No claim addresses the recommendation for external package version tracking (subquestion 0); evidence 0 only states the problem, not a recommendation.",
+        "子问题 1 未覆盖：What do AI-in-science authors recommend for external package version tracking?"
+      ],
+      "gold_evidence_slots": 2,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 1,
+      "all_displayed_citations_source_valid": true,
+      "retrieval_diagnostics": {
+        "retrieved_pages": 11,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": false,
+        "coverage_gaps": [
+          "No claim addresses the recommendation for external package version tracking (subquestion 0); evidence 0 only states the problem, not a recommendation.",
+          "子问题 1 未覆盖：What do AI-in-science authors recommend for external package version tracking?"
+        ],
+        "coverage_requirements": [
+          "Recommendation for external package version tracking",
+          "Recommendation for code documentation"
+        ],
+        "subquestions": [
+          "What do AI-in-science authors recommend for external package version tracking?",
+          "What do AI-in-science authors recommend for code documentation?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 1,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": "coverage_partial"
+      },
+      "citations": [
+        {
+          "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+          "pdf_page": 5,
+          "quote": "We recommend following the Good Research Code Handbook [22]."
+        }
+      ]
+    },
+    {
+      "id": "PT17-02",
+      "question_type": "cross_paper",
+      "gold_abstain": false,
+      "status": "generated_partial",
+      "claims": [
+        "The research data management paper states that, in the context of RDM, data publication refers to making research datasets openly accessible for review and reuse."
+      ],
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "No claim addresses the AI navigation paper's recommendations for making models or datasets easier to reuse (subquestion 0 entirely uncovered).",
+        "No claim addresses the research data management paper's recommendation for making models easier to reuse.",
+        "Claim 1 only notes that institutions seek to store data for reuse; it does not state a recommendation for making datasets easier to reuse.",
+        "Claim 0 defines data publication as making datasets openly accessible for review and reuse, which partially addresses datasets but not models, and does not cover the AI navigation paper.",
+        "子问题 1 未覆盖：What does the AI navigation paper recommend for making models and datasets easier to reuse?"
+      ],
+      "gold_evidence_slots": 2,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 1,
+      "all_displayed_citations_source_valid": true,
+      "retrieval_diagnostics": {
+        "retrieved_pages": 23,
+        "screen_selected_pages": 3,
+        "evidence_pages": 2,
+        "coverage_complete": false,
+        "coverage_gaps": [
+          "No claim addresses the AI navigation paper's recommendations for making models or datasets easier to reuse (subquestion 0 entirely uncovered).",
+          "No claim addresses the research data management paper's recommendation for making models easier to reuse.",
+          "Claim 1 only notes that institutions seek to store data for reuse; it does not state a recommendation for making datasets easier to reuse.",
+          "Claim 0 defines data publication as making datasets openly accessible for review and reuse, which partially addresses datasets but not models, and does not cover the AI navigation paper.",
+          "子问题 1 未覆盖：What does the AI navigation paper recommend for making models and datasets easier to reuse?"
+        ],
+        "coverage_requirements": [
+          "AI navigation paper's recommendation for making models easier to reuse",
+          "AI navigation paper's recommendation for making datasets easier to reuse",
+          "Research data management paper's recommendation for making models easier to reuse",
+          "Research data management paper's recommendation for making datasets easier to reuse"
+        ],
+        "subquestions": [
+          "What does the AI navigation paper recommend for making models and datasets easier to reuse?",
+          "What does the research data management paper recommend for making models and datasets easier to reuse?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 2,
+        "rejected_claims": 1,
+        "synthesis_error": null,
+        "refusal_stage": "coverage_partial"
+      },
+      "citations": [
+        {
+          "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+          "pdf_page": 8,
+          "quote": "In the context of RDM, data publication refers to making research datasets openly accessible for review and reuse."
+        }
+      ]
+    },
+    {
+      "id": "PT17-03",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "abstained",
+      "claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_slots": 1,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 0,
+      "all_displayed_citations_source_valid": null,
+      "retrieval_diagnostics": {
+        "retrieved_pages": 11,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "What file forms can serve as metadata in the research data management article?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": "PT17 费用门禁拦截请求；未发送",
+        "refusal_stage": "synthesis_or_review"
+      },
+      "citations": []
+    },
+    {
+      "id": "PT17-04",
+      "question_type": "unanswerable",
+      "gold_abstain": true,
+      "status": "abstained",
+      "claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_slots": 0,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 0,
+      "all_displayed_citations_source_valid": null,
+      "retrieval_diagnostics": {
+        "retrieved_pages": 12,
+        "screen_selected_pages": 7,
+        "evidence_pages": 3,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "How many patients were randomized to the placebo arm in the clinical trial reported in the researcher training article?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": "PT17 费用门禁拦截请求；未发送",
+        "refusal_stage": "synthesis_or_review"
+      },
+      "citations": []
+    },
+    {
+      "id": "PT17-05",
+      "question_type": "multi_hop",
+      "gold_abstain": false,
+      "status": "abstained",
+      "claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_slots": 2,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 0,
+      "all_displayed_citations_source_valid": null,
+      "retrieval_diagnostics": {
+        "retrieved_pages": 10,
+        "screen_selected_pages": 7,
+        "evidence_pages": 4,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "How should organizers both monitor learner progress during short-format training and use evaluation to improve later training?"
+        ],
+        "planning_error": "PT17 费用门禁拦截请求；未发送",
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": "PT17 费用门禁拦截请求；未发送",
+        "refusal_stage": "synthesis_or_review"
+      },
+      "citations": []
+    }
+  ]
+}

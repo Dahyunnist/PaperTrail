@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "source_report": "evals/pt17-model-e2e-20261023.json",
+  "purpose": "逐题召回、筛选、生成及预算错误归因；不改变单次运行结果。",
+  "corrected_metrics": {
+    "questions_total": 5,
+    "answerable_questions": 4,
+    "answerable_complete_answers": 0,
+    "candidate_gold_slots_recalled": 6,
+    "gold_slots_total": 7,
+    "screened_gold_slots": 3,
+    "cited_gold_slots": 1,
+    "gold_phrase_hits": 0,
+    "valid_unanswerable_model_abstentions": 0,
+    "budget_blocked_questions": 3
+  },
+  "results": [
+    {
+      "id": "PT17-01",
+      "question_type": "multi_hop",
+      "candidate_gold_slots": 2,
+      "screened_gold_slots": 1,
+      "cited_gold_slots": 1,
+      "gold_slots": 2,
+      "gold_phrase_hits": 0,
+      "status": "generated_partial",
+      "budget_blocked": false,
+      "retrieved_page_count": 11,
+      "screen_selected_page_count": 1,
+      "evidence_page_count": 1,
+      "subquestions": [
+        "What do AI-in-science authors recommend for external package version tracking?",
+        "What do AI-in-science authors recommend for code documentation?"
+      ],
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "No claim addresses the recommendation for external package version tracking (subquestion 0); evidence 0 only states the problem, not a recommendation.",
+        "子问题 1 未覆盖：What do AI-in-science authors recommend for external package version tracking?"
+      ]
+    },
+    {
+      "id": "PT17-02",
+      "question_type": "cross_paper",
+      "candidate_gold_slots": 2,
+      "screened_gold_slots": 0,
+      "cited_gold_slots": 0,
+      "gold_slots": 2,
+      "gold_phrase_hits": 0,
+      "status": "generated_partial",
+      "budget_blocked": false,
+      "retrieved_page_count": 23,
+      "screen_selected_page_count": 3,
+      "evidence_page_count": 2,
+      "subquestions": [
+        "What does the AI navigation paper recommend for making models and datasets easier to reuse?",
+        "What does the research data management paper recommend for making models and datasets easier to reuse?"
+      ],
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "No claim addresses the AI navigation paper's recommendations for making models or datasets easier to reuse (subquestion 0 entirely uncovered).",
+        "No claim addresses the research data management paper's recommendation for making models easier to reuse.",
+        "Claim 1 only notes that institutions seek to store data for reuse; it does not state a recommendation for making datasets easier to reuse.",
+        "Claim 0 defines data publication as making datasets openly accessible for review and reuse, which partially addresses datasets but not models, and does not cover the AI navigation paper.",
+        "子问题 1 未覆盖：What does the AI navigation paper recommend for making models and datasets easier to reuse?"
+      ]
+    },
+    {
+      "id": "PT17-03",
+      "question_type": "fact_location",
+      "candidate_gold_slots": 1,
+      "screened_gold_slots": 1,
+      "cited_gold_slots": 0,
+      "gold_slots": 1,
+      "gold_phrase_hits": 0,
+      "status": "abstained",
+      "budget_blocked": true,
+      "retrieved_page_count": 11,
+      "screen_selected_page_count": 1,
+      "evidence_page_count": 1,
+      "subquestions": [
+        "What file forms can serve as metadata in the research data management article?"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": []
+    },
+    {
+      "id": "PT17-04",
+      "question_type": "unanswerable",
+      "candidate_gold_slots": 0,
+      "screened_gold_slots": 0,
+      "cited_gold_slots": 0,
+      "gold_slots": 0,
+      "gold_phrase_hits": 0,
+      "status": "abstained",
+      "budget_blocked": true,
+      "retrieved_page_count": 12,
+      "screen_selected_page_count": 7,
+      "evidence_page_count": 3,
+      "subquestions": [
+        "How many patients were randomized to the placebo arm in the clinical trial reported in the researcher training article?"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": []
+    },
+    {
+      "id": "PT17-05",
+      "question_type": "multi_hop",
+      "candidate_gold_slots": 1,
+      "screened_gold_slots": 1,
+      "cited_gold_slots": 0,
+      "gold_slots": 2,
+      "gold_phrase_hits": 0,
+      "status": "abstained",
+      "budget_blocked": true,
+      "retrieved_page_count": 10,
+      "screen_selected_page_count": 7,
+      "evidence_page_count": 4,
+      "subquestions": [
+        "How should organizers both monitor learner progress during short-format training and use evaluation to improve later training?"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": []
+    }
+  ],
+  "metric_correction": "原始 runner 将任何 status=abstained 计作正确不可答拒答。PT17-04 的计划/生成请求被阶段预算门禁拦截，未得到模型判断，故有效不可答拒答应为 0/1。"
+}
