@@ -11,7 +11,7 @@
   "source_database": ".local/pt15-heldout.sqlite3",
   "source_database_sha256": "49878ed3e4b7a1a7976db148ec062d2278c4ae9679e7103924f0ceb594ef3313",
   "supplement_database": ".local/pt15-supplement-20261023.sqlite3",
-  "supplement_database_sha256": "e7aa512af88c52205359e6fcb7143788b272a4df7af90269ef90395036605a94",
+  "supplement_database_sha256": "34a61c0ea40534173de4bc059ed8a07aba78bb415648a21ca895553904716fa1",
   "qa_sha256": "0d838b636b4d83e250af8756de666f48ddca9d8863aae7eece4ef61e53a4c278",
   "local_llm_sha256": "bd634caf59099971ee361ac5e8e81316c9553c287ec1d04844cf374aecd1503f",
   "baseline_spent_usd": 0.43485948,
@@ -51,5 +51,6 @@
       "local_pdf_sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828"
     }
   ],
-  "runner_sha256": "6a083f364fb190a2666c1d943b12a0d6d491ec2df05888636d5703683bcdc1aa"
+  "runner_sha256": "6a083f364fb190a2666c1d943b12a0d6d491ec2df05888636d5703683bcdc1aa",
+  "preregistration_note": "无模型 dry-run 会写入 QA 对话历史；本哈希在 dry-run 后、任何生成请求前重新冻结。"
 }
