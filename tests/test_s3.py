@@ -9,6 +9,12 @@ from papertrail.qa import ask, conversation_history
 from papertrail.s1_index import index_selection
 
 
+def test_flash_peak_budget_reserves_current_output_rate():
+    from papertrail.local_llm import _max_request_cost
+
+    assert _max_request_cost(0) == 0.001056
+
+
 def _make_pdf(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     doc = fitz.open()
