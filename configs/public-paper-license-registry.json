@@ -209,6 +209,51 @@
       "benchmark_group": "pt8-public-development-20261023",
       "benchmark_role": "development",
       "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten Simple Rules for Effective Statistical Practice",
+      "doi": "10.1371/journal.pcbi.1004961",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004961",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004961",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1004961&type=printable",
+      "source_version": "版本记录；2016-06-09",
+      "local_pdf": "evals/fixtures/pt9-heldout/effective-statistical-practice.pdf",
+      "local_pdf_sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+      "benchmark_group": "pt9-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+    },
+    {
+      "title": "Ten simple rules for getting started with statistics in graduate school",
+      "doi": "10.1371/journal.pcbi.1010033",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010033",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010033",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010033&type=printable",
+      "source_version": "版本记录；2022-04-21",
+      "local_pdf": "evals/fixtures/pt9-heldout/statistics-graduate-school.pdf",
+      "local_pdf_sha256": "53e867793aa1f3a710004ee3c10346b4c1b8e2e5fdf9abfdf700ec3d3e09cbb1",
+      "benchmark_group": "pt9-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+    },
+    {
+      "title": "Ten simple rules for large-scale data processing",
+      "doi": "10.1371/journal.pcbi.1009757",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009757",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009757",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1009757&type=printable",
+      "source_version": "版本记录；2022-02-10",
+      "local_pdf": "evals/fixtures/pt9-heldout/large-scale-data-processing.pdf",
+      "local_pdf_sha256": "2f0758d577a8d09dbf45dc0c370ab303a2978858e0e2c0a0b979755c39f308bc",
+      "benchmark_group": "pt9-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
     }
   ]
 }
