@@ -55,3 +55,8 @@ def test_gold_evaluation_excludes_personal_notes_and_reports_abstention(tmp_path
     assert all(row["source_type"] == "original_pdf" for row in result["trace"][0]["chunk_results"])
     comparison = compare_modes(db, gold, k=1, modes=("bm25",))
     assert comparison["modes"]["bm25"]["trace"][0]["page_results"]
+    assert comparison["modes"]["bm25"]["gold_page_recall_at_k"] == 1.0
+    assert comparison["modes"]["bm25"]["complete_evidence_at_k"] == 1.0
+    assert comparison["modes"]["bm25"]["trace"][0]["complete_evidence"] is True
+    assert comparison["modes"]["bm25"]["trace"][0]["evidence_items_found"] == 1
+    assert next(iter(comparison["modes"]["bm25"]["by_paper"].values()))["page_hits"] == 1

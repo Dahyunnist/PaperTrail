@@ -10,13 +10,14 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .gold import load_gold
-from .s1_index import search
+from .gold import _normalize_excerpt, load_gold
+from .s1_index import open_database, search
 from .retrieval import retrieve
 
 
-def evaluate(database: Path, gold_path: Path, k: int = 5) -> dict[str, Any]:
-    items = load_gold(gold_path)
+def evaluate(database: Path, gold_path: Path, k: int = 5,
+             minimum_questions: int = 30) -> dict[str, Any]:
+    items = load_gold(gold_path, minimum_questions=minimum_questions)
     trace: list[dict[str, Any]] = []
     page_hits = 0
     document_hits = 0
@@ -55,7 +56,7 @@ def evaluate(database: Path, gold_path: Path, k: int = 5) -> dict[str, Any]:
             "page_results": [_trace_row(r) for r in pages],
         })
     unanswerable = []
-    for item in load_gold(gold_path):
+    for item in load_gold(gold_path, minimum_questions=minimum_questions):
         if not item["abstain"]:
             continue
         results = search(database, item["question"], k, source_type="original_pdf")
@@ -63,7 +64,7 @@ def evaluate(database: Path, gold_path: Path, k: int = 5) -> dict[str, Any]:
                              "retrieval_nonempty": bool(results),
                              "top_score": results[0]["rank_score"] if results else None,
                              "distinct_documents": len({r["sha256"] for r in results})})
-    gold_items = load_gold(gold_path)
+    gold_items = load_gold(gold_path, minimum_questions=minimum_questions)
     return {
         "k": k, "answerable_questions": answerable_count,
         "page_recall_at_k": page_hits / answerable_count if answerable_count else 0.0,
@@ -82,6 +83,15 @@ def evaluate(database: Path, gold_path: Path, k: int = 5) -> dict[str, Any]:
 
 def _file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _paper_titles(database: Path) -> dict[str, str]:
+    conn = open_database(database, readonly=True)
+    try:
+        return {row["sha256"]: row["title_candidate"] for row in conn.execute(
+            "SELECT v.sha256,p.title_candidate FROM paper_versions v JOIN papers p ON p.paper_id=v.paper_id")}
+    finally:
+        conn.close()
 
 
 def _trace_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -129,15 +139,20 @@ def _unique_documents(results: list[dict[str, Any]], limit: int) -> list[dict[st
 
 def compare_modes(database: Path, gold_path: Path, k: int = 5,
                   modes: tuple[str, ...] = ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),
-                  artifact: Path | None = None) -> dict[str, Any]:
-    items = [item for item in load_gold(gold_path) if not item["abstain"]]
+                  artifact: Path | None = None,
+                  minimum_questions: int = 30) -> dict[str, Any]:
+    all_items = load_gold(gold_path, minimum_questions=minimum_questions)
+    items = [item for item in all_items if not item["abstain"]]
     output: dict[str, Any] = {"k": k, "answerable_questions": len(items), "modes": {}}
+    paper_titles = _paper_titles(database)
     for mode in modes:
         page_hits = chunk_page_hits = document_hits = unique_document_hits = complete_hits = candidate_page_hits = 0
+        complete_evidence_hits = gold_page_total = gold_page_found_total = evidence_total = evidence_found_total = 0
         reciprocal_ranks: list[float] = []
         ndcgs: list[float] = []
         durations: list[float] = []
         by_type: dict[str, dict[str, int]] = {}
+        by_paper: dict[str, dict[str, int]] = {}
         trace: list[dict[str, Any]] = []
         for item in items:
             expected_pages = {(e["sha256"], e["pdf_page"]) for e in item["evidence"]}
@@ -166,6 +181,19 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             document_hit = any(hit["sha256"] in expected_hashes for hit in chunk_top)
             unique_document_hit = any(hit["sha256"] in expected_hashes for hit in document_top)
             all_pages = expected_pages.issubset({(hit["sha256"], hit["pdf_page"]) for hit in page_top})
+            selected_pages = {(hit["sha256"], hit["pdf_page"]) for hit in page_top}
+            retrieved_page_text: dict[tuple[str, int], list[str]] = {}
+            for hit in results:
+                key = (hit["sha256"], hit["pdf_page"])
+                if key in selected_pages:
+                    retrieved_page_text.setdefault(key, []).append(hit.get("text", ""))
+            evidence_matches = []
+            for pointer in item["evidence"]:
+                key = (pointer["sha256"], pointer["pdf_page"])
+                quote = _normalize_excerpt(pointer["quote"])
+                evidence_matches.append(any(quote in _normalize_excerpt(text)
+                                            for text in retrieved_page_text.get(key, [])))
+            complete_evidence = bool(evidence_matches) and all(evidence_matches)
             candidate_pages = {(page["sha256"], page["pdf_page"])
                                for hit in results for page in hit.get("rerank_candidate_pages", [])}
             candidate_hit = bool(expected_pages.intersection(candidate_pages))
@@ -174,6 +202,11 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             document_hits += document_hit
             unique_document_hits += unique_document_hit
             complete_hits += all_pages
+            complete_evidence_hits += complete_evidence
+            gold_page_total += len(expected_pages)
+            gold_page_found_total += len(expected_pages.intersection(selected_pages))
+            evidence_total += len(evidence_matches)
+            evidence_found_total += sum(evidence_matches)
             candidate_page_hits += int(candidate_hit)
             reciprocal_ranks.append(1 / ranks[0] if ranks else 0.0)
             dcg = sum(1 / math.log2(rank + 1) for rank in ranks)
@@ -182,6 +215,28 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
             group = by_type.setdefault(item["question_type"], {"total": 0, "page_hits": 0})
             group["total"] += 1
             group["page_hits"] += int(page_hit)
+            for paper_hash in expected_hashes:
+                paper_hit = any(hit["sha256"] == paper_hash for hit in chunk_top)
+                paper_page_hit = any(hit["sha256"] == paper_hash and
+                                     (hit["sha256"], hit["pdf_page"]) in expected_pages
+                                     for hit in page_top)
+                paper_evidence = [matches for pointer, matches in zip(item["evidence"], evidence_matches)
+                                  if pointer["sha256"] == paper_hash]
+                paper_group = by_paper.setdefault(paper_hash, {
+                    "title": paper_titles.get(paper_hash, ""),
+                    "total": 0, "page_hits": 0, "complete_evidence_hits": 0,
+                    "target_document_not_retrieved": 0, "target_document_retrieved_wrong_page": 0,
+                    "incomplete_evidence": 0,
+                })
+                paper_group["total"] += 1
+                paper_group["page_hits"] += int(paper_page_hit)
+                paper_group["complete_evidence_hits"] += int(bool(paper_evidence) and all(paper_evidence))
+                if not paper_hit:
+                    paper_group["target_document_not_retrieved"] += 1
+                elif not paper_page_hit:
+                    paper_group["target_document_retrieved_wrong_page"] += 1
+                if paper_page_hit and paper_evidence and not all(paper_evidence):
+                    paper_group["incomplete_evidence"] += 1
             trace.append({"id": item["id"], "question": item["question"], "type": item["question_type"],
                           "expected_pages": sorted([list(page) for page in expected_pages]),
                           "page_hit": page_hit, "chunk_page_hit": chunk_page_hit,
@@ -189,6 +244,9 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
                           "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
                                             else "target_document_retrieved_wrong_page"),
                           "all_evidence_pages": all_pages,
+                          "complete_evidence": complete_evidence,
+                          "evidence_items_found": sum(evidence_matches),
+                          "evidence_items_total": len(evidence_matches),
                           "rerank_candidate_hit": candidate_hit if mode == "hybrid_bge_rerank" else None,
                           "chunk_results": [_trace_row(hit) for hit in chunk_top],
                           "page_results": [_trace_row(hit) for hit in page_top],
@@ -197,18 +255,21 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
         total = len(items)
         output["modes"][mode] = {
             "page_recall_at_k": page_hits / total if total else 0,
+            "gold_page_recall_at_k": gold_page_found_total / gold_page_total if gold_page_total else 0,
             "chunk_page_recall_at_k": chunk_page_hits / total if total else 0,
             "document_recall_at_k": document_hits / total if total else 0,
             "unique_document_recall_at_k": unique_document_hits / total if total else 0,
             "all_evidence_pages_at_k": complete_hits / total if total else 0,
+            "complete_evidence_at_k": complete_evidence_hits / total if total else 0,
+            "evidence_item_recall_at_k": evidence_found_total / evidence_total if evidence_total else 0,
             "rerank_candidate_page_recall": candidate_page_hits / total if mode == "hybrid_bge_rerank" and total else None,
             "mrr_at_k": sum(reciprocal_ranks) / total if total else 0,
             "ndcg_at_k": sum(ndcgs) / total if total else 0,
             "mean_query_ms": sum(durations) * 1000 / total if total else 0,
             "page_hits": page_hits, "document_hits": document_hits,
-            "by_question_type": by_type, "trace": trace,
+            "by_question_type": by_type, "by_paper": by_paper, "trace": trace,
         }
-        unanswerable_items = [item for item in load_gold(gold_path) if item["abstain"]]
+        unanswerable_items = [item for item in all_items if item["abstain"]]
         unanswerable = []
         for item in unanswerable_items:
             results = retrieve(database, item["question"], k, source_type="original_pdf", mode=mode, artifact=artifact)
@@ -223,6 +284,7 @@ def main() -> None:
     parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
     parser.add_argument("--gold", type=Path, default=Path("evals/gold.jsonl"))
     parser.add_argument("--k", type=int, default=5)
+    parser.add_argument("--minimum-questions", type=int, default=30)
     parser.add_argument("--trace-out", type=Path, default=Path(".local/s1-retrieval-trace.json"))
     parser.add_argument("--compare", action="store_true", help="对照 BM25、潜在向量和 RRF 混合检索")
     parser.add_argument("--vector-artifact", type=Path)
@@ -230,7 +292,9 @@ def main() -> None:
     args = parser.parse_args()
     result = compare_modes(args.db, args.gold, args.k,
                            modes=tuple(args.modes) if args.modes else ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),
-                           artifact=args.vector_artifact) if args.compare else evaluate(args.db, args.gold, args.k)
+                           artifact=args.vector_artifact,
+                           minimum_questions=args.minimum_questions) if args.compare else evaluate(
+                               args.db, args.gold, args.k, minimum_questions=args.minimum_questions)
     args.trace_out.parent.mkdir(parents=True, exist_ok=True)
     args.trace_out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.compare:

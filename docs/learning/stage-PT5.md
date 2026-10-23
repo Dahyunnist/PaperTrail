@@ -30,3 +30,25 @@
 另外两篇候选的许可虽已核验为 CC BY 4.0，但官方 PDF 端点分别返回浏览器 PoW 页面/403 和空 HTTP 202，故未纳入冻结组；没有尝试绕过验证，也没有使用第三方镜像。PT1 的 Nature 论文仍是另一组 8 题开发集，不计入本组。
 
 PT5 目前只有 3 篇论文、6 道题，是可复现的公开论文小型诊断组；不能据此宣称独立测试集、广泛论文覆盖或泛化能力。PT1–PT3 的评测与账本未改动，本阶段没有模型调用，API 预算仍为 `$0.0974504 / $0.50`。
+
+## 离线检索诊断
+
+冻结组只用于诊断，不作为盲测。三篇 PDF 共 41 页、467 个索引块；使用 `papertrail-s1-4`，索引 revision 为 1。结果摘要在 `evals/pt5-public-retrieval-summary-20261023.json`；完整轨迹留在忽略目录 `.local/`，不包含私有来源。
+
+| 模式 | Recall@5 | MRR@5 | 完整短证据覆盖@5 | Recall@10 | MRR@10 | 完整短证据覆盖@10 |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 | 1.000 | 0.708 | 6/6 | 1.000 | 0.708 | 6/6 |
+| 字符 TF-IDF + SVD 向量 | 1.000 | 0.631 | 6/6 | 1.000 | 0.631 | 6/6 |
+| BM25 + 向量 RRF | 1.000 | 0.722 | 6/6 | 1.000 | 0.722 | 6/6 |
+| BGE dense | 未运行 | 未运行 | 未运行 | 未运行 | 未运行 | 未运行 |
+
+Recall 为目标 PDF 页的微平均召回；MRR 按去重后的物理页排名计算；完整短证据覆盖要求该题每条 gold quote 均出现在命中的目标页检索文本中。当前每题仅一条证据，因此三种已运行模式都达到 6/6；不能据此推断多证据或更大语料表现。BGE 模型缓存存在，但锁定环境缺少 `sentence_transformers` 和 `torch`，故未运行神经 dense；`vector` 是字符 TF-IDF + SVD，不冒称 dense embedding。无 API 调用。
+
+三篇论文分别均为 2/2 页命中、2/2 完整证据覆盖；未命中目标论文、错页或证据不全均为 0。此诊断题只测来源内事实定位，尚无跨文献、复杂多跳或不可回答题。
+
+可复现命令：
+
+```powershell
+.\.venv\Scripts\python.exe -m papertrail.evaluate --compare --db .local/pt5-public-eval.sqlite3 --gold evals/pt5-public-gold-20261023.jsonl --k 5 --minimum-questions 1 --modes bm25 vector hybrid --vector-artifact .local/pt5-public-eval.vectors.joblib --trace-out .local/pt5-public-retrieval-k5.json
+.\.venv\Scripts\python.exe -m papertrail.evaluate --compare --db .local/pt5-public-eval.sqlite3 --gold evals/pt5-public-gold-20261023.jsonl --k 10 --minimum-questions 1 --modes bm25 vector hybrid --vector-artifact .local/pt5-public-eval.vectors.joblib --trace-out .local/pt5-public-retrieval-k10.json
+```

@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "group_id": "pt5-public-real-20261023",
+  "gold_sha256": "c9aa6f36732229886ec0fe97426ca1a155a629c6474314cdcb1c497e77240ddb",
+  "index": {
+    "papers": 3,
+    "chunks": 467,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4",
+    "pdf_pages": 41
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前锁定测试环境未安装 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {
+        "retriever": "BM25",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.7083333333333334,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      },
+      "vector": {
+        "retriever": "字符 TF-IDF + SVD",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.6305555555555555,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      },
+      "hybrid": {
+        "retriever": "BM25 + 字符向量 RRF",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.7222222222222222,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      }
+    },
+    "k10": {
+      "bm25": {
+        "retriever": "BM25",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.7083333333333334,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      },
+      "vector": {
+        "retriever": "字符 TF-IDF + SVD",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.6305555555555555,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      },
+      "hybrid": {
+        "retriever": "BM25 + 字符向量 RRF",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.7222222222222222,
+        "complete_evidence_coverage": 1.0,
+        "evidence_item_recall": 1.0,
+        "paper_failures": {
+          "Workflow for detecting biomedical articles with underlying open and restricted-access datasets": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules to make computable knowledge shareable and reusable": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten quick tips for ensuring machine learning model validity": {
+            "questions": 2,
+            "page_hits": 2,
+            "complete_evidence_hits": 2,
+            "document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          }
+        }
+      }
+    }
+  }
+}
