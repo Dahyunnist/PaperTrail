@@ -25,6 +25,14 @@ _TURN_MAX_COST_USD = 0.05
 _turn_budget: ContextVar[dict[str, Any] | None] = ContextVar("papertrail_turn_budget", default=None)
 
 
+class ModelResponseTruncated(RuntimeError):
+    """A provider stopped at its output limit before completing the JSON response."""
+
+    def __init__(self, message: str, usage: dict[str, Any] | None = None):
+        super().__init__(message)
+        self.usage = usage or {}
+
+
 @contextmanager
 def model_turn_budget():
     """Bound all model calls made while answering one question."""
@@ -75,9 +83,17 @@ def chat_json(model: str, system: str, prompt: str, *, thinking: bool | None = N
     try:
         content = json.loads(result["message"]["content"])
     except (KeyError, TypeError, json.JSONDecodeError) as exc:
+        if result.get("done_reason") == "length":
+            raise ModelResponseTruncated("本机模型输出达到长度限制，JSON 不完整", {
+                key: result.get(key) for key in ("prompt_eval_count", "eval_count", "total_duration")
+            }) from exc
         raise RuntimeError("本机模型没有返回有效 JSON") from exc
     if not isinstance(content, dict):
         raise RuntimeError("本机模型 JSON 顶层必须是对象")
+    if result.get("done_reason") == "length":
+        raise ModelResponseTruncated("本机模型输出达到长度限制，JSON 不完整", {
+            key: result.get(key) for key in ("prompt_eval_count", "eval_count", "total_duration")
+        })
     content["_usage"] = {key: result.get(key) for key in ("prompt_eval_count", "eval_count", "total_duration")}
     return content
 
@@ -170,8 +186,16 @@ def _openai_compatible_json(model: str, system: str, prompt: str,
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
         reason = result.get("choices", [{}])[0].get("finish_reason", "unknown") if result.get("choices") else "no_choice"
         length = len(raw_content) if "raw_content" in locals() and isinstance(raw_content, str) else 0
+        if reason == "length":
+            raise ModelResponseTruncated(
+                f"Hosted model did not return valid JSON (finish_reason={reason}, chars={length})", cost_data
+            ) from exc
         raise RuntimeError(f"Hosted model did not return valid JSON (finish_reason={reason}, chars={length})") from exc
     if not isinstance(content, dict):
         raise RuntimeError("Hosted model JSON top-level must be an object")
+    if choice.get("finish_reason") == "length":
+        raise ModelResponseTruncated(
+            f"Hosted model did not return valid JSON (finish_reason=length, chars={len(raw_content)})", cost_data
+        )
     content["_usage"] = cost_data
     return content

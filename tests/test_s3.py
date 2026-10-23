@@ -59,6 +59,24 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     assert stale["claims"] == []
 
 
+def test_qa_does_not_cite_ocr_derived_text(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, source = _indexed_db(tmp_path)
+    monkeypatch.setattr(qa, "retrieve", lambda *_args, **_kwargs: [{
+        "chunk_id": "ocr-chunk", "version_id": "ocr-version", "paper_id": "ocr-paper",
+        "source_type": "original_pdf", "title": "Synthetic OCR", "section": "Results",
+        "pdf_page": 1, "path": str(source), "sha256": _hash(source),
+        "parse_status": "ocr_text", "text_origin": "ocr_derived", "rank_score": 1.0,
+        "text": "OCR-derived text that looks like an answer but is not a native-text citation.",
+    }])
+
+    result = ask(db, "What does OCR-derived text say?")
+
+    assert result["status"] == "abstained"
+    assert result["claims"] == []
+
+
 def test_local_llm_claims_require_verified_citations_and_support_review(tmp_path, monkeypatch):
     import papertrail.qa as qa
 
@@ -213,6 +231,60 @@ def test_empty_generation_gets_one_cited_retry(monkeypatch):
     assert result["usage"]["prompt_eval_count"] == 36
 
 
+def test_truncated_generation_gets_one_compact_retry_and_counts_both_calls(monkeypatch):
+    from papertrail.local_llm import ModelResponseTruncated
+    import papertrail.qa as qa
+
+    outputs = iter([
+        ModelResponseTruncated("finish_reason=length", {"prompt_eval_count": 10,
+                                                           "eval_count": 800,
+                                                           "estimated_usd": 0.001}),
+        {"claims": [{"text": "The method uses calibration.", "evidence_ids": [0]}],
+         "_usage": {"prompt_eval_count": 12, "eval_count": 20, "estimated_usd": 0.0002}},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_complete": True, "coverage_requirements": ["calibration"], "coverage_gaps": [],
+         "_usage": {"prompt_eval_count": 14, "eval_count": 5, "estimated_usd": 0.0001}},
+    ])
+    prompts = []
+
+    def mock_chat(_model, _system, prompt, **_kwargs):
+        prompts.append(json.loads(prompt))
+        value = next(outputs)
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    monkeypatch.setattr(qa, "chat_json", mock_chat)
+    result = qa._synthesize_local("What does the method use?", [{
+        "quote": "The method uses calibration to assess uncertainty.",
+        "title": "Paper", "pdf_page": 1}], "test-model")
+
+    assert result["generation_retry_used"] is True
+    assert len(prompts) == 3
+    assert prompts[1]["output"]["compact"] is True
+    assert result["usage"]["prompt_eval_count"] == 36
+    assert result["usage"]["eval_count"] == 825
+
+
+def test_truncated_generation_retry_is_bounded(monkeypatch):
+    import pytest
+    from papertrail.local_llm import ModelResponseTruncated
+    import papertrail.qa as qa
+
+    calls = []
+
+    def truncated(*_args, **_kwargs):
+        calls.append(True)
+        raise ModelResponseTruncated("finish_reason=length")
+
+    monkeypatch.setattr(qa, "chat_json", truncated)
+    with pytest.raises(ModelResponseTruncated):
+        qa._synthesize_local("Question?", [{"quote": "A source quote.", "title": "Paper",
+                                           "pdf_page": 1}], "test-model")
+
+    assert len(calls) == 2
+
+
 def test_complex_synthesis_requires_supported_claim_for_each_subquestion(monkeypatch):
     import json
     import papertrail.qa as qa
@@ -230,6 +302,7 @@ def test_complex_synthesis_requires_supported_claim_for_each_subquestion(monkeyp
         "title": "Paper A", "pdf_page": 1, "subquestion_ids": [0]}],
         "test-model", ["What does Paper A use?", "What does Paper B use?"])
     assert result["claims"][0]["subquestion_ids"] == [0]
+    assert result["coverage_gaps"]
     assert result["coverage_complete"] is False
     assert any("子问题 2 未覆盖" in gap for gap in result["coverage_gaps"])
 
@@ -258,13 +331,16 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     monkeypatch.setattr(qa, "_synthesize_local", lambda *_args: {
         "claims": [{"text": "Paper A uses CTGAN.", "evidence_ids": [0], "subquestion_ids": [0],
                     "support": "supported", "relevant": True, "support_method": "test_judge"}],
-        "coverage_complete": False, "coverage_requirements": ["Paper A method", "Paper B result"],
+        "coverage_complete": False, "covered_subquestions": [0],
+        "coverage_requirements": ["Paper A method", "Paper B result"],
         "coverage_gaps": ["Paper B evidence missing"], "generation_retry_used": False, "usage": {},
     })
     result = qa.ask(db, "Compare Papers A and B.", mode="bm25")
     assert queries == ["What method does Paper A use?", "What result does Paper B report?"]
     assert result["status"] == "generated_partial"
     assert result["claims"][0]["subquestion_ids"] == [0]
+    assert "Paper B evidence missing" in result["answer"]
+    assert result["missing_subquestions"] == ["What result does Paper B report?"]
 
 
 def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeypatch):
@@ -293,6 +369,8 @@ def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeyp
     assert result["status"] == "generated_partial", result
     assert result["claims"][0]["text"] == "CTGAN evaluates utility."
     assert "部分回答" in result["answer"]
+    assert "missing detail" in result["answer"]
+    assert result["coverage_gaps"] == ["missing detail"]
     assert result["usage"]["_diagnostics"]["refusal_stage"] == "coverage_partial"
     assert result["usage"]["_diagnostics"]["reviewed_claims"] == 2
     assert result["usage"]["_diagnostics"]["rejected_claims"] == 1

@@ -1,0 +1,5 @@
+version: 1
+roots:
+  - id: pt3_synthetic
+    path: evals/fixtures/pt3-synthetic
+    kinds: [pdf]

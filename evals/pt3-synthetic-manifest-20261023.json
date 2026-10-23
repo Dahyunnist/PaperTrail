@@ -1,0 +1,22 @@
+{
+  "dataset_id": "PT3-synthetic-cross-page-v1-20261023",
+  "freeze_date": "2026-10-23",
+  "gold_file": "pt3-synthetic-gold-20261023.jsonl",
+  "gold_sha256": "127308b31462b44a3ffd787d779e206edf09fd38b4b19de949168a91cef5e90d",
+  "question_count": 6,
+  "source_type": "synthetic_only",
+  "cloud_evaluation_allowed": true,
+  "sources": {
+    "study-alpha.pdf": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+    "study-beta.pdf": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da"
+  },
+  "scoring": {
+    "answerability_and_completeness": "manual per-question review against expected_answer and evidence",
+    "citation": "every emitted citation must match source SHA-256, physical page, and exact PDF text",
+    "partial": "supported claims retained; missing requirements must be named",
+    "abstention": "no unsupported fact may be emitted"
+  },
+  "limits": [
+    "Two synthetic papers; diagnostic only, not a real-paper generalization benchmark."
+  ]
+}

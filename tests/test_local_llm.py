@@ -2,7 +2,7 @@ import json
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from papertrail.local_llm import chat_json
+from papertrail.local_llm import ModelResponseTruncated, chat_json
 
 
 def test_local_chat_client_uses_loopback_ollama_json_api(monkeypatch):
@@ -80,6 +80,38 @@ def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path
     with pytest.raises(RuntimeError, match="budget cap"):
         chat_json("deepseek-flash", "system", "prompt")
     assert not seen
+
+
+def test_openai_compatible_client_marks_length_limited_json_and_records_usage(tmp_path, monkeypatch):
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def read(self):
+            return json.dumps({
+                "choices": [{"finish_reason": "length", "message": {"content": "{\\\"claims\\\":"}}],
+                "usage": {"prompt_tokens": 120, "completion_tokens": 800},
+            }).encode()
+
+    ledger = tmp_path / "budget.json"
+    monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "openai-compatible")
+    monkeypatch.setenv("PAPERTRAIL_OPENAI_BASE_URL", "https://api.deepseek.com")
+    monkeypatch.setenv("PAPERTRAIL_OPENAI_API_KEY_ENV", "TEST_DEEPSEEK_KEY")
+    monkeypatch.setenv("TEST_DEEPSEEK_KEY", "test-key")
+    monkeypatch.setenv("PAPERTRAIL_LLM_BUDGET_FILE", str(ledger))
+    monkeypatch.setenv("PAPERTRAIL_LLM_BUDGET_USD", "0.50")
+    import papertrail.local_llm as llm
+    monkeypatch.setattr(llm, "urlopen", lambda *_args, **_kwargs: Response())
+
+    import pytest
+    with pytest.raises(ModelResponseTruncated, match="finish_reason=length") as caught:
+        chat_json("deepseek-flash", "system", "prompt")
+
+    assert caught.value.usage["prompt_eval_count"] == 120
+    assert json.loads(ledger.read_text(encoding="utf-8"))["requests"][0]["completion_tokens"] == 800
 
 
 def test_one_qa_turn_blocks_model_call_17_before_network(monkeypatch):
