@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_not_run",
+  "dataset_role": "final_paper_disjoint_holdout",
+  "group_id": "pt15-public-heldout-20261023",
+  "registered_at": "2026-10-23",
+  "blind_design": {
+    "gold_authored_before_any_model_call": true,
+    "gold_and_expected_answers_sent_to_model": false,
+    "paper_disjoint_from_prior_pt_groups": true,
+    "source_doi_overlap_scan": "0 duplicate DOIs in previously tracked evals/docs",
+    "source_pdf_sha_overlap_scan": "0 duplicate PDF hashes in prior eval fixtures"
+  },
+  "gold_file": "evals/pt15-heldout-gold-20261023.jsonl",
+  "gold_sha256": "ca3f6a9cf6533b0755fd9402f3ed0ab0327f74ed758615d98ebc592825e9bc30",
+  "questions": 6,
+  "database_file": ".local/pt15-heldout.sqlite3",
+  "database_sha256": "a93863be3298b786110fa4a1c85b57c2b0f23ad0a18351d1a8e6a0bee0c1610e",
+  "database_counts": {
+    "papers": 3,
+    "paper_versions": 3,
+    "sections": 159,
+    "chunks": 559,
+    "source_locations": 3
+  },
+  "parser_versions": [
+    "papertrail-s1-4"
+  ],
+  "sources": [
+    {
+      "file_name": "research-with-humans.pdf",
+      "title": "Ten simple rules for research with humans",
+      "doi": "10.1371/journal.pcbi.1013362",
+      "authors": "Coates MK, Sava TV, Tashjian SM",
+      "year": 2025,
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1013362",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1013362&type=printable",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1013362",
+      "local_pdf": "evals/fixtures/pt15-blind/research-with-humans.pdf",
+      "local_pdf_sha256": "2ac2337b4a485c4c3b54bde3f25498bcbe24f09194de77aec4468a0d4d7c9c42",
+      "license": "CC BY 4.0",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt15-public-heldout-20261023",
+      "benchmark_role": "final_paper_disjoint_holdout"
+    },
+    {
+      "file_name": "measuring-data-rot.pdf",
+      "title": "Measuring data rot: An analysis of the continued availability of shared data from a Single University",
+      "doi": "10.1371/journal.pone.0304781",
+      "authors": "Briney KA",
+      "year": 2024,
+      "public_record": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0304781",
+      "download_url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0304781&type=printable",
+      "license_evidence": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0304781",
+      "local_pdf": "evals/fixtures/pt15-blind/measuring-data-rot.pdf",
+      "local_pdf_sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+      "license": "CC BY 4.0",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt15-public-heldout-20261023",
+      "benchmark_role": "final_paper_disjoint_holdout"
+    },
+    {
+      "file_name": "working-with-other-peoples-code.pdf",
+      "title": "Ten simple rules for working with other people’s code",
+      "doi": "10.1371/journal.pcbi.1011031",
+      "authors": "Pilgrim C, Kent P, Hosseini K, Chalstrey E",
+      "year": 2023,
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011031",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1011031&type=printable",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011031",
+      "local_pdf": "evals/fixtures/pt15-blind/working-with-other-peoples-code.pdf",
+      "local_pdf_sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+      "license": "CC BY 4.0",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt15-public-heldout-20261023",
+      "benchmark_role": "final_paper_disjoint_holdout"
+    }
+  ],
+  "locked_config": {
+    "provider": "openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "temperature": 0.0,
+    "max_output_tokens": 800,
+    "retrieval_mode": "bm25",
+    "evidence_limit": 5,
+    "generate": true,
+    "runtime_support_scorer": "same-model support/coverage review inside _synthesize_local; not independent",
+    "independent_scorer": "frozen deterministic PDF-hash/page/quote matching; does not judge answer semantics",
+    "independent_human_review_required": true,
+    "post_evaluation_tuning": false
+  },
+  "locked_hashes": {
+    "runner_sha256": "92311e64a2216e37dd2d968cb4407b1352ab60347b16ec9c5fdad39a0496f70c",
+    "prompt_sha256": "cf5ed541cec0967b8a323da932cff898cd53d77f49ae61bdeaa948b448ce709b",
+    "scorer_sha256": "534523904f53b1bafbd033f8e110d18634948e5aaa084c2863d6253e6d5cede4",
+    "source_code": {
+      "papertrail/qa.py": "2db121ecfbbe1e8a73dab9c9e6f0b4a732a4c11dc5517a77e64e6f2645e8d977",
+      "papertrail/local_llm.py": "bd634caf59099971ee361ac5e8e81316c9553c287ec1d04844cf374aecd1503f",
+      "papertrail/retrieval.py": "7b5384200a92bc0c7405b53ee3034effa998c4af80559365a9c2749e39f577ff",
+      "papertrail/s1_index.py": "dd85e778211001675905583c98a79ba888abaacb3ee57ab9b7b16de7b897fe83",
+      "papertrail/gold.py": "0279ae12a260e0f5bf5879a32ae44034c420e827a4000315cb0453c380b301d7",
+      "papertrail/audit.py": "7ea7b78212f69b53f25765a494cdade28dbba51c4b75eb18a9f421b3f9b4a289"
+    },
+    "gold_sha256": "ca3f6a9cf6533b0755fd9402f3ed0ab0327f74ed758615d98ebc592825e9bc30",
+    "source_manifest_sha256": "e5b56f5b322ac9407499b510ce1459e0adb6956620602a4c8b15244a54972cc0",
+    "source_config_sha256": "b558aeac8b79132e8bcb82c4d16b7b90d33074fc9b4d5fcfbd0e1566354a94df",
+    "selection_sha256": "f688dbc576993aefc54ce44c781b6133e9d16aefb13e6b64da13e891890a2100"
+  },
+  "budget_gate": {
+    "master_ledger": ".local/pt-master-usage.json",
+    "master_cap_usd": 0.5,
+    "master_spent_before_usd": 0.42856722,
+    "master_remaining_before_usd": 0.07143278,
+    "evaluation_peak_reserve_cap_usd": 0.065,
+    "unallocated_peak_margin_usd": 0.00643278,
+    "request_reserves_checked_before_send": true,
+    "cumulative_cost_ceiling_usd": 0.5
+  },
+  "limitations": [
+    "6 题、3 篇 CC BY 4.0 论文；样本小。",
+    "内部同模型审查不算独立质量判定。",
+    "人工审查应独立于模型完成；审查前不报告语义正确率。",
+    "PLOS PDF 原文哈希在来源清单；gold 证据为物理 PDF 页码。"
+  ]
+}
