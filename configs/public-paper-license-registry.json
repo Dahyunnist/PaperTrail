@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-23",
+  "license_policy": "只纳入官方记录明确显示 CC BY 4.0 的论文；缺少本地 PDF 哈希和页级黄金题前，不得用于冻结基准。",
+  "papers": [
+    {
+      "title": "AI models collapse when trained on recursively generated data",
+      "doi": "10.1038/s41586-024-07566-y",
+      "public_record": "https://www.nature.com/articles/s41586-024-07566-y",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://www.nature.com/articles/s41586-024-07566-y#rightslink",
+      "local_pdf_sha256": null,
+      "benchmark_status": "已有 PT1 单篇开发集；不计入新增论文"
+    },
+    {
+      "title": "Learning to explain is a good biomedical few-shot learner",
+      "doi": "10.1093/bioinformatics/btae589",
+      "pmcid": "PMC11483110",
+      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11483110/",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11483110/#copyright-information",
+      "local_pdf_sha256": null,
+      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+    },
+    {
+      "title": "Workflow for detecting biomedical articles with underlying open and restricted-access datasets",
+      "doi": "10.1371/journal.pone.0302787",
+      "pmcid": "PMC11078384",
+      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/",
+      "local_pdf_sha256": null,
+      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+    },
+    {
+      "title": "Enhancing Clinical Relevance of Pretrained Language Models Through Integration of External Knowledge: Case Study on Cardiovascular Diagnosis From Electronic Health Records",
+      "pmcid": "PMC11336492",
+      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11336492/",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11336492/#permissions",
+      "local_pdf_sha256": null,
+      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+    },
+    {
+      "title": "Ten simple rules to make computable knowledge shareable and reusable",
+      "pmcid": "PMC11189186",
+      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11189186/",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11189186/",
+      "local_pdf_sha256": null,
+      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+    }
+  ]
+}

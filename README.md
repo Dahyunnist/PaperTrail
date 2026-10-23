@@ -12,6 +12,8 @@ S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/pro
 
 PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻结清单在 `evals/pt3-synthetic-manifest-20261023.json`；生成器会拒绝覆盖现有冻结文件。模型评测脚本仅索引这两份合成 PDF，并将请求费用写入去重后的本地总账。结果和逐题复核见 [PT3 记录](docs/learning/stage-PT3.md)，演示步骤见 [五分钟演示](docs/demo-5-minutes.md)。
 
+PT4 补齐配置来源重建时的版本对账、过期索引清理和证据覆盖显示；本机 Web 与 MCP 仍是单用户，不含多租户 ACL。PT5 登记了 4 篇许可明确的候选公开论文；因未导入本地 PDF、未生成页级黄金题，仍不计入冻结论文组基准。详情见 [PT4](docs/learning/stage-PT4.md)、[PT5 许可来源登记](docs/learning/stage-PT5.md)。
+
 ## 源资料
 
 默认只读扫描 `configs/sources.example.yaml` 指定的目录。扫描只计算哈希与 PDF 页级文本统计，不复制或改写源文件。请先检查并按本机路径调整配置，再运行：
