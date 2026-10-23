@@ -6,7 +6,8 @@ import fitz
 import yaml
 
 from papertrail.audit import _hash
-from papertrail.s1_index import _title_from_pdf, database_summary, index_selection, inspect_document, parse_pdf, search
+from papertrail.s1_index import (_reading_order_blocks, _title_from_pdf, database_summary,
+                                index_selection, inspect_document, parse_pdf, search)
 from papertrail.retrieval import build_vector_index, hybrid_search, vector_search
 
 
@@ -107,6 +108,29 @@ def test_pdf_title_ignores_publisher_banner():
     title = _title_from_pdf(path, {"title": "Published as a conference paper at ICLR 2026"},
                             "Published as a conference paper at ICLR 2026\n\nA Useful Scientific Paper Title\n")
     assert title == "A Useful Scientific Paper Title"
+
+
+def test_two_column_blocks_are_ordered_by_column_with_full_width_anchor():
+    def block(text, bbox):
+        return {"type": 0, "bbox": bbox, "text": text}
+
+    rows = [
+        block("Full width heading", (40, 30, 560, 50)),
+        block("left paragraph one", (50, 100, 250, 130)),
+        block("right paragraph one", (350, 105, 550, 135)),
+        block("left paragraph two", (50, 180, 250, 210)),
+        block("right paragraph two", (350, 185, 550, 215)),
+        block("left paragraph three", (50, 260, 250, 290)),
+        block("right paragraph three", (350, 265, 550, 295)),
+    ]
+
+    ordered = _reading_order_blocks(rows, 600)
+
+    assert [row["text"] for row in ordered] == [
+        "Full width heading", "left paragraph one", "left paragraph two",
+        "left paragraph three", "right paragraph one", "right paragraph two",
+        "right paragraph three",
+    ]
 
 
 def test_ocr_fallback_records_unavailable_engine(tmp_path, monkeypatch):

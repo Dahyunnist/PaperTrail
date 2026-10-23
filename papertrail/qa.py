@@ -131,13 +131,22 @@ def _hosted_json_prompt(system: str, payload: dict[str, Any]) -> str:
     while len(system) + len(json.dumps(payload, ensure_ascii=False)) > _HOSTED_PROMPT_TARGET:
         evidence = payload.get("evidence") or payload.get("candidates")
         if isinstance(evidence, list) and len(evidence) > 1:
-            evidence.pop()
-            continue
+            covered = {value for item in evidence for value in item.get("subquestion_ids", [])}
+            removable = next((index for index in range(len(evidence) - 1, -1, -1)
+                              if covered.issubset(
+                                  {value for row_index, item in enumerate(evidence) if row_index != index
+                                   for value in item.get("subquestion_ids", [])})), None)
+            if removable is not None:
+                evidence.pop(removable)
+                continue
         if isinstance(evidence, list) and evidence:
+            candidates = [(len(item.get("quote", item.get("text", ""))), item)
+                          for item in evidence if isinstance(item, dict)]
             text_key = "quote" if "quote" in evidence[0] else "text"
-            text = evidence[0].get(text_key, "")
-            if isinstance(text, str) and len(text) > 100:
-                evidence[0][text_key] = text[:max(100, int(len(text) * 0.75))]
+            text = max(candidates, key=lambda candidate: candidate[0])[1].get(text_key, "") if candidates else ""
+            if isinstance(text, str) and len(text) > 60:
+                target = max(60, int(len(text) * 0.75))
+                next((item for item in evidence if item.get(text_key) == text), evidence[0])[text_key] = text[:target]
                 continue
         question = payload.get("question")
         if isinstance(question, str) and len(question) > 300:

@@ -168,6 +168,22 @@ def test_hosted_prompt_budget_compacts_candidates_before_provider_call():
     assert all(candidate["text"] for candidate in payload["candidates"])
 
 
+def test_hosted_prompt_compaction_preserves_each_subquestion_slot():
+    import papertrail.qa as qa
+
+    system = "screening system prompt"
+    payload = {"question": "Compare all four studies.", "candidates": [
+        {"id": index, "title": f"Paper {index}", "text": (f"Evidence sentence {index}. " * 35),
+         "subquestion_ids": [index // 3]}
+        for index in range(12)
+    ]}
+
+    prompt = qa._hosted_json_prompt(system, payload)
+
+    assert len(system) + len(prompt) <= qa._HOSTED_PROMPT_TARGET
+    assert {slot for row in payload["candidates"] for slot in row["subquestion_ids"]} == {0, 1, 2, 3}
+
+
 def test_exact_serial_question_requires_a_cited_serial_value():
     import papertrail.qa as qa
 

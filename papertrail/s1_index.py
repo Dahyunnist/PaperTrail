@@ -67,6 +67,56 @@ def _looks_like_heading(text: str, sizes: list[float], bold_flags: list[bool], b
     return numbered or larger or bold or short_unpunctuated
 
 
+def _reading_order_blocks(blocks: list[dict[str, Any]], page_width: float) -> list[dict[str, Any]]:
+    """Read stable two-column text by column while preserving full-width anchors."""
+    text_blocks = [block for block in blocks if block.get("type") == 0 and block.get("bbox")]
+    if len(text_blocks) < 6 or page_width <= 0:
+        return blocks
+
+    midpoint = page_width / 2
+    left: list[dict[str, Any]] = []
+    right: list[dict[str, Any]] = []
+    anchors: list[dict[str, Any]] = []
+    ambiguous = 0
+    for block in text_blocks:
+        x0, y0, x1, y1 = block["bbox"]
+        if x1 <= midpoint - page_width * 0.015:
+            left.append(block)
+        elif x0 >= midpoint + page_width * 0.015:
+            right.append(block)
+        elif x1 - x0 >= page_width * 0.68:
+            anchors.append(block)
+        else:
+            ambiguous += 1
+    if (min(len(left), len(right)) < 2 or ambiguous > max(1, int(len(text_blocks) * 0.15))
+            or len(left) + len(right) < int(len(text_blocks) * 0.7)):
+        return blocks
+
+    def y_mid(block: dict[str, Any]) -> float:
+        return (float(block["bbox"][1]) + float(block["bbox"][3])) / 2
+
+    def order_band(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        band_left = [row for row in rows if row["bbox"][2] <= midpoint]
+        band_right = [row for row in rows if row["bbox"][0] >= midpoint]
+        if band_left and band_right:
+            return sorted(band_left, key=y_mid) + sorted(band_right, key=y_mid)
+        return sorted(rows, key=y_mid)
+
+    ordered: list[dict[str, Any]] = []
+    remaining = [*left, *right]
+    for anchor in sorted(anchors, key=y_mid):
+        before = [block for block in remaining if y_mid(block) < y_mid(anchor)]
+        ordered.extend(order_band(before))
+        remaining = [block for block in remaining if y_mid(block) >= y_mid(anchor)]
+        ordered.append(anchor)
+    ordered.extend(order_band(remaining))
+    if len(ordered) != len(text_blocks):
+        return blocks
+
+    text_iter = iter(ordered)
+    return [next(text_iter) if block.get("type") == 0 else block for block in blocks]
+
+
 def parse_pdf(path: Path, source_type: str, ocr_fallback: bool = False) -> ParsedDocument:
     import fitz
 
@@ -99,11 +149,12 @@ def parse_pdf(path: Path, source_type: str, ocr_fallback: bool = False) -> Parse
         for page_no, page in enumerate(doc, 1):
             origin = "ocr_derived" if page_no in ocr_text_by_page else "native_text"
             page_dict = page.get_text("dict", textpage=ocr_text_by_page.get(page_no), sort=True)
+            page_blocks = _reading_order_blocks(page_dict.get("blocks", []), page.rect.width)
             spans = [span for block in page_dict.get("blocks", []) if block.get("type") == 0
                      for line in block.get("lines", []) for span in line.get("spans", []) if span.get("text", "").strip()]
             font_sizes = [float(span.get("size", 10.0)) for span in spans]
             body_size = statistics.median(font_sizes) if font_sizes else 10.0
-            for block in page_dict.get("blocks", []):
+            for block in page_blocks:
                 if block.get("type") != 0:
                     continue
                 lines: list[str] = []
