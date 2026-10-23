@@ -11,6 +11,16 @@ def test_unpunctuated_pdf_list_items_remain_citable():
     assert _sentences(text) == ["Save the raw data", "Record all steps used to process data"]
 
 
+def test_complete_list_sentence_suppresses_wrapped_prefix_duplicate():
+    from papertrail.qa import _sentences
+
+    text = "• Data management: saving raw and intermediate forms, documenting all steps, creating\n" \
+        "tidy data amenable to analysis."
+    assert _sentences(text) == [
+        "• Data management: saving raw and intermediate forms, documenting all steps, creating tidy data amenable to analysis."
+    ]
+
+
 def test_plural_paper_questions_trigger_subquestion_decomposition():
     from papertrail.qa import _requires_decomposition
 

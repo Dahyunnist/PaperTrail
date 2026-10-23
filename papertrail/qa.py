@@ -109,7 +109,9 @@ def _sentences(text: str) -> list[str]:
     for line in source_lines:
         marked = re.match(r"^\s*(?:[-*•▪‣]|\(?\d+[.)]|[a-zA-Z][.)])\s*(.+)$", line)
         fragment = marked.group(1).strip() if marked else ""
-        if 8 <= len(fragment) <= 500 and fragment not in sentences:
+        already_complete = any(
+            sentence.lstrip("•▪‣-* ").startswith(fragment) for sentence in sentences)
+        if 8 <= len(fragment) <= 500 and fragment not in sentences and not already_complete:
             sentences.append(fragment)
     return sentences
 
