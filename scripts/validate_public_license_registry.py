@@ -44,6 +44,9 @@ def validate(path: Path = REGISTRY) -> list[str]:
         source_hash = paper.get("local_pdf_sha256")
         if source_hash is not None and not re.fullmatch(r"[a-f0-9]{64}", source_hash):
             errors.append(f"{label} local_pdf_sha256 格式无效")
+        license_detail = paper.get("license_detail")
+        if license_detail and license_detail != "https://creativecommons.org/licenses/by/4.0/":
+            errors.append(f"{label} license_detail 不是 CC BY 4.0 官方许可文本")
         if paper.get("benchmark_status", "").startswith("冻结") and source_hash is None:
             errors.append(f"{label} 冻结基准缺少本地 PDF SHA-256")
         local_file = paper.get("local_pdf")

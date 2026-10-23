@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "group_id": "pt6-public-heldout-20261023",
+  "dataset_role": "test_holdout_single_exposure",
+  "gold_sha256": "247089bf9dcb0b0901b143d3b58f8a8456a9c931de7f8088b61c360e4e6de827",
+  "corpus_group_ids": [
+    "pt5-public-real-20261023",
+    "pt6-public-heldout-20261023"
+  ],
+  "index": {
+    "papers": 6,
+    "chunks": 822,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4",
+    "pdf_pages": 67
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前锁定测试环境未安装 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "question_types": {
+    "cross_paper": 2,
+    "fact_location": 2,
+    "multi_hop": 1,
+    "unanswerable": 1
+  },
+  "runs": {
+    "k5": {
+      "bm25": {
+        "retriever": "BM25",
+        "recall_at_k": 0.75,
+        "mrr_at_k": 0.6666666666666667,
+        "all_evidence_pages_at_k": 0.6,
+        "complete_evidence_coverage": 0.0,
+        "evidence_item_recall": 0.3333333333333333,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 2,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 2,
+            "questions": 3,
+            "complete_evidence_hits": 0,
+            "chunk_document_misses": 1,
+            "wrong_page": 0,
+            "incomplete_evidence": 2
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 0,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 2
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-02",
+          "PT6-03",
+          "PT6-04",
+          "PT6-05"
+        ]
+      },
+      "vector": {
+        "retriever": "字符 TF-IDF + SVD",
+        "recall_at_k": 0.75,
+        "mrr_at_k": 0.7166666666666667,
+        "all_evidence_pages_at_k": 0.6,
+        "complete_evidence_coverage": 0.2,
+        "evidence_item_recall": 0.5555555555555556,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 1,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 1,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 2,
+            "questions": 3,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 1,
+            "wrong_page": 0,
+            "incomplete_evidence": 1
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 1
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-02",
+          "PT6-03",
+          "PT6-05"
+        ]
+      },
+      "hybrid": {
+        "retriever": "BM25 + 字符向量 RRF",
+        "recall_at_k": 0.875,
+        "mrr_at_k": 0.7166666666666667,
+        "all_evidence_pages_at_k": 0.8,
+        "complete_evidence_coverage": 0.0,
+        "evidence_item_recall": 0.3333333333333333,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 2,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 3,
+            "questions": 3,
+            "complete_evidence_hits": 0,
+            "chunk_document_misses": 2,
+            "wrong_page": 0,
+            "incomplete_evidence": 3
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 0,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 2
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-02",
+          "PT6-03",
+          "PT6-04",
+          "PT6-05"
+        ]
+      }
+    },
+    "k10": {
+      "bm25": {
+        "retriever": "BM25",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.6666666666666667,
+        "all_evidence_pages_at_k": 1.0,
+        "complete_evidence_coverage": 0.4,
+        "evidence_item_recall": 0.6666666666666666,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 2,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 3,
+            "questions": 3,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 2
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 1
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-02",
+          "PT6-03"
+        ]
+      },
+      "vector": {
+        "retriever": "字符 TF-IDF + SVD",
+        "recall_at_k": 0.875,
+        "mrr_at_k": 0.7166666666666667,
+        "all_evidence_pages_at_k": 0.8,
+        "complete_evidence_coverage": 0.6,
+        "evidence_item_recall": 0.7777777777777778,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 1,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 1,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 3,
+            "questions": 3,
+            "complete_evidence_hits": 3,
+            "chunk_document_misses": 1,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 1
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-03"
+        ]
+      },
+      "hybrid": {
+        "retriever": "BM25 + 字符向量 RRF",
+        "recall_at_k": 1.0,
+        "mrr_at_k": 0.7166666666666667,
+        "all_evidence_pages_at_k": 1.0,
+        "complete_evidence_coverage": 0.4,
+        "evidence_item_recall": 0.6666666666666666,
+        "paper_results": {
+          "Ten simple rules for documenting scientific software": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 2,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 0
+          },
+          "Ten simple rules for making research software more robust": {
+            "target_pages_hit": 3,
+            "questions": 3,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 2
+          },
+          "Ten (not so) simple rules for clinical trial data-sharing": {
+            "target_pages_hit": 2,
+            "questions": 2,
+            "complete_evidence_hits": 1,
+            "chunk_document_misses": 0,
+            "wrong_page": 0,
+            "incomplete_evidence": 1
+          }
+        },
+        "failed_questions": [
+          "PT6-01",
+          "PT6-02",
+          "PT6-03"
+        ]
+      }
+    }
+  },
+  "qa_citation_path": {
+    "mode": "hybrid",
+    "generate": false,
+    "answerable_questions": 5,
+    "gold_evidence_items_cited": 0,
+    "gold_evidence_items_total": 9,
+    "model_calls": 0,
+    "note": "QA returned verified_excerpts, but its displayed excerpt citations did not contain the exact gold snippets on target pages."
+  }
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
 import json
 import os
 import tempfile
@@ -78,29 +79,47 @@ def _fetch(client: httpx.Client, paper: dict, target: Path) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--group", default=GROUP)
+    parser.add_argument("--expected-count", type=int, default=3)
+    parser.add_argument("--manifest", type=Path, default=MANIFEST)
+    args = parser.parse_args()
+    manifest_path = (ROOT / args.manifest).resolve() if not args.manifest.is_absolute() else args.manifest.resolve()
+    if not manifest_path.is_relative_to(ROOT.resolve()):
+        raise SystemExit("manifest 路径必须位于项目目录")
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    papers = [paper for paper in data["papers"] if paper.get("benchmark_group") == GROUP]
-    if len(papers) != 3:
-        raise SystemExit(f"{GROUP} 应有 3 篇论文，实际为 {len(papers)}")
+    papers = [paper for paper in data["papers"] if paper.get("benchmark_group") == args.group]
+    if len(papers) != args.expected_count:
+        raise SystemExit(f"{args.group} 应有 {args.expected_count} 篇论文，实际为 {len(papers)}")
     with httpx.Client(follow_redirects=True, timeout=90, headers={"User-Agent": "PaperTrail/0.1 CC-BY benchmark fetch"}) as client:
         for paper in papers:
             target = ROOT / paper["local_pdf"]
             sha = _fetch(client, paper, target)
             paper["local_pdf_sha256"] = sha
-            paper["benchmark_status"] = "官方出版者 PDF 已下载并校验 SHA-256；等待人工页级黄金题冻结"
+            if not paper.get("benchmark_status", "").startswith("已冻结"):
+                paper["benchmark_status"] = "官方出版者 PDF 已下载并校验 SHA-256；等待人工页级黄金题冻结"
             _save_registry(data)
             print(f"{paper['doi']} {sha}")
     manifest = {
         "schema_version": 1,
-        "group_id": GROUP,
+        "group_id": args.group,
         "status": "source_files_frozen_gold_pending",
         "license": "CC BY 4.0",
+        "dataset_role": next((paper.get("benchmark_role") for paper in papers
+                              if paper.get("benchmark_role")), None),
         "sources": [{key: paper.get(key) for key in (
-            "title", "doi", "source_version", "public_record", "license_evidence",
-            "download_url", "local_pdf", "local_pdf_sha256")} for paper in papers],
+            "title", "doi", "source_version", "public_record", "license_evidence", "license_detail",
+            "download_url", "local_pdf", "local_pdf_sha256", "benchmark_group", "benchmark_role")
+                    for paper in papers],
     }
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(MANIFEST.relative_to(ROOT))
+    if manifest_path.is_file():
+        previous = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if previous.get("group_id") == args.group:
+            manifest.update({key: value for key, value in previous.items()
+                             if key not in {"sources", "schema_version", "group_id"}})
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(manifest_path.relative_to(ROOT))
 
 
 if __name__ == "__main__":

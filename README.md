@@ -8,11 +8,11 @@ S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/pro
 
 更高难度的 P14 诊断集覆盖多步数值推导、跨文献证据聚合、统计结论边界和拒答；其真实模型结果及逐题复核见 [P14 评测记录](docs/learning/stage-P14-hard-evaluation-20261023.md)。
 
-真实论文诊断因许可可核验范围有限，目前冻结 4 篇论文、14 道本地题：PT1 单篇开发集 8 题，PT5 新增公开论文组 3 篇、6 题。两者均为小型诊断集，不构成独立测试集或泛化证明。设计、许可边界和复现方式见 [PT1 记录](docs/learning/stage-PT1.md)、[PT2 记录](docs/learning/stage-PT2.md)和 [PT5 记录](docs/learning/stage-PT5.md)。PT5 公开论文 PDF、题目与来源路径公开提交；私有来源仍保存在忽略目录 `.local/`，不会提交或上传。
+公开许可组目前有 6 篇论文、12 道题，按论文分为 PT5 开发组与 PT6 首轮 holdout 组。PT6 已完成一次离线评测，结果不用于后续调参；6 题仅作诊断，不能证明泛化。PT1 另有 1 篇本地开发论文和 8 道题。公开组来源、许可、页级证据及评测见 [PT5](docs/learning/stage-PT5.md)与 [PT6](docs/learning/stage-PT6.md)；目标规模仍是 30–60 篇、至少 40 题，尚未达到。私有来源仍保存在忽略目录 `.local/`，不会提交或上传。
 
 PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻结清单在 `evals/pt3-synthetic-manifest-20261023.json`；生成器会拒绝覆盖现有冻结文件。模型评测脚本仅索引这两份合成 PDF，并将请求费用写入去重后的本地总账。结果和逐题复核见 [PT3 记录](docs/learning/stage-PT3.md)，演示步骤见 [五分钟演示](docs/demo-5-minutes.md)。
 
-PT4 补齐配置来源重建时的版本对账、过期索引清理和证据覆盖显示；本机 Web 与 MCP 仍是单用户，不含多租户 ACL。PT5 冻结 3 篇官方出版者 PDF 和 6 道逐页核验题，均为 CC BY 4.0；另两篇许可明确的候选因官方 PDF 下载端点不可用而排除。详情见 [PT4](docs/learning/stage-PT4.md)、[PT5 公开论文组](docs/learning/stage-PT5.md)。
+PT4 补齐配置来源版本对账、过期索引清理和证据覆盖显示；本机 Web 与 MCP 仍是单用户。PT5/PT6 收录 6 篇 CC BY 4.0 官方出版者 PDF，两个按论文隔离的 6 题诊断组均有 manifest 与页级哈希。PT6 首轮结果显示，找到目标页不等于检索到完整引文。详情见 [PT4](docs/learning/stage-PT4.md)、[PT5](docs/learning/stage-PT5.md)和 [PT6](docs/learning/stage-PT6.md)。
 
 ## 源资料
 

@@ -74,6 +74,51 @@
       "local_pdf_sha256": "176e2321b47a2cf1c726372eafeb24f47b73e9b3d75c91c98545af4dcc5835b5",
       "benchmark_group": "pt5-public-real-20261023",
       "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级黄金题均登记"
+    },
+    {
+      "title": "Ten simple rules for making research software more robust",
+      "doi": "10.1371/journal.pcbi.1005412",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005412",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005412",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1005412&type=printable",
+      "source_version": "版本记录；2017-04-13",
+      "local_pdf": "evals/fixtures/pt6-heldout/research-software-robustness.pdf",
+      "local_pdf_sha256": "002081be65fbd42c0356d3e49ac7f49fa6202f566f50341481ead22d3cce78b2",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记"
+    },
+    {
+      "title": "Ten (not so) simple rules for clinical trial data-sharing",
+      "doi": "10.1371/journal.pcbi.1010879",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010879",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010879",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010879&type=printable",
+      "source_version": "版本记录；2023-03-09",
+      "local_pdf": "evals/fixtures/pt6-heldout/clinical-trial-data-sharing.pdf",
+      "local_pdf_sha256": "950c43a35649934f2375e745c792a599225e0838e9fc1527c3df5829c9b3877f",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记"
+    },
+    {
+      "title": "Ten simple rules for documenting scientific software",
+      "doi": "10.1371/journal.pcbi.1006561",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006561",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006561",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1006561&type=printable",
+      "source_version": "版本记录；2018-12-20",
+      "local_pdf": "evals/fixtures/pt6-heldout/documenting-scientific-software.pdf",
+      "local_pdf_sha256": "c2b50ad022577a957672622dec9ae0ad7ab746ef38a04ab051f007814fb76e7d",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记"
     }
   ]
 }

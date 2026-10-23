@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "group_id": "pt6-public-heldout-20261023",
+  "status": "heldout_sources_frozen_gold_frozen",
+  "license": "CC BY 4.0",
+  "sources": [
+    {
+      "title": "Ten simple rules for making research software more robust",
+      "doi": "10.1371/journal.pcbi.1005412",
+      "source_version": "版本记录；2017-04-13",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005412",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005412",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1005412&type=printable",
+      "local_pdf": "evals/fixtures/pt6-heldout/research-software-robustness.pdf",
+      "local_pdf_sha256": "002081be65fbd42c0356d3e49ac7f49fa6202f566f50341481ead22d3cce78b2",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    },
+    {
+      "title": "Ten (not so) simple rules for clinical trial data-sharing",
+      "doi": "10.1371/journal.pcbi.1010879",
+      "source_version": "版本记录；2023-03-09",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010879",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010879",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010879&type=printable",
+      "local_pdf": "evals/fixtures/pt6-heldout/clinical-trial-data-sharing.pdf",
+      "local_pdf_sha256": "950c43a35649934f2375e745c792a599225e0838e9fc1527c3df5829c9b3877f",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    },
+    {
+      "title": "Ten simple rules for documenting scientific software",
+      "doi": "10.1371/journal.pcbi.1006561",
+      "source_version": "版本记录；2018-12-20",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006561",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006561",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1006561&type=printable",
+      "local_pdf": "evals/fixtures/pt6-heldout/documenting-scientific-software.pdf",
+      "local_pdf_sha256": "c2b50ad022577a957672622dec9ae0ad7ab746ef38a04ab051f007814fb76e7d",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "benchmark_group": "pt6-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    }
+  ],
+  "dataset_role": "test_holdout",
+  "gold_file": "evals/pt6-heldout-gold-20261023.jsonl",
+  "gold_sha256": "247089bf9dcb0b0901b143d3b58f8a8456a9c931de7f8088b61c360e4e6de827",
+  "question_count": 6,
+  "group_note": "3篇未用于PT5开发检索的公开论文；包含跨文献、跨页多跳与不可回答题。冻结后不得据其结果调参。"
+}
