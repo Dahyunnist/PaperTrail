@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "incomplete_once_no_rerun",
+  "status": "completed_once_no_tuning_after",
   "dataset_role": "final_paper_disjoint_holdout",
   "dataset": "pt9-pt12-final-heldout-20261023",
   "gold_sha256": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c",
@@ -35,12 +35,13 @@
     "request_reserves_checked_before_send": true
   },
   "model_usage": {
-    "api_calls": 23,
-    "reserved_usd": 0.0736248,
-    "charged_upper_bound_usd": 0.00541512,
-    "ledger_spent_after_usd": 0.42415404,
-    "ledger_remaining_after_usd": 0.07584596,
-    "run_reserve_ceiling_usd": 0.075
+    "api_calls": 41,
+    "summed_request_reserves_usd": 0.1312284,
+    "charged_upper_bound_usd": 0.0098283,
+    "ledger_spent_after_usd": 0.42856722,
+    "ledger_remaining_after_usd": 0.07143278,
+    "run_spend_ceiling_usd": 0.075,
+    "resume_count": 1
   },
   "results": [
     {
@@ -332,6 +333,316 @@
           "refusal_stage": "evidence_organization"
         }
       }
+    },
+    {
+      "id": "PT12-01",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "作者建议在每个项目文件夹和子文件夹中放置一个 readme 或标准操作程序（SOP）文件。"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [
+        {
+          "title": "Ten simple rules for navigating the computational aspect of an interdisciplinary PhD",
+          "pdf_page": 7,
+          "sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+          "quote": "Treat your future self with kindness and incorporate a readme or standard operating procedure (SOP) file in every project folder and subfolder."
+        }
+      ],
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.0091212,
+      "usage": {
+        "prompt_eval_count": 1497,
+        "eval_count": 156,
+        "total_duration": 0,
+        "estimated_usd": 0.0006550200000000001,
+        "_diagnostics": {
+          "retrieved_pages": 12,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "在每个项目文件夹和子文件夹中放置一个 readme 或标准操作程序（SOP）文件"
+          ],
+          "subquestions": [
+            "What documentation do the authors recommend placing in every project folder and subfolder?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 1,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      }
+    },
+    {
+      "id": "PT12-02",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "Anything that is repeated more than thrice should become a script or function."
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [
+        {
+          "title": "Ten simple rules for navigating the computational aspect of an interdisciplinary PhD",
+          "pdf_page": 6,
+          "sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+          "quote": "Anything that is repeated more than thrice should become a script or function [13]."
+        }
+      ],
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.0084864,
+      "usage": {
+        "prompt_eval_count": 1355,
+        "eval_count": 146,
+        "total_duration": 0,
+        "estimated_usd": 0.00059922,
+        "_diagnostics": {
+          "retrieved_pages": 19,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "State what researchers should do with a task repeated more than three times: turn it into a script or function."
+          ],
+          "subquestions": [
+            "What should researchers do with a task they repeat more than three times?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 1,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      }
+    },
+    {
+      "id": "PT12-03",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.0072816,
+      "usage": {
+        "prompt_eval_count": 1123,
+        "eval_count": 69,
+        "total_duration": 0,
+        "estimated_usd": 0.00042798,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What does the responsible-workflow paper say documentation should make possible for people outside the research team?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      }
+    },
+    {
+      "id": "PT12-04",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "项目计划应包含通向预期产出的里程碑和截止日期。",
+        "项目计划应根据每位团队成员的优势和兴趣分配角色和任务。",
+        "项目计划应投入于每位团队成员的个人贡献。",
+        "项目计划应由团队和团队负责人共同创建。",
+        "有效协作需要明确界定的项目目标。"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [
+        {
+          "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+          "pdf_page": 4,
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "quote": "Teams and team leaders should cocreate a project management plan with milestones and deadlines that lead to the desired output, assign roles and tasks according to the strengths and interests of each team member, and invest in the personal contribution of individual team members."
+        },
+        {
+          "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+          "pdf_page": 4,
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "quote": "Teams and team leaders should cocreate a project management plan with milestones and deadlines that lead to the desired output, assign roles and tasks according to the strengths and interests of each team member, and invest in the personal contribution of individual team members."
+        },
+        {
+          "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+          "pdf_page": 4,
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "quote": "Teams and team leaders should cocreate a project management plan with milestones and deadlines that lead to the desired output, assign roles and tasks according to the strengths and interests of each team member, and invest in the personal contribution of individual team members."
+        },
+        {
+          "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+          "pdf_page": 4,
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "quote": "Teams and team leaders should cocreate a project management plan with milestones and deadlines that lead to the desired output, assign roles and tasks according to the strengths and interests of each team member, and invest in the personal contribution of individual team members."
+        },
+        {
+          "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+          "pdf_page": 4,
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "quote": "Effective collaboration requires team leadership, personal motivation, and clearly defined proj- ect goals."
+        }
+      ],
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.0088116,
+      "usage": {
+        "prompt_eval_count": 1401,
+        "eval_count": 347,
+        "total_duration": 0,
+        "estimated_usd": 0.00087834,
+        "_diagnostics": {
+          "retrieved_pages": 14,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "项目计划应包含通向预期产出的里程碑和截止日期",
+            "项目计划应根据每位团队成员的优势和兴趣分配角色和任务",
+            "项目计划应投入于每位团队成员的个人贡献",
+            "项目计划应由团队和团队负责人共同创建",
+            "有效协作需要明确界定的项目目标"
+          ],
+          "subquestions": [
+            "What belongs in a project management plan for a transdisciplinary team?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 5,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      }
+    },
+    {
+      "id": "PT12-05",
+      "question_type": "cross_paper",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "No claim states any specific recommendation from the computational-PhD paper for making research work easier to reproduce later.",
+        "No claim states any specific recommendation from the transdisciplinary-collaboration paper for making research work easier to reproduce later.",
+        "Only one evidence item is provided, and it is from a Jupyter Notebooks paper, not from either named paper; claims 1-3 cite evidence IDs with no corresponding evidence entries, so they cannot be verified."
+      ],
+      "gold_evidence_pages": 2,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 5,
+      "turn_reserved_usd": 0.0168972,
+      "usage": {
+        "prompt_eval_count": 2543,
+        "eval_count": 510,
+        "total_duration": 0,
+        "estimated_usd": 0.0014360999999999998,
+        "_diagnostics": {
+          "retrieved_pages": 25,
+          "screen_selected_pages": 5,
+          "evidence_pages": 3,
+          "coverage_complete": false,
+          "coverage_gaps": [
+            "No claim states any specific recommendation from the computational-PhD paper for making research work easier to reproduce later.",
+            "No claim states any specific recommendation from the transdisciplinary-collaboration paper for making research work easier to reproduce later.",
+            "Only one evidence item is provided, and it is from a Jupyter Notebooks paper, not from either named paper; claims 1-3 cite evidence IDs with no corresponding evidence entries, so they cannot be verified."
+          ],
+          "coverage_requirements": [
+            "Recommendations from the computational-PhD paper for making research easier to reproduce later",
+            "Recommendations from the transdisciplinary-collaboration paper for making research easier to reproduce later"
+          ],
+          "subquestions": [
+            "How do the computational-PhD and transdisciplinary-collaboration papers recommend making research work easier to reproduce later?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 4,
+          "rejected_claims": 4,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        }
+      }
+    },
+    {
+      "id": "PT12-06",
+      "question_type": "unanswerable",
+      "gold_abstain": true,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 0,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.0070056,
+      "usage": {
+        "prompt_eval_count": 1098,
+        "eval_count": 66,
+        "total_duration": 0,
+        "estimated_usd": 0.00041652,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What percentage reduction in total project time did the authors measure after introducing these practices?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      }
     }
   ],
   "limitations": [
@@ -341,22 +652,22 @@
     "仅 12 题，结果只描述本测试集。"
   ],
   "started_at": "2026-10-23T06:36:44.306669+00:00",
-  "completed_at": "2026-10-23T06:37:13.147742+00:00",
+  "completed_at": "2026-10-23T06:41:43.699520+00:00",
   "totals": {
-    "questions_completed": 6,
+    "questions_completed": 12,
     "questions_total": 12,
     "answerable_questions": 10,
     "unanswerable_questions": 2,
     "answerable_gold_pages": 13,
-    "gold_pages_cited": 2,
-    "gold_phrases_contained": 2,
+    "gold_pages_cited": 5,
+    "gold_phrases_contained": 5,
     "exact_gold_quotes": 0,
-    "generated_claims": 6,
-    "unanswerable_abstentions": 1
+    "generated_claims": 13,
+    "unanswerable_abstentions": 2
   },
-  "failure": "首段因累计最大预留额达到运行阈值而停止；主账本未超限。",
-  "resume_allowed_once": true,
-  "resume_count": 0,
+  "failure": null,
+  "resume_allowed_once": false,
+  "resume_count": 1,
   "resume_reason": "首段守卫累计请求的最大预留额，未按已实际扣账金额累计；只续跑冻结题集剩余六题。",
   "resume_core_corpus_sha256": "b68df67f55e9258a1efc02ec1cb3deda3aea575df35059411ff43639cfc1387e",
   "resume_core_table_counts": {
@@ -365,5 +676,7 @@
     "sections": 841,
     "chunks": 4553,
     "source_locations": 30
-  }
+  },
+  "resume_started_at": "2026-10-23T06:41:17.677055+00:00",
+  "resume_closed_at": "2026-10-23T06:41:43.699520+00:00"
 }
