@@ -8,7 +8,7 @@ S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/pro
 
 更高难度的 P14 诊断集覆盖多步数值推导、跨文献证据聚合、统计结论边界和拒答；其真实模型结果及逐题复核见 [P14 评测记录](docs/learning/stage-P14-hard-evaluation-20261023.md)。
 
-公开许可组目前有 21 篇论文、36 道题：PT5、PT7、PT8、PT10 与 PT11 是开发诊断组；PT6 首轮 holdout 已评测并暴露；PT9 新 holdout 已按论文冻结，尚未运行检索或问答评测。PT6 结果未用于调参，PT9 保留一次性测试角色。PT1 另有 1 篇本地开发论文和 8 道题。公开组来源、许可、页级证据及评测见 [PT5](docs/learning/stage-PT5.md)、[PT6](docs/learning/stage-PT6.md)、[PT7](docs/learning/stage-PT7.md)、[PT8](docs/learning/stage-PT8.md)、[PT9](docs/learning/stage-PT9.md)、[PT10](docs/learning/stage-PT10.md)与 [PT11](docs/learning/stage-PT11.md)；目标规模仍是 30–60 篇、至少 40 题，尚未达到。私有来源仍保存在忽略目录 `.local/`，不会提交或上传。
+公开许可组目前有 24 篇论文、42 道题：PT5、PT7、PT8、PT10 与 PT11 是开发诊断组；PT6 首轮 holdout 已评测并暴露；PT9 与 PT12 是已冻结、未评测的一次性测试组，共 6 篇论文、12 道题。PT6 结果未用于调参。PT1 另有 1 篇本地开发论文和 8 道题。公开组来源、许可、页级证据及评测见 [PT5](docs/learning/stage-PT5.md)、[PT6](docs/learning/stage-PT6.md)、[PT7](docs/learning/stage-PT7.md)、[PT8](docs/learning/stage-PT8.md)、[PT9](docs/learning/stage-PT9.md)、[PT10](docs/learning/stage-PT10.md)、[PT11](docs/learning/stage-PT11.md)与 [PT12](docs/learning/stage-PT12.md)；距离目标下限还差 6 篇论文。私有来源仍保存在忽略目录 `.local/`，不会提交或上传。
 
 PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻结清单在 `evals/pt3-synthetic-manifest-20261023.json`；生成器会拒绝覆盖现有冻结文件。模型评测脚本仅索引这两份合成 PDF，并将请求费用写入去重后的本地总账。结果和逐题复核见 [PT3 记录](docs/learning/stage-PT3.md)，演示步骤见 [五分钟演示](docs/demo-5-minutes.md)。
 

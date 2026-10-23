@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "group_id": "pt12-public-heldout-20261023",
+  "status": "heldout_sources_frozen_gold_frozen_not_evaluated",
+  "license": "CC BY 4.0",
+  "dataset_role": "test_holdout",
+  "gold_file": "evals/pt12-heldout-gold-20261023.jsonl",
+  "gold_sha256": "d1ee0919a8bcddb3b040b573dc53b871f46e2dc54aa674d63d29d35d1d1ea01f",
+  "question_count": 6,
+  "group_note": "三篇未用于 PT5-PT11 开发诊断的新论文；六道黄金题已冻结，尚未运行索引、检索或问答评测。",
+  "sources": [
+    {
+      "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",
+      "doi": "10.1371/journal.pcbi.1008879",
+      "source_version": "版本记录；2021-05-13",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008879",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008879",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008879&type=printable",
+      "local_pdf": "evals/fixtures/pt12-heldout/transdisciplinary-data-science.pdf",
+      "local_pdf_sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+      "benchmark_group": "pt12-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    },
+    {
+      "title": "Ten simple rules for navigating the computational aspect of an interdisciplinary PhD",
+      "doi": "10.1371/journal.pcbi.1008554",
+      "source_version": "版本记录；2021-02-18",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008554",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008554",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008554&type=printable",
+      "local_pdf": "evals/fixtures/pt12-heldout/interdisciplinary-phd-computing.pdf",
+      "local_pdf_sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+      "benchmark_group": "pt12-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    },
+    {
+      "title": "Ten simple rules for building and maintaining a responsible data science workflow",
+      "doi": "10.1371/journal.pcbi.1012232",
+      "source_version": "版本记录；2024-07-18",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012232",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012232",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1012232&type=printable",
+      "local_pdf": "evals/fixtures/pt12-heldout/responsible-data-workflow.pdf",
+      "local_pdf_sha256": "f8e2af70e399923198b253109e255d3a818f732ce97dbd5092cf7c6accead567",
+      "benchmark_group": "pt12-public-heldout-20261023",
+      "benchmark_role": "test_holdout"
+    }
+  ]
+}
