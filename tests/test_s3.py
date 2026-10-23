@@ -374,6 +374,9 @@ def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeyp
     assert result["usage"]["_diagnostics"]["refusal_stage"] == "coverage_partial"
     assert result["usage"]["_diagnostics"]["reviewed_claims"] == 2
     assert result["usage"]["_diagnostics"]["rejected_claims"] == 1
+    history = qa.conversation_history(db, result["conversation_id"])
+    assert history[0]["coverage_gaps"] == ["missing detail"]
+    assert history[0]["coverage_complete"] == 0
 
 
 def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):

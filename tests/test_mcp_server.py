@@ -57,6 +57,11 @@ def test_stdio_mcp_tools_and_resources_are_read_only(tmp_path):
         assert sha in read["result"]["contents"][0]["text"]
         invalid = call(7, "tools/call", {"name": "get_evidence", "arguments": {"sha256": sha, "page": 99}})
         assert invalid["result"]["isError"] is True
+        outside = call(8, "tools/call", {"name": "get_evidence", "arguments": {
+            "sha256": "0" * 64, "page": 1}})
+        assert outside["result"]["isError"] is True
+        unknown_resource = call(9, "resources/read", {"uri": f"papertrail://documents/{'0' * 64}"})
+        assert unknown_resource["result"]["isError"] is True
         assert hashlib.sha256(db.read_bytes()).hexdigest() == before
     finally:
         proc.terminate()

@@ -38,10 +38,10 @@ def recover_jobs(database: Path) -> int:
 
 
 def enqueue_index(database: Path, sources: Path, selection: Path,
-                  upload_id: str | None = None) -> str:
+                  upload_id: str | None = None, reconcile: bool = False) -> str:
     job_id = str(uuid.uuid4())
     payload = {"sources": str(sources.resolve()), "selection": str(selection.resolve()),
-               "upload_id": upload_id}
+               "upload_id": upload_id, "reconcile": reconcile}
     with _connect(database) as conn:
         conn.execute("INSERT INTO index_jobs VALUES(?,?,?,?,0,NULL,?,?)",
                      (job_id, "queued", json.dumps(payload), json.dumps({"completed": 0, "total": 0}), _now(), _now()))
@@ -106,7 +106,8 @@ def _run(database: Path, event: threading.Event) -> None:
                                   _now(), job_id))
 
             result = index_selection(Path(database), Path(payload["sources"]), Path(payload["selection"]),
-                                     progress_callback=progress)
+                                     progress_callback=progress,
+                                     reconcile=bool(payload.get("reconcile", False)))
             issues = result.get("issues", [])
             state = "succeeded" if not issues else "succeeded_with_issues"
             error = json.dumps(issues, ensure_ascii=False) if issues else None

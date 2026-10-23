@@ -111,6 +111,48 @@ def test_pdf_title_ignores_publisher_banner():
     assert title == "A Useful Scientific Paper Title"
 
 
+def test_reconcile_updates_changed_paths_and_removes_deleted_sources(tmp_path):
+    from papertrail.s1_index import open_database
+    from papertrail.workspace import library_documents
+
+    root = tmp_path / "papers"
+    root.mkdir()
+    source = root / "paper.pdf"
+    _pdf(source, "oldversionmarker is on the second page with enough words for indexing.")
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "approved", "path": str(root)}]}), encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+    def save_selection():
+        selection.write_text(json.dumps({"root_id": "approved", "file_name": source.name,
+            "relative_path": source.name, "sha256": _hash(source), "kind": "pdf",
+            "source_type": "original_pdf"}) + "\n", encoding="utf-8")
+    db = tmp_path / "index.sqlite3"
+    save_selection()
+    assert index_selection(db, config, selection, reconcile=True)["added"] == 1
+    assert index_selection(db, config, selection, reconcile=True)["added"] == 0
+    old_hash = _hash(source)
+    source.unlink()
+    _pdf(source, "newversionmarker is on the second page with enough words for indexing.")
+    stale = index_selection(db, config, selection, reconcile=True)
+    assert stale["added"] == 0 and stale["issues"][0]["issue"] == "source_missing_or_changed"
+    assert not inspect_document(db, old_hash)
+    save_selection()
+    assert index_selection(db, config, selection, reconcile=True)["added"] == 1
+    assert not inspect_document(db, old_hash)
+    assert search(db, "oldversionmarker", source_type="original_pdf") == []
+    assert search(db, "newversionmarker", source_type="original_pdf")
+    source.unlink()
+    selection.write_text("", encoding="utf-8")
+    assert index_selection(db, config, selection, reconcile=True)["added"] == 0
+    assert library_documents(db) == []
+    conn = open_database(db, readonly=True)
+    try:
+        revision = int(conn.execute("SELECT value FROM app_metadata WHERE key='index_revision'").fetchone()[0])
+        assert revision == 4
+    finally:
+        conn.close()
+
+
 def test_two_column_blocks_are_ordered_by_column_with_full_width_anchor():
     def block(text, bbox):
         return {"type": 0, "bbox": bbox, "text": text}

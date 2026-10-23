@@ -87,7 +87,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             flash("没有找到已配置的来源清单。", "warning")
             return redirect(url_for("home") + "#library")
         try:
-            job_id = enqueue_index(app.config["DATABASE"], sources_config, selection_manifest)
+            job_id = enqueue_index(app.config["DATABASE"], sources_config, selection_manifest, reconcile=True)
             flash(f"索引任务已排队：{job_id}。可通过 /jobs/{job_id} 查看进度。", "success")
         except (ValueError, OSError) as exc:
             flash(f"读取配置文献失败：{exc}", "warning")

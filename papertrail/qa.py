@@ -61,7 +61,7 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
             REFERENCES qa_conversations(conversation_id) ON DELETE CASCADE,
         question TEXT NOT NULL, answer TEXT NOT NULL, status TEXT NOT NULL,
         retrieval_mode TEXT NOT NULL, context_query TEXT,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL, coverage_json TEXT NOT NULL DEFAULT '[]', coverage_complete INTEGER
     );
     CREATE TABLE IF NOT EXISTS qa_claims (
         claim_id TEXT PRIMARY KEY, turn_id TEXT NOT NULL
@@ -79,6 +79,11 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
         created_at TEXT NOT NULL, rated_at TEXT
     );
     """)
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(qa_turns)")}
+    if "coverage_json" not in columns:
+        conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_json TEXT NOT NULL DEFAULT '[]'")
+    if "coverage_complete" not in columns:
+        conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_complete INTEGER")
 
 
 def _validate_quote(path: str, sha256: str, page_number: int, quote: str,
@@ -721,8 +726,11 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             conn.execute("UPDATE qa_conversations SET updated_at=? WHERE conversation_id=?",
                          (now, conversation_id))
         turn_id = str(uuid.uuid4())
-        conn.execute("INSERT INTO qa_turns VALUES(?,?,?,?,?,?,?,?)",
-                     (turn_id, conversation_id, question, answer, status, mode, context_query, now))
+        conn.execute("INSERT INTO qa_turns(turn_id,conversation_id,question,answer,status,retrieval_mode,context_query,created_at,coverage_json,coverage_complete) "
+                     "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                     (turn_id, conversation_id, question, answer, status, mode, context_query, now,
+                      json.dumps(coverage_gaps, ensure_ascii=False),
+                      int(coverage_complete) if coverage_assessed else None))
         for ordinal, claim in enumerate(claims, 1):
             stored = {**claim["evidence"], "support_evidence": claim.get("support_evidence"),
                       "support": claim.get("support"), "support_method": claim.get("support_method"),
@@ -786,7 +794,7 @@ def conversation_history(database: Path, conversation_id: str) -> list[dict[str,
                                   (turn["turn_id"],)).fetchall()
             result.append({**dict(turn), "claims": [{"ordinal": row["ordinal"],
                             "text": row["claim_text"], "evidence": json.loads(row["evidence_json"])}
-                           for row in claims]})
+                           for row in claims], "coverage_gaps": json.loads(turn["coverage_json"])})
         return result
     finally:
         conn.close()

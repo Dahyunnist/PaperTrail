@@ -367,10 +367,12 @@ def open_database(path: Path, readonly: bool = False) -> sqlite3.Connection:
     return conn
 
 
-def _selection_rows(selection_path: Path, source_config_path: Path) -> list[dict[str, Any]]:
+def _selection_rows(selection_path: Path, source_config_path: Path,
+                    allow_stale: bool = False) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     config = yaml.safe_load(source_config_path.read_text(encoding="utf-8"))
     roots = {root["id"]: Path(root["path"]) for root in config.get("roots", [])}
     selected: list[dict[str, Any]] = []
+    stale: list[dict[str, str]] = []
     for line_no, line in enumerate(selection_path.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
             continue
@@ -387,16 +389,42 @@ def _selection_rows(selection_path: Path, source_config_path: Path) -> list[dict
             candidates = [p for p in base.rglob(item["file_name"]) if p.is_file()]
         path = next((p for p in candidates if _hash(p) == item["sha256"]), None)
         if path is None:
+            if allow_stale:
+                stale.append({"file_name": item["file_name"], "issue": "source_missing_or_changed",
+                              "details": "来源已删除或哈希变化；请重新生成来源清单"})
+                continue
             raise ValueError(f"selection 第 {line_no} 行没有匹配哈希的源文件：{item['file_name']}")
         item["path"] = path.resolve()
         selected.append(item)
-    return selected
+    return selected, stale
 
 
 def _remove_version_content(conn: sqlite3.Connection, version_id: str) -> None:
     ids = [row[0] for row in conn.execute("SELECT chunk_id FROM chunks WHERE version_id=?", (version_id,))]
     conn.executemany("DELETE FROM chunks_fts WHERE chunk_id=?", ((chunk_id,) for chunk_id in ids))
     conn.execute("DELETE FROM paper_versions WHERE version_id=?", (version_id,))
+
+
+def _detach_location(conn: sqlite3.Connection, root_id: str, path: str,
+                     keep_sha256: str | None = None) -> bool:
+    sql = ("SELECT v.version_id FROM source_locations l JOIN paper_versions v ON v.version_id=l.version_id "
+           "WHERE l.root_id=? AND l.absolute_path=?")
+    params: tuple[Any, ...] = (root_id, path)
+    if keep_sha256 is not None:
+        sql += " AND v.sha256<>?"
+        params += (keep_sha256,)
+    rows = conn.execute(sql, params).fetchall()
+    changed = bool(rows)
+    for row in rows:
+        version_id = row["version_id"]
+        conn.execute("DELETE FROM source_locations WHERE version_id=? AND root_id=? AND absolute_path=?",
+                     (version_id, root_id, path))
+        if not conn.execute("SELECT 1 FROM source_locations WHERE version_id=?", (version_id,)).fetchone():
+            paper = conn.execute("SELECT paper_id FROM paper_versions WHERE version_id=?", (version_id,)).fetchone()
+            _remove_version_content(conn, version_id)
+            if paper and not conn.execute("SELECT 1 FROM paper_versions WHERE paper_id=?", (paper[0],)).fetchone():
+                conn.execute("DELETE FROM papers WHERE paper_id=?", (paper[0],))
+    return changed
 
 
 def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: ParsedDocument) -> dict[str, int]:
@@ -469,13 +497,25 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
 
 
 def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback: bool = False,
-                    progress_callback: Any | None = None) -> dict[str, Any]:
-    selected = _selection_rows(selection, sources)
+                    progress_callback: Any | None = None, reconcile: bool = False) -> dict[str, Any]:
+    selected, stale_issues = _selection_rows(selection, sources, allow_stale=reconcile)
     conn = open_database(database)
     totals = {"selected": len(selected), "added": 0, "duplicates": 0, "sections": 0, "chunks": 0, "low_text_documents": 0}
-    issues: list[dict[str, str]] = []
+    issues: list[dict[str, str]] = list(stale_issues)
     seen_sha: set[str] = set()
+    locations_changed = False
     try:
+        if reconcile:
+            config = yaml.safe_load(sources.read_text(encoding="utf-8"))
+            root_ids = [root["id"] for root in config.get("roots", [])]
+            selected_paths = {(item["root_id"], str(item["path"])) for item in selected}
+            with conn:
+                for root_id in root_ids:
+                    existing_paths = [row[0] for row in conn.execute(
+                        "SELECT absolute_path FROM source_locations WHERE root_id=?", (root_id,))]
+                    for old_path in existing_paths:
+                        if (root_id, old_path) not in selected_paths:
+                            locations_changed |= _detach_location(conn, root_id, old_path)
         for item_number, item in enumerate(selected, 1):
             if item["sha256"] in seen_sha:
                 existing = conn.execute("SELECT version_id FROM paper_versions WHERE sha256=?", (item["sha256"],)).fetchone()
@@ -490,6 +530,7 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
             try:
                 parsed = parse_pdf(item["path"], item["source_type"], ocr_fallback) if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"])
                 with conn:
+                    locations_changed |= _detach_location(conn, item["root_id"], str(item["path"]), item["sha256"])
                     counts = _insert_document(conn, item, parsed)
                 totals["added"] += counts["added"]
                 totals["duplicates"] += counts["duplicate"]
@@ -507,7 +548,7 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
             if progress_callback:
                 progress_callback(item_number, len(selected), item["file_name"])
         conn.commit()
-        if totals["added"]:
+        if totals["added"] or locations_changed:
             conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
             conn.commit()
     finally:
