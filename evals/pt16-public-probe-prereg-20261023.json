@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_not_run",
+  "dataset_role": "one_question_public_paper_probe",
+  "source": {
+    "title": "Good enough practices in scientific computing",
+    "doi": "10.1371/journal.pcbi.1005510",
+    "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510",
+    "license": "CC BY 4.0",
+    "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+    "local_pdf": "evals/fixtures/pt10-development/good-enough-scientific-computing.pdf",
+    "local_pdf_sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017"
+  },
+  "question": "Where should researchers put input data versus files produced during analysis?",
+  "evidence_limit": 1,
+  "expected_evidence": {
+    "pdf_pages": [10],
+    "quote": "Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables."
+  },
+  "oracle": {
+    "answer_facets": [
+      "Raw data and metadata belong in a data directory.",
+      "Files generated during cleanup and analysis belong in a results directory.",
+      "Generated files include intermediate and final results."
+    ],
+    "citation_pdf_pages": [10],
+    "claim_review_method": "Manually check each generated claim against the listed facets and cited source quote; check SHA-256, PDF page and exact quote deterministically.",
+    "independent_semantic_reviewer": false
+  },
+  "locked_config": {
+    "provider": "openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "temperature": 0.0,
+    "retrieval_mode": "bm25",
+    "generate": true,
+    "frozen_benchmarks_read_or_changed": false
+  },
+  "budget_gate": {
+    "verified_price_source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "peak_input_usd_per_million": 0.3,
+    "peak_output_usd_per_million": 1.32,
+    "prompt_char_limit_per_call": 2400,
+    "output_token_limit_per_call": 800,
+    "max_calls_including_retries": 8,
+    "max_request_reserve_usd": 0.003936,
+    "model_envelope_usd": 0.031488,
+    "wrapup_buffer_usd": 0.008512,
+    "hard_stage_cap_usd": 0.04,
+    "master_spent_before_usd": 0.43356528,
+    "master_remaining_before_usd": 0.06643472,
+    "minimum_master_remaining_usd": 0.02643472
+  },
+  "actual_model_calls": 0,
+  "report": "evals/pt16-public-probe-20261023.json"
+}
