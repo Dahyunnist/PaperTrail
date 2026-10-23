@@ -4,6 +4,60 @@ def test_short_evidence_statements_are_kept_for_fact_location():
     assert _sentences("Driver names were not collected.") == ["Driver names were not collected."]
 
 
+def test_plural_paper_questions_trigger_subquestion_decomposition():
+    from papertrail.qa import _requires_decomposition
+
+    assert _requires_decomposition(
+        "How do the scientific-computing and numerical-data papers recommend supporting reproducibility?")
+    assert _requires_decomposition(
+        "What do the two computational-notebook papers recommend to help others reuse a project?")
+    assert _requires_decomposition("这两篇论文分别提供什么建议？")
+    assert not _requires_decomposition("What does the scientific-computing paper recommend?")
+    assert not _requires_decomposition("Is the finding unrelated to the main question?")
+
+
+def test_decomposed_same_paper_evidence_keeps_each_required_slot(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.s1_index import open_database
+
+    db = tmp_path / "slots.sqlite3"
+    open_database(db).close()
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "slot-test-model")
+    subquestions = ["Alpha finding?", "Beta finding?", "Gamma finding?"]
+    rows = {}
+    for index, word in enumerate(("Alpha", "Beta", "Gamma"), 1):
+        rows[f"{word} finding?"] = [{
+            "chunk_id": f"chunk-{index}", "version_id": f"version-{index}",
+            "paper_id": "one-paper", "sha256": "a" * 64, "source_type": "original_pdf",
+            "title": "One Study", "section": "Results", "pdf_page": index,
+            "path": "unused.pdf", "text_origin": "native_text", "rank_score": 1.0,
+            "text": f"{word} finding is supported by direct evidence in this study.",
+        }]
+    monkeypatch.setattr(qa, "_plan_subquestions", lambda *_args: {
+        "subquestions": subquestions, "usage": {},
+    })
+    monkeypatch.setattr(qa, "retrieve", lambda _db, query, *_args, **_kwargs: rows[query])
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, candidates, _model: {
+        "relevant_ids": list(range(len(candidates))), "targeted_query": "",
+        "sufficient": True, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, evidence, _model, _subs: {
+        "claims": [{"text": "All three findings are supported.", "evidence_ids": [0, 1, 2],
+                    "subquestion_ids": [0, 1, 2], "support": "supported",
+                    "relevant": True, "support_method": "test_judge"}],
+        "coverage_complete": True, "covered_subquestions": [0, 1, 2],
+        "coverage_requirements": subquestions, "coverage_gaps": [],
+        "generation_retry_used": False, "usage": {},
+    })
+
+    result = qa.ask(db, "Compare these three findings.", limit=5, mode="bm25")
+
+    assert result["status"] == "generated_claims_reviewed"
+    assert len(result["claims"][0]["support_evidence"]) == 3
+    assert result["missing_subquestions"] == []
+
+
 def test_invalid_subquestion_ids_get_one_structured_repair_retry(monkeypatch):
     import papertrail.qa as qa
 

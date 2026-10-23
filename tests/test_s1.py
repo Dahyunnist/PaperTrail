@@ -9,7 +9,7 @@ import yaml
 from papertrail.audit import _hash
 from papertrail.s1_index import (_reading_order_blocks, _title_from_pdf, database_summary,
                                 index_selection, inspect_document, parse_pdf, search, PARSER_VERSION)
-from papertrail.retrieval import build_vector_index, hybrid_search, vector_search
+from papertrail.retrieval import build_vector_index, hybrid_search, retrieve, vector_search
 
 
 def _pdf(path: Path, second_page: str = "latepagekeyword appears on the second physical page.") -> None:
@@ -102,6 +102,32 @@ def test_s1_indexes_text_pages_notes_versions_and_exact_duplicates(tmp_path):
     assert len(inspection["locations"]) == 2
     assert inspection["identity_status"] == "provisional"
     assert inspection["parse_status"] == "text"
+
+
+def test_expanded_bm25_supplements_partial_and_query_hits(tmp_path):
+    root = tmp_path / "corpus"
+    root.mkdir()
+    target = root / "target.pdf"
+    decoy = root / "decoy.pdf"
+    _pdf(target)
+    _pdf(decoy, "CTGAN and latepagekeyword occur together in this decoy evidence sentence.")
+    sources = tmp_path / "sources.yaml"
+    sources.write_text(yaml.safe_dump({"roots": [{"id": "papers", "path": str(root)}]}),
+                       encoding="utf-8")
+    manifest = tmp_path / "selection.jsonl"
+    manifest.write_text("".join(json.dumps({
+        "root_id": "papers", "file_name": path.name, "sha256": _hash(path),
+        "kind": "pdf", "source_type": "original_pdf",
+    }) + "\n" for path in (target, decoy)), encoding="utf-8")
+    db = tmp_path / "expanded.sqlite3"
+    index_selection(db, sources, manifest)
+
+    strict = retrieve(db, "CTGAN latepagekeyword", 20, "original_pdf", "bm25")
+    expanded = retrieve(db, "CTGAN latepagekeyword", 20, "original_pdf", "bm25_expanded")
+    target_pages = {(row["sha256"], row["pdf_page"]) for row in expanded}
+
+    assert not any(row["sha256"] == _hash(target) and row["pdf_page"] == 2 for row in strict)
+    assert (_hash(target), 2) in target_pages
 
 
 def test_pdf_title_ignores_publisher_banner():

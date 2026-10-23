@@ -133,7 +133,7 @@ def test_one_hosted_qa_turn_reserves_peak_cost_before_call(monkeypatch):
 
     monkeypatch.setenv("PAPERTRAIL_LLM_PROVIDER", "openai-compatible")
     with llm.model_turn_budget() as budget:
-        for _ in range(13):
+        for _ in range(12):
             llm._reserve_turn_call("s" * 100, "p" * 2_200)
         with pytest.raises(RuntimeError, match="QA turn model-cost budget"):
             llm._reserve_turn_call("s" * 100, "p" * 2_200)

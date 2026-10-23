@@ -563,6 +563,56 @@ def _query_terms(query: str) -> list[str]:
     return [term for term in terms if term not in seen and not seen.add(term)]
 
 
+def search_or(database: Path, query: str, limit: int = 5, source_type: str | None = None,
+              readonly: bool = False) -> list[dict[str, Any]]:
+    """Return lexical candidates matching any query token, ordered by FTS5 BM25."""
+    terms = _query_terms(query)
+    if not terms:
+        return []
+    fallback_terms = [('"' + term.replace('"', '""') + '"*'
+                       if term.isascii() and term.isalpha() and len(term) >= 4 else
+                       '"' + term.replace('"', '""') + '"') for term in terms]
+    or_query = "body : (" + " OR ".join(fallback_terms) + ")"
+    conn = open_database(database, readonly=readonly)
+    try:
+        sql = (
+            "SELECT c.chunk_id,c.version_id,c.source_type,c.title,c.section_title,c.page_number,c.text_origin,c.body,"
+            "p.paper_id,v.sha256,v.parse_status,l.absolute_path,"
+            "bm25(chunks_fts,0,4.0,2.0,1.0) AS bm25_score "
+            "FROM chunks_fts JOIN chunks c ON c.chunk_id=chunks_fts.chunk_id "
+            "JOIN paper_versions v ON v.version_id=c.version_id JOIN papers p ON p.paper_id=v.paper_id "
+            "JOIN source_locations l ON l.version_id=v.version_id "
+            "WHERE chunks_fts MATCH ?")
+        params: list[Any] = [or_query]
+        if source_type:
+            sql += " AND c.source_type=?"
+            params.append(source_type)
+        sql += " ORDER BY bm25_score LIMIT ?"
+        params.append(max(1, limit) * 4)
+        rows = conn.execute(sql, params).fetchall()
+        results = []
+        seen: set[tuple[str, int | None, str]] = set()
+        for row in rows:
+            identity = (row["sha256"], row["page_number"], row["body"])
+            if identity in seen:
+                continue
+            seen.add(identity)
+            results.append({
+                "paper_id": row["paper_id"], "version_id": row["version_id"],
+                "sha256": row["sha256"], "source_type": row["source_type"],
+                "title": row["title"], "section": row["section_title"],
+                "pdf_page": row["page_number"], "path": row["absolute_path"],
+                "parse_status": row["parse_status"], "text_origin": row["text_origin"],
+                "rank_score": -float(row["bm25_score"]), "text": row["body"],
+                "chunk_id": row["chunk_id"],
+            })
+            if len(results) >= limit:
+                break
+        return results
+    finally:
+        conn.close()
+
+
 def search(database: Path, query: str, limit: int = 5, source_type: str | None = None,
            readonly: bool = False) -> list[dict[str, Any]]:
     terms = _query_terms(query)

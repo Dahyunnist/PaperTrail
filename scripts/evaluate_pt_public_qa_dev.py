@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -56,12 +57,14 @@ def evaluate_group(group: str) -> dict[str, Any]:
 
             answerable_gold_pages += len(item["evidence"])
             parsed_pages = retrieved_pages = cited_pages = quote_exact = quote_contained_count = 0
-            retrieved = retrieve(database, item["question"], 20, source_type="original_pdf", mode="bm25")
+            retrieved = retrieve(database, item["question"], 20, source_type="original_pdf",
+                                 mode="bm25_expanded")
             retrieved_page_keys = {(row["sha256"], row["pdf_page"]) for row in retrieved}
             result = ask(database, item["question"], limit=5, mode="bm25", generate=False,
                          artifact=artifact)
             citations = [(claim["evidence"]["sha256"], claim["evidence"]["pdf_page"],
                           _normalize(claim["evidence"]["quote"])) for claim in result["claims"]]
+            evidence_path = []
             for evidence in item["evidence"]:
                 args = (evidence["sha256"], evidence["pdf_page"])
                 chunks = conn.execute(
@@ -88,11 +91,22 @@ def evaluate_group(group: str) -> dict[str, Any]:
                 exact_quotes += int(quote_equal)
                 quote_contained_count += int(quote_contained_hit)
                 contained_quotes += int(quote_contained_hit)
+                evidence_path.append({
+                    "sha256": args[0], "pdf_page": args[1],
+                    "parsed_page": parsed_page, "gold_quote_in_parsed_chunks": parsed_quote,
+                    "top20_retrieval_rank": next((index + 1 for index, row in enumerate(retrieved)
+                                                   if (row["sha256"], row["pdf_page"]) == args), None),
+                    "final_page_cited": page_cited, "exact_quote_cited": quote_equal,
+                    "gold_phrase_contained": quote_contained_hit,
+                    "final_quotes": [quote for sha, page, quote in citations
+                                     if sha == args[0] and page == args[1]],
+                })
             question_results.append({
                 "id": item["id"], "question_type": item["question_type"], "abstain": False,
                 "gold_pages": len(item["evidence"]), "parsed_pages": parsed_pages,
                 "top20_retrieved_pages": retrieved_pages, "final_cited_pages": cited_pages,
                 "exact_quote_citations": quote_exact, "gold_phrase_contained": quote_contained_count,
+                "evidence_path": evidence_path,
             })
     finally:
         conn.close()
@@ -114,6 +128,10 @@ def evaluate_group(group: str) -> dict[str, Any]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=Path(
+        "evals/pt7-pt8-pt10-pt11-qa-diagnostic-20261023.json"))
+    args = parser.parse_args()
     groups = [evaluate_group(group) for group in GROUPS]
     sums = {key: sum(group[key] for group in groups) for key in (
         "questions", "answerable_questions", "answerable_gold_pages", "parsed_gold_pages",
@@ -125,7 +143,8 @@ def main() -> None:
         "dataset_role": "development_diagnostic",
         "groups": groups,
         "totals": sums,
-        "configuration": {"mode": "bm25", "candidate_limit": 20, "evidence_limit": 5,
+        "configuration": {"candidate_mode": "bm25_expanded", "candidate_limit": 20,
+                           "extractive_qa_mode": "bm25", "evidence_limit": 5,
                            "generate": False, "model_calls": 0, "estimated_model_cost_usd": 0},
         "limitations": [
             "仅覆盖 PT7、PT8、PT10、PT11 共 18 题，属于开发诊断，不能外推。",
@@ -133,7 +152,7 @@ def main() -> None:
             "不可回答题的非空摘录仅表示关闭生成时返回候选，不代表模型拒答失败。",
         ],
     }
-    output = ROOT / "evals" / "pt7-pt8-pt10-pt11-qa-diagnostic-20261023.json"
+    output = args.output if args.output.is_absolute() else ROOT / args.output
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"output": str(output), "totals": sums}, ensure_ascii=False, indent=2))
 

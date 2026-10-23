@@ -1,0 +1,554 @@
+{
+  "schema_version": 1,
+  "dataset_role": "development_diagnostic",
+  "groups": [
+    {
+      "group_id": "pt7-public-development-20261023",
+      "questions": 6,
+      "answerable_questions": 5,
+      "answerable_gold_pages": 7,
+      "parsed_gold_pages": 7,
+      "parsed_gold_quotes": 7,
+      "top20_retrieved_gold_pages": 6,
+      "final_cited_gold_pages": 3,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 1,
+      "unanswerable_questions_with_extractive_candidates": 1,
+      "question_results": [
+        {
+          "id": "PT7-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 19,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT7-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "629c33befe0160b0cb463799af659a35fdf49203720f55bd0371bef4d55fe073",
+              "pdf_page": 4,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 2,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": [
+                "in addition to being clear about the sampling sites, informing the size of the team of data collectors, as well as how the team was divided across sites and treatments, can help the readers to understand sampling effort and potential biases.",
+                "understanding those key points can pre- vent serious biases as, for example, the number of nodes and links in an ecological network tends to increase with sampling effort."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT7-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1,
+          "evidence_path": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 11,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": true,
+              "final_quotes": [
+                "in summary, when playtesting your analogue science game, you need to check for scientific accuracy, audience fit, and the capacity for the game to disseminate accu- rate facts or start meaningful conversations.",
+                "to test the scientific accuracy of the game, it is necessary to playtest it with experts working in the field to ensure that it is not conveying information that is incorrect or misleading."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT7-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": null,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": [
+                "the designers of science ninjas: valence also considered the target audience (schoolchil- dren), creating a “junior” version with simplified rules aimed at younger audiences."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT7-05",
+          "question_type": "multi_hop",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 2,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 2,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 8,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 10,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT7-06",
+          "question_type": "unanswerable",
+          "abstain": true,
+          "extractive_candidates_returned": true
+        }
+      ]
+    },
+    {
+      "group_id": "pt8-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 3,
+      "answerable_gold_pages": 3,
+      "parsed_gold_pages": 3,
+      "parsed_gold_quotes": 3,
+      "top20_retrieved_gold_pages": 3,
+      "final_cited_gold_pages": 1,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 0,
+      "unanswerable_questions_with_extractive_candidates": 1,
+      "question_results": [
+        {
+          "id": "PT8-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "91f24205d15596227407fc5ade92c71d37c86dd1fc589b8dc1d64d7c7dd38ed0",
+              "pdf_page": 5,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 2,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT8-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "98d6d1458eac6b88fc8f8fd8e376ad1707e053f205db2b71e4a35ecdc2f09f4e",
+              "pdf_page": 8,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": [
+                "importantly, consideration and respect of accents or linguistic mistakes can make a significant difference in the confer- ence experience of non-native english speakers."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT8-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+              "pdf_page": 6,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 16,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT8-04",
+          "question_type": "unanswerable",
+          "abstain": true,
+          "extractive_candidates_returned": true
+        }
+      ]
+    },
+    {
+      "group_id": "pt10-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 4,
+      "answerable_gold_pages": 5,
+      "parsed_gold_pages": 5,
+      "parsed_gold_quotes": 5,
+      "top20_retrieved_gold_pages": 4,
+      "final_cited_gold_pages": 2,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 2,
+      "unanswerable_questions_with_extractive_candidates": 0,
+      "question_results": [
+        {
+          "id": "PT10-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 11,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT10-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1,
+          "evidence_path": [
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 8,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": true,
+              "final_quotes": [
+                "considering the units used in formulas can help in two ways: when checking your own formulas and when trying to understand other people’s formulas.",
+                "when checking plausibility of your own formulas, one aspect is to check whether all units match."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT10-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1,
+          "evidence_path": [
+            {
+              "sha256": "ad4f59ea9b8fa6941db4184ea8b648c099ce55c3db57943206b613a90962d30a",
+              "pdf_page": 8,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": true,
+              "final_quotes": [
+                "the often anonymous q&a document, coupled with structured chairing (i.e., host asking questions and checking hands), also discouraged commentary-style questions that often eat up time and do not engage the group."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT10-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": null,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            },
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 5,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 16,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "pt11-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 4,
+      "answerable_gold_pages": 5,
+      "parsed_gold_pages": 5,
+      "parsed_gold_quotes": 5,
+      "top20_retrieved_gold_pages": 5,
+      "final_cited_gold_pages": 3,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 1,
+      "unanswerable_questions_with_extractive_candidates": 0,
+      "question_results": [
+        {
+          "id": "PT11-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1,
+          "evidence_path": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 7,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": true,
+              "final_quotes": [
+                "first, you should store your data into the results/data/raw subfolder."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT11-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 2,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        },
+        {
+          "id": "PT11-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+              "pdf_page": 3,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 1,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": [
+                "your goal is to show the reviewer that you took their comments seri- ously, and you should quickly convey what you did in response to their critique."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "PT11-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 2,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0,
+          "evidence_path": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 6,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 2,
+              "final_page_cited": true,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": [
+                "schematics of the organization of a research project (proj_name) around a computational notebook (proj_name.rmd/jl, referring to an rmarkdown or julia file).",
+                "the notebook contains narrative text supplementary to the manuscript’s main text, as well as text explaining the reasoning behind the computational work (included as code blocks) and its respective outputs (either kept on the notebook or saved as figures or tables)."
+              ]
+            },
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "parsed_page": true,
+              "gold_quote_in_parsed_chunks": true,
+              "top20_retrieval_rank": 8,
+              "final_page_cited": false,
+              "exact_quote_cited": false,
+              "gold_phrase_contained": false,
+              "final_quotes": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "questions": 18,
+    "answerable_questions": 16,
+    "answerable_gold_pages": 20,
+    "parsed_gold_pages": 20,
+    "parsed_gold_quotes": 20,
+    "top20_retrieved_gold_pages": 18,
+    "final_cited_gold_pages": 9,
+    "exact_quote_citations": 0,
+    "gold_phrases_contained_in_citations": 4,
+    "unanswerable_questions_with_extractive_candidates": 2
+  },
+  "configuration": {
+    "candidate_mode": "bm25_expanded",
+    "candidate_limit": 20,
+    "extractive_qa_mode": "bm25",
+    "evidence_limit": 5,
+    "generate": false,
+    "model_calls": 0,
+    "estimated_model_cost_usd": 0
+  },
+  "limitations": [
+    "仅覆盖 PT7、PT8、PT10、PT11 共 18 题，属于开发诊断，不能外推。",
+    "检索页命中与原文摘录覆盖不代表答案语义正确。",
+    "不可回答题的非空摘录仅表示关闭生成时返回候选，不代表模型拒答失败。"
+  ]
+}

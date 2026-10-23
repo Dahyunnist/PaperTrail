@@ -17,14 +17,10 @@ import fitz
 
 from .audit import _hash
 from .gold import _normalize_excerpt
-from .retrieval import retrieve
+from .retrieval import QUESTION_STOPWORDS, retrieve
 from .s1_index import open_database
 from .local_llm import ModelResponseTruncated, chat_json, configured_model, model_turn_budget
 
-QUESTION_STOPWORDS = {"a", "an", "and", "are", "as", "at", "be", "does", "for", "from",
-                      "how", "in", "is", "it", "of", "on", "or", "the", "their", "this",
-                      "to", "what", "when", "which", "with", "why", "data", "paper", "study",
-                      "method", "model", "approach", "result", "的", "了", "吗", "如何", "什么"}
 COMPLEX_QUERY_MARKERS = ("跨论文", "比较", "对比", "相比", "相较", "区别", "关系", "差异", "冲突", "矛盾", "不同版本", "多跳", "分别", "结合",
                          "across papers", "compare", "versus", "conflict", "contradict", "different versions",
                          "multi-hop", "both", "whereas")
@@ -33,7 +29,9 @@ _HOSTED_PROMPT_TARGET = 2_200
 
 def _requires_decomposition(question: str) -> bool:
     folded = question.casefold()
-    return any(marker in folded for marker in COMPLEX_QUERY_MARKERS)
+    return any(marker in folded for marker in COMPLEX_QUERY_MARKERS) or bool(
+        re.search(r"\b(?:papers|related|relationship)\b|(?:两|多)篇(?:论文|文章)",
+                  folded, re.IGNORECASE))
 
 
 def _plan_subquestions(question: str, model: str) -> dict[str, Any]:
@@ -426,8 +424,9 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             context_query = previous["question"]
             retrieval_query = context_query + " " + question
         search_queries = subquestions if len(subquestions) > 1 else [retrieval_query]
+        search_mode = "bm25_expanded" if model and mode == "bm25" else mode
         per_query_rows = [retrieve(database, query, max(limit * 4, 12),
-                                   source_type="original_pdf", mode=mode, artifact=artifact)
+                                   source_type="original_pdf", mode=search_mode, artifact=artifact)
                           for query in search_queries]
         result_rows: list[dict[str, Any]] = []
         row_by_chunk: dict[str, dict[str, Any]] = {}
@@ -484,7 +483,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             screen["selected_chunk_ids"] = initially_selected
             if not screen["sufficient"] and screen["targeted_query"]:
                 focused = retrieve(database, screen_question + " " + screen["targeted_query"], max(limit * 4, 12),
-                                   source_type="original_pdf", mode=mode, artifact=artifact)
+                                   source_type="original_pdf", mode=search_mode, artifact=artifact)
                 known = {row["chunk_id"] for row in result_rows}
                 result_rows.extend(row for row in focused if row["chunk_id"] not in known)
                 if focused:
@@ -508,7 +507,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
                     relevant_ids = set(targeted["relevant_ids"])
                     if not relevant_ids:
                         focused = retrieve(database, subquestion, max(limit * 4, 12),
-                                           source_type="original_pdf", mode=mode, artifact=artifact)
+                                           source_type="original_pdf", mode=search_mode, artifact=artifact)
                         by_chunk = {row["chunk_id"]: row for row in result_rows}
                         focused_rows = []
                         for incoming in focused:
@@ -585,10 +584,11 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         candidates = balanced + [item for item in candidates
                                  if (item[2]["sha256"], item[2]["pdf_page"], item[3]) not in used]
     paper_counts: dict[tuple[str, str], int] = {}
+    max_quotes_per_paper = max(2, len(subquestions))
     for _, _, row, quote, evidence_subquestions in candidates:
         key = (row["sha256"], row["pdf_page"], quote)
         paper_key = (row["paper_id"], row["sha256"])
-        if key in seen or paper_counts.get(paper_key, 0) >= 2:
+        if key in seen or paper_counts.get(paper_key, 0) >= max_quotes_per_paper:
             continue
         if not _validate_quote(row["path"], row["sha256"], row["pdf_page"], quote, page_cache):
             continue

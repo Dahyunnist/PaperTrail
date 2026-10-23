@@ -3,13 +3,44 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 from typing import Any
 
-from .s1_index import open_database, search as bm25_search
+from .s1_index import open_database, search as bm25_search, search_or as bm25_or_search
 
 VECTOR_INDEX_FORMAT = 2
+QUESTION_STOPWORDS = {"a", "an", "and", "are", "as", "at", "be", "does", "for", "from",
+                      "how", "in", "is", "it", "of", "on", "or", "the", "their", "this",
+                      "to", "what", "when", "which", "with", "why", "data", "paper", "study",
+                      "method", "model", "approach", "result", "的", "了", "吗", "如何", "什么"}
 _BUNDLE_CACHE: dict[str, tuple[int, dict[str, Any]]] = {}
+
+
+def _expanded_bm25_search(database: Path, query: str, limit: int,
+                          source_type: str | None) -> list[dict[str, Any]]:
+    pool_size = max(limit * 4, 20)
+    exact = bm25_search(database, query, pool_size, source_type)
+    terms = list(dict.fromkeys(term for term in re.findall(r"[\w]+", query.casefold())
+                               if term not in QUESTION_STOPWORDS and len(term) > 1))
+    expanded = bm25_or_search(database, " ".join(terms), pool_size, source_type) if terms else []
+    combined: dict[str, dict[str, Any]] = {}
+    for rows, weight, signal in ((exact, 2.0, "bm25_and"), (expanded, 1.0, "bm25_or")):
+        page_rows = []
+        seen_pages = set()
+        for rank, row in enumerate(rows, 1):
+            page_key = (row["sha256"], row["pdf_page"])
+            if page_key in seen_pages:
+                continue
+            seen_pages.add(page_key)
+            page_rows.append((rank, row))
+        for rank, row in page_rows:
+            key = (row["sha256"], row["pdf_page"])
+            item = combined.setdefault(key, {**row, "rank_score": 0.0,
+                                               "retrieval_signals": []})
+            item["rank_score"] += weight / (60 + rank)
+            item["retrieval_signals"].append(signal)
+    return sorted(combined.values(), key=lambda item: item["rank_score"], reverse=True)[:limit]
 
 
 def _vector_dependencies():
@@ -152,6 +183,8 @@ def retrieve(database: Path, query: str, limit: int = 5,
              artifact: Path | None = None) -> list[dict[str, Any]]:
     if mode == "bm25":
         return bm25_search(database, query, limit, source_type)
+    if mode == "bm25_expanded":
+        return _expanded_bm25_search(database, query, limit, source_type)
     if mode == "vector":
         return vector_search(database, query, limit, source_type, artifact)
     if mode == "hybrid":

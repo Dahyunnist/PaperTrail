@@ -320,11 +320,13 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     db, _ = _indexed_db(tmp_path)
     monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "complex-test")
     queries = []
+    search_modes = []
     def plan(_question, _model):
         return {"subquestions": ["What method does Paper A use?", "What result does Paper B report?"],
                 "usage": {}}
     def tracked_retrieve(database, query, *args, **kwargs):
         queries.append(query)
+        search_modes.append(kwargs.get("mode"))
         return real_retrieve(database, "What does CTGAN evaluate?", *args, **kwargs)
     monkeypatch.setattr(qa, "_plan_subquestions", plan)
     monkeypatch.setattr(qa, "retrieve", tracked_retrieve)
@@ -343,6 +345,7 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     })
     result = qa.ask(db, "Compare Papers A and B.", mode="bm25")
     assert queries == ["What method does Paper A use?", "What result does Paper B report?"]
+    assert search_modes == ["bm25_expanded", "bm25_expanded"]
     assert result["status"] == "generated_partial"
     assert result["claims"][0]["subquestion_ids"] == [0]
     assert "Paper B evidence missing" in result["answer"]
