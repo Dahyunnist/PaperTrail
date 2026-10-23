@@ -76,8 +76,8 @@ def get_evidence(database: Path, sha256: str, page_number: int) -> dict[str, Any
         actual_hash = hashlib.file_digest(stream, "sha256").hexdigest()
     if actual_hash != sha256.lower():
         raise ValueError("source file changed or is unavailable")
-    import fitz
-    with fitz.open(path) as doc:
+    import pymupdf
+    with pymupdf.open(path) as doc:
         if page_number > doc.page_count:
             raise ValueError("page is outside source document")
         text = doc[page_number - 1].get_text("text")

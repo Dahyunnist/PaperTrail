@@ -8,7 +8,13 @@
 
 清单先整体解析和校验，再做对账。逐篇写入在 SQLite 事务内执行；崩溃后同一清单可重放。后台任务仍按原队列恢复。个人上传采用独立单文件任务，不把它误当成上传目录的完整快照。上传删除只删应用管理目录内文件；共享哈希版本在仍有其他来源位置时保留。
 
-离线验证新增临时数据库用例，覆盖同清单幂等、路径内容替换、删除失效和修订号变化。完整 pytest 未能启动：当前运行时没有 pytest，也没有项目依赖（如 PyMuPDF）；未联网安装依赖。
+## 测试环境复查
+
+仓库原先没有 `pyproject.toml`、依赖锁或 Python 版本声明；`requirements-dev.txt` 只有宽范围直接依赖。采用本机提供的 Windows x64 CPython 3.12.14，建立 `.venv`，并添加 `.python-version` 与精确版本快照 `requirements-dev.lock`。`pip check` 通过。新环境复现命令见 README。
+
+PT4 临时数据库用例覆盖同清单幂等、源哈希变化、删除失效和修订号。首次定向运行发现 MCP 在请求证据时使用旧 `fitz` 别名，PyMuPDF 新版向 stdout 写弃用警告，破坏 JSON-RPC；改用 `pymupdf` 后通过。
+
+完整测试：`52 passed in 26.04s`。已运行 `tests/test_s1.py`、`tests/test_s3.py`、`tests/test_s5_web.py`、`tests/test_mcp_server.py` 定向回归，并运行全量 pytest。没有调用模型。
 
 ## Web 与权限边界
 

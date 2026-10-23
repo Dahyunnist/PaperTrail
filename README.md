@@ -19,10 +19,13 @@ PT4 补齐配置来源重建时的版本对账、过期索引清理和证据覆�
 默认只读扫描 `configs/sources.example.yaml` 指定的目录。扫描只计算哈希与 PDF 页级文本统计，不复制或改写源文件。请先检查并按本机路径调整配置，再运行：
 
 ```powershell
-python -m pip install -r requirements-dev.txt
-python -m papertrail.audit --sources configs/sources.example.yaml --out docs/corpus-audit.md --inventory-out .local/corpus-inventory.jsonl
-python -m pytest
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.lock
+.\.venv\Scripts\python.exe -m papertrail.audit --sources configs/sources.example.yaml --out docs/corpus-audit.md --inventory-out .local/corpus-inventory.jsonl
+.\.venv\Scripts\python.exe -m pytest
 ```
+
+`.python-version` 和 `requirements-dev.lock` 固定测试环境为 Windows x64 / CPython 3.12.14，并锁定直接及传递依赖。若要主动升级依赖，请先更新 `requirements-dev.txt`，再生成并验证新的锁文件。
 
 `.local/` 盘点明细和本地检索数据库包含完整路径/全文，默认忽略且不应提交。`docs/corpus-audit.md` 保存可共享的统计摘要、路径说明和异常清单。PDF、全文抽取物、索引、模型缓存和密钥均不进入 Git。
 
