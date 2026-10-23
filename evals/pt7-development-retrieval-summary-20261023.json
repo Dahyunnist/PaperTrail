@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "group_id": "pt7-public-development-20261023",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "1988b33fafe7817277fa54ab1bbf240b159dd7d856f0ee1efa76f2216ee2463d",
+  "index": {
+    "papers": 3,
+    "chunks": 444,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4",
+    "pdf_pages": 38
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前锁定测试环境未安装 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {"recall_at_k": 0.6, "mrr_at_k": 0.4, "all_evidence_pages": 0.4, "complete_evidence_coverage": 0.4, "evidence_item_recall": 0.4286},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.6667, "all_evidence_pages": 0.8, "complete_evidence_coverage": 0.4, "evidence_item_recall": 0.5714},
+      "hybrid": {"recall_at_k": 0.6, "mrr_at_k": 0.5, "all_evidence_pages": 0.4, "complete_evidence_coverage": 0.4, "evidence_item_recall": 0.4286}
+    },
+    "k10": {
+      "bm25": {"recall_at_k": 0.8, "mrr_at_k": 0.4222, "all_evidence_pages": 0.6, "complete_evidence_coverage": 0.6, "evidence_item_recall": 0.7143},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.6667, "all_evidence_pages": 1.0, "complete_evidence_coverage": 0.8, "evidence_item_recall": 0.8571},
+      "hybrid": {"recall_at_k": 0.8, "mrr_at_k": 0.5333, "all_evidence_pages": 0.6, "complete_evidence_coverage": 0.6, "evidence_item_recall": 0.7143}
+    }
+  },
+  "by_paper_at_k10": {
+    "innovative_research_dissemination": {"bm25_page_hits": 0, "vector_page_hits": 2, "hybrid_page_hits": 0, "bm25_complete_questions": 0, "vector_complete_questions": 1, "hybrid_complete_questions": 0},
+    "species_interaction_reporting": {"bm25_page_hits": 1, "vector_page_hits": 1, "hybrid_page_hits": 1, "bm25_complete_questions": 1, "vector_complete_questions": 1, "hybrid_complete_questions": 1},
+    "analogue_science_games": {"bm25_page_hits": 3, "vector_page_hits": 3, "hybrid_page_hits": 3, "bm25_complete_questions": 3, "vector_complete_questions": 3, "hybrid_complete_questions": 3}
+  },
+  "qa_evidence_path": {
+    "answerable_questions": 5,
+    "model_calls": 0,
+    "verified_excerpt_status": 5,
+    "gold_evidence_pages_cited": 3,
+    "gold_evidence_pages_total": 7,
+    "exact_gold_quotes_cited": 1,
+    "exact_gold_quotes_total": 7,
+    "unanswerable_question_retrieval_nonempty": true
+  },
+  "limitations": [
+    "PT7 是开发诊断组，结果不能用于泛化结论。",
+    "三篇论文和六道题不足以代表真实论文检索。",
+    "不可回答题虽有候选返回，但本次关闭生成，不能评价最终拒答行为。",
+    "检索到目标页不保证该页进入 QA 最终显示引用，也不保证显示精确黄金证据。"
+  ]
+}

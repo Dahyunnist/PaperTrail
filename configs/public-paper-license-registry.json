@@ -119,6 +119,51 @@
       "benchmark_group": "pt6-public-heldout-20261023",
       "benchmark_role": "test_holdout",
       "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记"
+    },
+    {
+      "title": "Ten simple rules for innovative dissemination of research",
+      "doi": "10.1371/journal.pcbi.1007704",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007704",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007704",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1007704&type=printable",
+      "source_version": "版本记录；2020-04-16",
+      "local_pdf": "evals/fixtures/pt7-development/innovative-research-dissemination.pdf",
+      "local_pdf_sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+      "benchmark_group": "pt7-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for reporting information on species interactions",
+      "doi": "10.1371/journal.pcbi.1010362",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010362",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010362",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010362&type=printable",
+      "source_version": "版本记录；2022-08-11",
+      "local_pdf": "evals/fixtures/pt7-development/species-interaction-reporting.pdf",
+      "local_pdf_sha256": "629c33befe0160b0cb463799af659a35fdf49203720f55bd0371bef4d55fe073",
+      "benchmark_group": "pt7-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for designing analogue science games",
+      "doi": "10.1371/journal.pcbi.1009009",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009009",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009009",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1009009&type=printable",
+      "source_version": "版本记录；2021-06-10",
+      "local_pdf": "evals/fixtures/pt7-development/analogue-science-games.pdf",
+      "local_pdf_sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+      "benchmark_group": "pt7-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
     }
   ]
 }

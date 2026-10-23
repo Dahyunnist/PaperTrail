@@ -1,4 +1,4 @@
-"""Fetch the frozen PT5 CC BY corpus from official PLOS download endpoints."""
+"""Fetch a registered CC BY group from official PLOS download endpoints."""
 
 from __future__ import annotations
 
@@ -109,7 +109,7 @@ def main() -> None:
                               if paper.get("benchmark_role")), None),
         "sources": [{key: paper.get(key) for key in (
             "title", "doi", "source_version", "public_record", "license_evidence", "license_detail",
-            "download_url", "local_pdf", "local_pdf_sha256", "benchmark_group", "benchmark_role")
+            "download_url", "local_pdf", "local_pdf_sha256", "benchmark_group", "benchmark_role")}
                     for paper in papers],
     }
     if manifest_path.is_file():
