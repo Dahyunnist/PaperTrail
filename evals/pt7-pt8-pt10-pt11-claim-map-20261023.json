@@ -26,9 +26,9 @@
       "answerable_questions": 16,
       "gold_pages": 20,
       "cited_gold_pages": 10,
-      "gold_phrases_contained": 4,
+      "gold_phrases_contained": 5,
       "exact_gold_quotes": 0,
-      "displayed_citations": 66,
+      "displayed_citations": 59,
       "source_validation_failures": 0,
       "model_calls": 0
     }
@@ -167,10 +167,10 @@
       "totals": {
         "answerable_questions": 5,
         "gold_pages": 7,
-        "cited_gold_pages": 4,
+        "cited_gold_pages": 3,
         "gold_phrases_contained": 1,
         "exact_gold_quotes": 0,
-        "displayed_citations": 20,
+        "displayed_citations": 18,
         "source_validation_failures": 0,
         "model_calls": 0
       },
@@ -267,7 +267,7 @@
             {
               "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
               "pdf_page": 2,
-              "page_cited": true,
+              "page_cited": false,
               "gold_phrase_contained": false,
               "exact_gold_quote": false
             },
@@ -279,10 +279,8 @@
               "exact_gold_quote": false
             }
           ],
-          "displayed_citations": 5,
+          "displayed_citations": 3,
           "citation_source_valid": [
-            true,
-            true,
             true,
             true,
             true
@@ -373,7 +371,7 @@
         "cited_gold_pages": 1,
         "gold_phrases_contained": 0,
         "exact_gold_quotes": 0,
-        "displayed_citations": 10,
+        "displayed_citations": 9,
         "source_validation_failures": 0,
         "model_calls": 0
       },
@@ -389,9 +387,8 @@
               "exact_gold_quote": false
             }
           ],
-          "displayed_citations": 3,
+          "displayed_citations": 2,
           "citation_source_valid": [
-            true,
             true,
             true
           ],
@@ -547,9 +544,9 @@
         "answerable_questions": 4,
         "gold_pages": 5,
         "cited_gold_pages": 2,
-        "gold_phrases_contained": 1,
+        "gold_phrases_contained": 2,
         "exact_gold_quotes": 0,
-        "displayed_citations": 18,
+        "displayed_citations": 15,
         "source_validation_failures": 0,
         "model_calls": 0
       },
@@ -565,10 +562,8 @@
               "exact_gold_quote": false
             }
           ],
-          "displayed_citations": 5,
+          "displayed_citations": 3,
           "citation_source_valid": [
-            true,
-            true,
             true,
             true,
             true
@@ -582,7 +577,7 @@
               "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
               "pdf_page": 8,
               "page_cited": true,
-              "gold_phrase_contained": false,
+              "gold_phrase_contained": true,
               "exact_gold_quote": false
             }
           ],
@@ -633,9 +628,8 @@
               "exact_gold_quote": false
             }
           ],
-          "displayed_citations": 5,
+          "displayed_citations": 4,
           "citation_source_valid": [
-            true,
             true,
             true,
             true,
@@ -755,10 +749,10 @@
       "totals": {
         "answerable_questions": 4,
         "gold_pages": 5,
-        "cited_gold_pages": 3,
+        "cited_gold_pages": 4,
         "gold_phrases_contained": 2,
         "exact_gold_quotes": 0,
-        "displayed_citations": 18,
+        "displayed_citations": 17,
         "source_validation_failures": 0,
         "model_calls": 0
       },
@@ -774,9 +768,8 @@
               "exact_gold_quote": false
             }
           ],
-          "displayed_citations": 5,
+          "displayed_citations": 4,
           "citation_source_valid": [
-            true,
             true,
             true,
             true,
@@ -811,7 +804,7 @@
             {
               "sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
               "pdf_page": 3,
-              "page_cited": false,
+              "page_cited": true,
               "gold_phrase_contained": false,
               "exact_gold_quote": false
             }

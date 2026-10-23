@@ -26,16 +26,16 @@ def _expanded_bm25_search(database: Path, query: str, limit: int,
     expanded = bm25_or_search(database, " ".join(terms), pool_size, source_type) if terms else []
     combined: dict[str, dict[str, Any]] = {}
     for rows, weight, signal in ((exact, 2.0, "bm25_and"), (expanded, 1.0, "bm25_or")):
-        page_rows = []
-        seen_pages = set()
+        chunk_rows = []
+        seen_chunks = set()
         for rank, row in enumerate(rows, 1):
-            page_key = (row["sha256"], row["pdf_page"])
-            if page_key in seen_pages:
+            chunk_key = row["chunk_id"]
+            if chunk_key in seen_chunks:
                 continue
-            seen_pages.add(page_key)
-            page_rows.append((rank, row))
-        for rank, row in page_rows:
-            key = (row["sha256"], row["pdf_page"])
+            seen_chunks.add(chunk_key)
+            chunk_rows.append((rank, row))
+        for rank, row in chunk_rows:
+            key = row["chunk_id"]
             item = combined.setdefault(key, {**row, "rank_score": 0.0,
                                                "retrieval_signals": []})
             item["rank_score"] += weight / (60 + rank)

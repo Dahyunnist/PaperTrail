@@ -4,6 +4,13 @@ def test_short_evidence_statements_are_kept_for_fact_location():
     assert _sentences("Driver names were not collected.") == ["Driver names were not collected."]
 
 
+def test_unpunctuated_pdf_list_items_remain_citable():
+    from papertrail.qa import _sentences
+
+    text = "Methods\n- Save the raw data\ne) Record all steps used to process data"
+    assert _sentences(text) == ["Save the raw data", "Record all steps used to process data"]
+
+
 def test_plural_paper_questions_trigger_subquestion_decomposition():
     from papertrail.qa import _requires_decomposition
 

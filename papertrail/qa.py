@@ -100,9 +100,18 @@ def _validate_quote(path: str, sha256: str, page_number: int, quote: str,
 
 
 def _sentences(text: str) -> list[str]:
-    text = " ".join(text.split())
-    return [part.strip() for part in re.split(r"(?<=[.!?。！？])\s+", text)
-            if 20 <= len(part.strip()) <= 500 and re.search(r"[.!?。！？]$", part.strip())]
+    source_lines = text.splitlines()
+    flattened = " ".join(text.split())
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?。！？])\s+", flattened)
+                 if 20 <= len(part.strip()) <= 500 and re.search(r"[.!?。！？]$", part.strip())]
+    # PDF parsers often split numbered/bulleted instructions into independent
+    # source lines without terminal punctuation. Keep those spans citable.
+    for line in source_lines:
+        marked = re.match(r"^\s*(?:[-*•▪‣]|\(?\d+[.)]|[a-zA-Z][.)])\s*(.+)$", line)
+        fragment = marked.group(1).strip() if marked else ""
+        if 8 <= len(fragment) <= 500 and fragment not in sentences:
+            sentences.append(fragment)
+    return sentences
 
 
 def _term_overlap(query_terms: set[str], sentence_terms: set[str]) -> int:
