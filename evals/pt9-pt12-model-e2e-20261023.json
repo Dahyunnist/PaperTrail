@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "preregistered_not_run",
+  "status": "incomplete_once_no_rerun",
   "dataset_role": "final_paper_disjoint_holdout",
   "dataset": "pt9-pt12-final-heldout-20261023",
   "gold_sha256": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c",
@@ -34,12 +34,336 @@
     "ledger": ".local/pt-master-usage.json",
     "request_reserves_checked_before_send": true
   },
-  "model_usage": null,
-  "results": null,
+  "model_usage": {
+    "api_calls": 23,
+    "reserved_usd": 0.0736248,
+    "charged_upper_bound_usd": 0.00541512,
+    "ledger_spent_after_usd": 0.42415404,
+    "ledger_remaining_after_usd": 0.07584596,
+    "run_reserve_ceiling_usd": 0.075
+  },
+  "results": [
+    {
+      "id": "PT9-01",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "当多个处理步骤组合成工作流时（规则4），工作流本身应当进行版本控制。",
+        "每种工作流语言本身都是不断演进的工具，会新增语法和功能，因此研究者应指明使用的是哪个版本并对其进行了测试。"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [
+        {
+          "title": "Ten simple rules for large-scale data processing",
+          "pdf_page": 4,
+          "sha256": "2f0758d577a8d09dbf45dc0c370ab303a2978858e0e2c0a0b979755c39f308bc",
+          "quote": "When multiple processing steps are combined into workflow (Rule 4), the workflow itself should be versioned."
+        },
+        {
+          "title": "Ten simple rules for large-scale data processing",
+          "pdf_page": 4,
+          "sha256": "2f0758d577a8d09dbf45dc0c370ab303a2978858e0e2c0a0b979755c39f308bc",
+          "quote": "Each workflow language itself is a tool that is evolving with new syntax and functionality, so the researcher should specify which version is used and tested."
+        }
+      ],
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.0083844,
+      "usage": {
+        "prompt_eval_count": 1343,
+        "eval_count": 216,
+        "total_duration": 0,
+        "estimated_usd": 0.00068802,
+        "_diagnostics": {
+          "retrieved_pages": 11,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "说明工作流本身应当进行版本控制",
+            "说明工作流语言是不断演进的工具，应指明所用并测试的版本"
+          ],
+          "subquestions": [
+            "What does the large-scale processing paper say about versioning a multi-step workflow?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      }
+    },
+    {
+      "id": "PT9-02",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.0069672,
+      "usage": {
+        "prompt_eval_count": 1053,
+        "eval_count": 70,
+        "total_duration": 0,
+        "estimated_usd": 0.0004083,
+        "_diagnostics": {
+          "retrieved_pages": 15,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What should graduate students examine before choosing among statistical analysis techniques?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      }
+    },
+    {
+      "id": "PT9-03",
+      "question_type": "cross_paper",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 2,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 8,
+      "turn_reserved_usd": 0.0264756,
+      "usage": {
+        "prompt_eval_count": 3090,
+        "eval_count": 248,
+        "total_duration": 0,
+        "estimated_usd": 0.0012543600000000002,
+        "_diagnostics": {
+          "retrieved_pages": 34,
+          "screen_selected_pages": 2,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What does the statistical-practice paper say should guide statistical method choice?",
+            "What does the graduate-school paper say should guide statistical method choice?",
+            "How do the guidance criteria for statistical method choice compare between the statistical-practice paper and the graduate-school paper?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": "模型 claim 缺少有效证据引用",
+          "refusal_stage": "synthesis_or_review"
+        }
+      }
+    },
+    {
+      "id": "PT9-04",
+      "question_type": "multi_hop",
+      "gold_abstain": false,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 2,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 4,
+      "turn_reserved_usd": 0.0114852,
+      "usage": {
+        "prompt_eval_count": 1738,
+        "eval_count": 83,
+        "total_duration": 0,
+        "estimated_usd": 0.0006309600000000001,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "How do the authors recommend testing and scaling a large-scale analysis workload?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        }
+      }
+    },
+    {
+      "id": "PT9-05",
+      "question_type": "fact_location",
+      "gold_abstain": false,
+      "status": "generated_claims_reviewed",
+      "model_claims": [
+        "报告结果时，必须提供某种统计不确定性的概念。",
+        "不确定性量化（UQ）能说明可以从结果中得出或应当得出何种程度的结论。",
+        "不确定性量化（UQ）能说明数值结果中有多少位数字是显著的，以及应在正文和表格中呈现多少位数字。",
+        "一个常见错误是计算标准误时未考虑数据或变量之间的依赖性，这通常意味着对真实不确定性的实质性低估。"
+      ],
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 1,
+      "gold_pages_cited": 1,
+      "gold_phrases_contained": 1,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [
+        {
+          "title": "Ten Simple Rules for Effective Statistical Practice",
+          "pdf_page": 5,
+          "sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+          "quote": "When reporting results, it is essential to supply some notion of statistical uncertainty."
+        },
+        {
+          "title": "Ten quick tips for getting the most scientific value out of numerical data",
+          "pdf_page": 13,
+          "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+          "quote": "On the one hand, UQ indicates to what extent conclusions can or should be drawn from the results."
+        },
+        {
+          "title": "Ten quick tips for getting the most scientific value out of numerical data",
+          "pdf_page": 13,
+          "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+          "quote": "On the other hand, UQ gives an idea how many digits of numerical results are significant and should be presented in text and tables."
+        },
+        {
+          "title": "Ten Simple Rules for Effective Statistical Practice",
+          "pdf_page": 5,
+          "sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+          "quote": "A common mistake is to calculate standard errors without taking into account the dependen- cies among data or variables, which usually means a substantial underestimate of the real uncertainty."
+        }
+      ],
+      "turn_model_calls": 3,
+      "turn_reserved_usd": 0.009726,
+      "usage": {
+        "prompt_eval_count": 1630,
+        "eval_count": 354,
+        "total_duration": 0,
+        "estimated_usd": 0.0009562799999999999,
+        "_diagnostics": {
+          "retrieved_pages": 20,
+          "screen_selected_pages": 2,
+          "evidence_pages": 2,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "报告结果时应提供统计不确定性的概念",
+            "说明不确定性量化（UQ）如何帮助界定可从结果中得出的结论程度",
+            "说明不确定性量化（UQ）如何帮助确定数值结果中显著数字的位数及正文和表格中应呈现的位数",
+            "指出计算标准误时未考虑数据或变量间依赖性这一常见错误及其导致的不确定性低估"
+          ],
+          "subquestions": [
+            "What should researchers report alongside results to communicate uncertainty?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        }
+      }
+    },
+    {
+      "id": "PT9-06",
+      "question_type": "unanswerable",
+      "gold_abstain": true,
+      "status": "abstained",
+      "model_claims": [],
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "gold_evidence_pages": 0,
+      "gold_pages_cited": 0,
+      "gold_phrases_contained": 0,
+      "exact_gold_quotes": 0,
+      "cited_evidence": [],
+      "turn_model_calls": 2,
+      "turn_reserved_usd": 0.0068736,
+      "usage": {
+        "prompt_eval_count": 1066,
+        "eval_count": 64,
+        "total_duration": 0,
+        "estimated_usd": 0.00040428,
+        "_diagnostics": {
+          "retrieved_pages": 18,
+          "screen_selected_pages": 0,
+          "evidence_pages": 0,
+          "coverage_complete": null,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "What runtime reduction did the authors measure in their benchmark after increasing processing capacity tenfold?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "evidence_organization"
+        }
+      }
+    }
+  ],
   "limitations": [
     "PT9/PT12 冻结组仅执行本登记的一次生成式端到端评测；不得据此调参或重跑。",
     "同一模型负责生成和支持性审查，审查不是独立盲评。",
     "检索召回、页码引用和模型自审通过均不等于答案正确。",
     "仅 12 题，结果只描述本测试集。"
-  ]
+  ],
+  "started_at": "2026-10-23T06:36:44.306669+00:00",
+  "completed_at": "2026-10-23T06:37:13.147742+00:00",
+  "totals": {
+    "questions_completed": 6,
+    "questions_total": 12,
+    "answerable_questions": 10,
+    "unanswerable_questions": 2,
+    "answerable_gold_pages": 13,
+    "gold_pages_cited": 2,
+    "gold_phrases_contained": 2,
+    "exact_gold_quotes": 0,
+    "generated_claims": 6,
+    "unanswerable_abstentions": 1
+  },
+  "failure": "首段因累计最大预留额达到运行阈值而停止；主账本未超限。",
+  "resume_allowed_once": true,
+  "resume_count": 0,
+  "resume_reason": "首段守卫累计请求的最大预留额，未按已实际扣账金额累计；只续跑冻结题集剩余六题。",
+  "resume_core_corpus_sha256": "b68df67f55e9258a1efc02ec1cb3deda3aea575df35059411ff43639cfc1387e",
+  "resume_core_table_counts": {
+    "papers": 30,
+    "paper_versions": 30,
+    "sections": 841,
+    "chunks": 4553,
+    "source_locations": 30
+  }
 }

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,27 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _corpus_fingerprint() -> tuple[str, dict[str, int]]:
+    connection = sqlite3.connect(f"file:{DATABASE.as_posix()}?mode=ro", uri=True)
+    digest = hashlib.sha256()
+    counts = {}
+    tables = ("papers", "paper_versions", "sections", "chunks", "source_locations")
+    try:
+        for table in tables:
+            columns = [row[1] for row in connection.execute(f"PRAGMA table_info({table})")]
+            order = ",".join(str(index + 1) for index in range(len(columns)))
+            rows = connection.execute(f"SELECT * FROM {table} ORDER BY {order}").fetchall()
+            counts[table] = len(rows)
+            digest.update(table.encode())
+            for row in rows:
+                digest.update(json.dumps(row, ensure_ascii=False, separators=(",", ":"),
+                                         default=str).encode("utf-8"))
+                digest.update(b"\n")
+    finally:
+        connection.close()
+    return digest.hexdigest(), counts
+
+
 def _norm(value: str) -> str:
     return " ".join(value.casefold().split())
 
@@ -57,32 +79,61 @@ def _evidence_rows(claim: dict[str, Any]) -> list[dict[str, Any]]:
     return unique
 
 
-def _check_preregistration(report: dict[str, Any]) -> None:
-    if report.get("status") != "preregistered_not_run":
-        raise SystemExit("评测已经启动或完成；冻结组禁止重跑")
+def _check_preregistration(report: dict[str, Any]) -> bool:
+    status = report.get("status")
+    resume = status == "incomplete_once_no_rerun" and report.get("resume_allowed_once") is True \
+        and report.get("resume_count", 0) == 0
+    if status != "preregistered_not_run" and not resume:
+        raise SystemExit("评测已完成或不可续跑；冻结组禁止重跑")
     gold_sha = _sha256(GOLD)
-    database_sha = _sha256(DATABASE)
-    if gold_sha != report["gold_sha256"] or database_sha != report["database_sha256"]:
-        raise SystemExit("冻结题集或数据库哈希与预登记不符")
+    if gold_sha != report["gold_sha256"]:
+        raise SystemExit("冻结题集哈希与预登记不符")
+    corpus_sha, corpus_counts = _corpus_fingerprint()
+    if resume:
+        if corpus_sha != report.get("resume_core_corpus_sha256"):
+            raise SystemExit("续跑期间论文、索引块或来源清单发生变化")
+    elif _sha256(DATABASE) != report["database_sha256"]:
+        raise SystemExit("初次运行的冻结数据库哈希与预登记不符")
+    if corpus_counts != {"papers": 30, "paper_versions": 30, "sections": 841,
+                         "chunks": 4553, "source_locations": 30}:
+        raise SystemExit("论文语料或解析索引计数与预登记不符")
     for relative, expected in SOURCE_HASHES.items():
         if _sha256(ROOT / relative) != expected:
             raise SystemExit(f"锁定代码已变化：{relative}")
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     remaining = float(ledger["cap_usd"]) - float(ledger["spent_upper_bound_usd"])
-    if remaining < RUN_RESERVE_USD:
-        raise SystemExit(f"账本余量不足：需 ${RUN_RESERVE_USD:.6f}，现余 ${remaining:.8f}")
+    minimum_remaining = _max_request_cost(2400) if resume else RUN_RESERVE_USD
+    if remaining < minimum_remaining:
+        raise SystemExit(f"账本余量不足：需至少 ${minimum_remaining:.6f}，现余 ${remaining:.8f}")
     if not os.environ.get("DEEPSEEK_API_KEY"):
         raise SystemExit("缺少 DeepSeek API 凭据；冻结组不调用模型")
+    if resume:
+        gold_rows = [json.loads(line) for line in GOLD.read_text(encoding="utf-8").splitlines()]
+        completed_ids = [row.get("id") for row in report.get("results") or []]
+        expected_prefix = [row["id"] for row in gold_rows[:len(completed_ids)]]
+        if not completed_ids or completed_ids != expected_prefix:
+            raise SystemExit("已有结果不是冻结题集前缀；禁止续跑")
+    return resume
 
 
 def main() -> None:
     report = json.loads(REPORT.read_text(encoding="utf-8"))
-    _check_preregistration(report)
-    before = json.loads(LEDGER.read_text(encoding="utf-8"))
-    before_cost = float(before["spent_upper_bound_usd"])
-
-    report["status"] = "started"
-    report["started_at"] = datetime.now(timezone.utc).isoformat()
+    resume = _check_preregistration(report)
+    baseline_cost = float(report["budget_gate"]["repriced_spent_upper_bound_usd"])
+    if resume:
+        completed = list(report["results"])
+        previous_calls = int(report["model_usage"]["api_calls"])
+        previous_reserved = float(report["model_usage"].get("summed_request_reserves_usd",
+                                                            report["model_usage"].get("reserved_usd", 0.0)))
+        report["status"] = "resuming_predeclared_questions"
+        report["resume_count"] = 1
+        report["resume_started_at"] = datetime.now(timezone.utc).isoformat()
+    else:
+        completed = []
+        previous_calls = 0
+        previous_reserved = 0.0
+        report["status"] = "started"
+        report["started_at"] = datetime.now(timezone.utc).isoformat()
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     os.environ["PAPERTRAIL_LLM_PROVIDER"] = "openai-compatible"
@@ -100,19 +151,20 @@ def main() -> None:
     def budgeted_chat_json(model: str, system: str, prompt: str, **kwargs: Any) -> dict[str, Any]:
         nonlocal reserved, calls
         next_reserve = _max_request_cost(len(system) + len(prompt) + len("\nReturn a valid JSON object only."))
-        if reserved + next_reserve > RUN_RESERVE_USD:
+        current_ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
+        eval_actual_cost = float(current_ledger["spent_upper_bound_usd"]) - baseline_cost
+        if eval_actual_cost + next_reserve > RUN_RESERVE_USD:
             raise EvaluationReserveExceeded(
-                f"运行预留上限 ${RUN_RESERVE_USD:.3f} 将被超出；新请求未发送")
+                f"评测实际费用加下一请求峰值预留将超过 ${RUN_RESERVE_USD:.3f}；新请求未发送")
         reserved = round(reserved + next_reserve, 8)
         calls += 1
         return real_chat_json(model, system, prompt, **kwargs)
 
     qa.chat_json = budgeted_chat_json
     gold_rows = [json.loads(line) for line in GOLD.read_text(encoding="utf-8").splitlines()]
-    completed = []
     failure = None
     try:
-        for item in gold_rows:
+        for item in gold_rows[len(completed):]:
             result = qa.ask(DATABASE, item["question"], limit=5, mode="bm25", generate=True)
             cited = [row for claim in result["claims"] for row in _evidence_rows(claim)]
             gold_page_hits = 0
@@ -150,7 +202,7 @@ def main() -> None:
         qa.chat_json = real_chat_json
 
     after = json.loads(LEDGER.read_text(encoding="utf-8"))
-    charged = round(float(after["spent_upper_bound_usd"]) - before_cost, 8)
+    charged = round(float(after["spent_upper_bound_usd"]) - baseline_cost, 8)
     pages_total = sum(len(item["evidence"]) for item in gold_rows if not item["abstain"])
     result_totals = {
         "questions_completed": len(completed), "questions_total": len(gold_rows),
@@ -168,12 +220,14 @@ def main() -> None:
         "status": "completed_once_no_tuning_after" if len(completed) == len(gold_rows)
                   and failure is None else "incomplete_once_no_rerun",
         "completed_at": datetime.now(timezone.utc).isoformat(),
-        "model_usage": {"api_calls": calls, "reserved_usd": round(reserved, 8),
+        "model_usage": {"api_calls": previous_calls + calls,
+                        "summed_request_reserves_usd": round(previous_reserved + reserved, 8),
                         "charged_upper_bound_usd": charged,
                         "ledger_spent_after_usd": after["spent_upper_bound_usd"],
                         "ledger_remaining_after_usd": round(
                             float(after["cap_usd"]) - float(after["spent_upper_bound_usd"]), 8),
-                        "run_reserve_ceiling_usd": RUN_RESERVE_USD},
+                        "run_spend_ceiling_usd": RUN_RESERVE_USD,
+                        "resume_count": report.get("resume_count", 0)},
         "totals": result_totals,
         "results": completed,
         "failure": failure,
