@@ -33,6 +33,17 @@ def test_plural_paper_questions_trigger_subquestion_decomposition():
     assert not _requires_decomposition("Is the finding unrelated to the main question?")
 
 
+def test_two_named_sources_joined_by_and_trigger_decomposition():
+    from papertrail.qa import _requires_decomposition
+
+    assert _requires_decomposition(
+        "What do the data-sharing study and code-use guide recommend for reuse?"
+    )
+    assert not _requires_decomposition(
+        "What does the code-use guide recommend for reuse?"
+    )
+
+
 def test_decomposed_same_paper_evidence_keeps_each_required_slot(tmp_path, monkeypatch):
     import papertrail.qa as qa
     from papertrail.s1_index import open_database

@@ -32,6 +32,9 @@ def _requires_decomposition(question: str) -> bool:
     folded = question.casefold()
     return any(marker in folded for marker in COMPLEX_QUERY_MARKERS) or bool(
         re.search(r"\b(?:papers|related|relationship)\b|(?:两|多)篇(?:论文|文章)",
+                  folded, re.IGNORECASE)) or bool(
+        re.search(r"\b(?:paper|study|article|guide|review|report)\b.{0,100}\band\b"
+                  r".{0,100}\b(?:paper|study|article|guide|review|report)\b",
                   folded, re.IGNORECASE))
 
 
