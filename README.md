@@ -6,6 +6,8 @@
 
 S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/product-contract.md)；各阶段记录见 [S0](docs/learning/stage-S0.md)、[S1](docs/learning/stage-S1.md)、[S2](docs/learning/stage-S2.md)、[S3](docs/learning/stage-S3.md)、[S4](docs/learning/stage-S4.md)和 [S5](docs/learning/stage-S5.md)。
 
+更高难度的 P14 诊断集覆盖多步数值推导、跨文献证据聚合、统计结论边界和拒答；其真实模型结果及逐题复核见 [P14 评测记录](docs/learning/stage-P14-hard-evaluation-20261023.md)。
+
 ## 源资料
 
 默认只读扫描 `configs/sources.example.yaml` 指定的目录。扫描只计算哈希与 PDF 页级文本统计，不复制或改写源文件。请先检查并按本机路径调整配置，再运行：

@@ -1,0 +1,23 @@
+{
+  "benchmark": "PaperTrail P14 targeted challenge set",
+  "data_policy": "Synthetic PDFs only; reuses P13 fixture corpus; novel question formulations.",
+  "question_count": 12,
+  "answerable_count": 9,
+  "unanswerable_count": 3,
+  "question_types": {
+    "cross_paper": 1,
+    "fact_location": 1,
+    "multi_hop": 7,
+    "unanswerable": 3
+  },
+  "documents": {
+    "study-a.pdf": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+    "study-b.pdf": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+    "study-c.pdf": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+    "study-d.pdf": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404"
+  },
+  "gold_sha256": "3d256ce7f0a7c52fba658c76c3c289ec40288e53f315a3d5e363e91e47f18102",
+  "verified_evidence_quotes": 19,
+  "exact_question_overlap_with_prior_gold": 0,
+  "scope": "Targeted diagnostic over four one-page synthetic PDFs. Tests arithmetic, evidence aggregation, statistical-inference boundaries, and abstention. Not an independent corpus holdout."
+}

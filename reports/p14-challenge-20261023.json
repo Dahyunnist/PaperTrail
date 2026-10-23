@@ -1,0 +1,1597 @@
+{
+  "gold": "p14-challenge-gold-20261023.jsonl",
+  "mode": "bm25",
+  "extractive": {
+    "model_run": false,
+    "questions": 12,
+    "answerable_coverage": 0.7777777777777778,
+    "complete_answer_rate": null,
+    "partial_answer_count": 0,
+    "gold_page_citation_rate": 0.7777777777777778,
+    "all_expected_pages_cited_rate": 0.6666666666666666,
+    "gold_page_coverage": 0.7,
+    "correct_abstention_rate": 0.6666666666666666,
+    "false_answer_rate": 0.3333333333333333,
+    "mean_latency_ms": 10.943116666718803,
+    "median_latency_ms": 10.864750000337153,
+    "citation_precision_at_gold_pages": 0.7222222222222222,
+    "claim_support_acceptance_rate": 1.0,
+    "reviewed_claims": 19,
+    "rejected_claims": 0,
+    "by_question_type": {
+      "cross_paper": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "all_expected_pages_cited_rate": 0.0,
+        "correct_abstention_rate": null
+      },
+      "fact_location": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "all_expected_pages_cited_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "multi_hop": {
+        "total": 7,
+        "answerable_coverage": 0.7142857142857143,
+        "gold_page_citation_rate": 0.7142857142857143,
+        "all_expected_pages_cited_rate": 0.7142857142857143,
+        "correct_abstention_rate": null
+      },
+      "unanswerable": {
+        "total": 3,
+        "answerable_coverage": null,
+        "gold_page_citation_rate": null,
+        "all_expected_pages_cited_rate": null,
+        "correct_abstention_rate": 0.6666666666666666
+      }
+    },
+    "api_requests": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_upper_bound_usd": 0,
+    "cases": [
+      {
+        "id": "P14-01",
+        "type": "multi_hop",
+        "question": "Using Study B's sample sizes and failure rates, estimate the number of failed shipments for each container and overall.",
+        "expected_answer": "Container A had 2 failures and Container B had 5, for 7 failures across 160 shipments.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Foam Container B failed temperature control in 6.25 percent of shipments.",
+            "claim": "Foam Container B failed temperature control in 6.25 percent of shipments."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Insulated Container A failed temperature control in 2.5 percent of shipments.",
+            "claim": "Insulated Container A failed temperature control in 2.5 percent of shipments."
+          }
+        ],
+        "claims": [
+          "Foam Container B failed temperature control in 6.25 percent of shipments.",
+          "Insulated Container A failed temperature control in 2.5 percent of shipments."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 15.007599999989907,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-02",
+        "type": "multi_hop",
+        "question": "Compare Container B's failure rate with A's as both a percentage-point gap and a rate ratio.",
+        "expected_answer": "B was 3.75 percentage points higher and had 2.5 times A's failure rate (6.25% versus 2.5%).",
+        "abstain_expected": false,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 1,
+        "expected_page_coverage": 0.0,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 9.720999999899504,
+        "usage": null,
+        "answer": "当前检索范围内没有找到可通过原 PDF 哈希、页码和原文校验的证据，因此暂不作答。"
+      },
+      {
+        "id": "P14-03",
+        "type": "multi_hop",
+        "question": "What absolute and relative reduction in mean waiting time did Policy Cedar estimate?",
+        "expected_answer": "Waiting time fell by 3 minutes, a 25% reduction from 12 to 9 minutes.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes.",
+            "claim": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+          }
+        ],
+        "claims": [
+          "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 10.808400000314577,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-04",
+        "type": "cross_paper",
+        "question": "How does Study A's delivery sample compare with the combined intervention and control sample in Study D?",
+        "expected_answer": "Study A included 240 deliveries; Study D included 200 orders total, so Study A's sample was larger by 40.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 2,
+        "expected_page_coverage": 0.5,
+        "all_expected_pages_cited": false,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders.",
+            "claim": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders."
+          }
+        ],
+        "claims": [
+          "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+          "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 11.151799999879586,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-05",
+        "type": "multi_hop",
+        "question": "Given the reported group sizes and success rates in Study D, how many successful deliveries were observed in each group?",
+        "expected_answer": "There were 92 successful intervention orders and 89 successful control orders, a difference of 3.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group.",
+            "claim": "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Two cold-chain container designs were each tested on 80 synthetic shipments.",
+            "claim": "Two cold-chain container designs were each tested on 80 synthetic shipments."
+          }
+        ],
+        "claims": [
+          "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+          "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group.",
+          "Two cold-chain container designs were each tested on 80 synthetic shipments."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 12.422799999967538,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-06",
+        "type": "fact_location",
+        "question": "Study D reports a difference in mean scan-to-door time. Does it establish a statistically reliable intervention effect?",
+        "expected_answer": "The observed means were 17 minutes for intervention and 18.5 for control, but the confidence interval crossed zero, so a statistically reliable improvement was not established.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group.",
+            "claim": "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement.",
+            "claim": "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement."
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes."
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes."
+          },
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes.",
+            "claim": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+          }
+        ],
+        "claims": [
+          "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group.",
+          "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement.",
+          "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+          "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+          "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 13.227700000243203,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-07",
+        "type": "multi_hop",
+        "question": "Do the urban and rural delivery counts reconcile with Study A's total, and how far apart are their medians?",
+        "expected_answer": "The counts sum to 240 (160 urban and 80 rural), matching the reported total; their medians differ by 12 minutes (26 versus 14).",
+        "abstain_expected": false,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 1,
+        "expected_page_coverage": 0.0,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 8.68850000006205,
+        "usage": null,
+        "answer": "当前检索范围内没有找到可通过原 PDF 哈希、页码和原文校验的证据，因此暂不作答。"
+      },
+      {
+        "id": "P14-08",
+        "type": "multi_hop",
+        "question": "For Policy Cedar, calculate both the absolute and relative change in fuel use per route.",
+        "expected_answer": "Fuel use fell by 0.3 liters per route, about 7.1%, from 4.2 to 3.9 liters.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+            "claim": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route."
+          },
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes.",
+            "claim": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+          }
+        ],
+        "claims": [
+          "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+          "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 10.92110000035973,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-09",
+        "type": "unanswerable",
+        "question": "Which city had the highest delivery success rate in Study D?",
+        "expected_answer": "Study D does not report city-level outcomes.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 8.550999999897613,
+        "usage": null,
+        "answer": "当前检索范围内没有找到可通过原 PDF 哈希、页码和原文校验的证据，因此暂不作答。"
+      },
+      {
+        "id": "P14-10",
+        "type": "unanswerable",
+        "question": "What p-value and confidence interval bounds were reported for Study D?",
+        "expected_answer": "The report says the confidence interval crossed zero but gives no p-value or interval bounds.",
+        "abstain_expected": true,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement.",
+            "claim": "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement."
+          }
+        ],
+        "claims": [
+          "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 10.376000000178465,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-11",
+        "type": "multi_hop",
+        "question": "Can the exact overall median be derived by weighting the urban and rural medians by parcel count? What overall median did the study report?",
+        "expected_answer": "No. Subgroup medians cannot be combined by a weighted average; the study separately reports an overall median of 18 minutes.",
+        "abstain_expected": false,
+        "status": "verified_excerpts",
+        "answered": true,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes."
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The report did not break outcomes down by city or weather conditions.",
+            "claim": "The report did not break outcomes down by city or weather conditions."
+          }
+        ],
+        "claims": [
+          "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+          "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+          "The report did not break outcomes down by city or weather conditions."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 11.81959999985338,
+        "usage": null,
+        "answer": "在当前原文中找到以下逐条核验过的摘录。系统未自动综合其含义；请结合上下文阅读。"
+      },
+      {
+        "id": "P14-12",
+        "type": "unanswerable",
+        "question": "Which weather condition caused the most delays in Study D?",
+        "expected_answer": "Study D does not report weather breakdowns.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {},
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 8.621899999980087,
+        "usage": null,
+        "answer": "当前检索范围内没有找到可通过原 PDF 哈希、页码和原文校验的证据，因此暂不作答。"
+      }
+    ]
+  },
+  "model_reviewed": {
+    "model_run": true,
+    "questions": 12,
+    "answerable_coverage": 0.8888888888888888,
+    "complete_answer_rate": 0.7777777777777778,
+    "partial_answer_count": 1,
+    "gold_page_citation_rate": 0.8888888888888888,
+    "all_expected_pages_cited_rate": 0.7777777777777778,
+    "gold_page_coverage": 0.8,
+    "correct_abstention_rate": 1.0,
+    "false_answer_rate": 0.0,
+    "mean_latency_ms": 5655.122500000023,
+    "median_latency_ms": 4437.766400000328,
+    "citation_precision_at_gold_pages": 1.0,
+    "claim_support_acceptance_rate": 0.8461538461538461,
+    "reviewed_claims": 26,
+    "rejected_claims": 4,
+    "by_question_type": {
+      "cross_paper": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "all_expected_pages_cited_rate": 0.0,
+        "correct_abstention_rate": null
+      },
+      "fact_location": {
+        "total": 1,
+        "answerable_coverage": 1.0,
+        "gold_page_citation_rate": 1.0,
+        "all_expected_pages_cited_rate": 1.0,
+        "correct_abstention_rate": null
+      },
+      "multi_hop": {
+        "total": 7,
+        "answerable_coverage": 0.8571428571428571,
+        "gold_page_citation_rate": 0.8571428571428571,
+        "all_expected_pages_cited_rate": 0.8571428571428571,
+        "correct_abstention_rate": null
+      },
+      "unanswerable": {
+        "total": 3,
+        "answerable_coverage": null,
+        "gold_page_citation_rate": null,
+        "all_expected_pages_cited_rate": null,
+        "correct_abstention_rate": 1.0
+      }
+    },
+    "api_requests": 64,
+    "prompt_tokens": 32134,
+    "completion_tokens": 4616,
+    "cost_upper_bound_usd": 0.0151794,
+    "cases": [
+      {
+        "id": "P14-01",
+        "type": "multi_hop",
+        "question": "Using Study B's sample sizes and failure rates, estimate the number of failed shipments for each container and overall.",
+        "expected_answer": "Container A had 2 failures and Container B had 5, for 7 failures across 160 shipments.",
+        "abstain_expected": false,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": false,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": false,
+          "coverage_gaps": [
+            "No sample sizes are provided for either container, so per-container failed shipment counts cannot be computed.",
+            "No calculation of failed shipments for Foam Container B is given.",
+            "No calculation of failed shipments for Insulated Container A is given.",
+            "No overall failed shipment total is provided."
+          ],
+          "coverage_requirements": [
+            "Study B's sample size for each container (Foam Container B and Insulated Container A)",
+            "Study B's failure rate for each container",
+            "Number of failed shipments for Foam Container B = sample size × 6.25%",
+            "Number of failed shipments for Insulated Container A = sample size × 2.5%",
+            "Overall number of failed shipments across both containers (sum of per-container failures)"
+          ],
+          "subquestions": [
+            "Using Study B's sample sizes and failure rates, estimate the number of failed shipments for each container and overall."
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 2,
+          "rejected_claims": 2,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        },
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 1,
+        "expected_page_coverage": 0.0,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 2,
+        "latency_ms": 5321.698299999753,
+        "usage": {
+          "prompt_eval_count": 2233,
+          "eval_count": 358,
+          "total_duration": 0,
+          "estimated_usd": 0.0010995,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": false,
+            "coverage_gaps": [
+              "No sample sizes are provided for either container, so per-container failed shipment counts cannot be computed.",
+              "No calculation of failed shipments for Foam Container B is given.",
+              "No calculation of failed shipments for Insulated Container A is given.",
+              "No overall failed shipment total is provided."
+            ],
+            "coverage_requirements": [
+              "Study B's sample size for each container (Foam Container B and Insulated Container A)",
+              "Study B's failure rate for each container",
+              "Number of failed shipments for Foam Container B = sample size × 6.25%",
+              "Number of failed shipments for Insulated Container A = sample size × 2.5%",
+              "Overall number of failed shipments across both containers (sum of per-container failures)"
+            ],
+            "subquestions": [
+              "Using Study B's sample sizes and failure rates, estimate the number of failed shipments for each container and overall."
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 2,
+            "rejected_claims": 2,
+            "synthesis_error": null,
+            "refusal_stage": "synthesis_or_review"
+          },
+          "request_count": 5
+        },
+        "answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。"
+      },
+      {
+        "id": "P14-02",
+        "type": "multi_hop",
+        "question": "Compare Container B's failure rate with A's as both a percentage-point gap and a rate ratio.",
+        "expected_answer": "B was 3.75 percentage points higher and had 2.5 times A's failure rate (6.25% versus 2.5%).",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Container B's failure rate as a percentage",
+            "Container A's failure rate as a percentage",
+            "Percentage-point gap computed as B minus A",
+            "Rate ratio computed as B divided by A"
+          ],
+          "subquestions": [
+            "What is Container B's failure rate?",
+            "What is Container A's failure rate?",
+            "What is the percentage-point gap between Container B's failure rate and Container A's failure rate?",
+            "What is the rate ratio of Container B's failure rate to Container A's failure rate?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Foam Container B failed temperature control in 6.25 percent of shipments.",
+            "claim": "Container B's failure rate is 6.25 percent of shipments."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Insulated Container A failed temperature control in 2.5 percent of shipments.",
+            "claim": "Container A's failure rate is 2.5 percent of shipments."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Foam Container B failed temperature control in 6.25 percent of shipments.",
+            "claim": "The percentage-point gap between Container B's failure rate and Container A's failure rate is 3.75 percentage points (6.25 - 2.5)."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Insulated Container A failed temperature control in 2.5 percent of shipments.",
+            "claim": "The percentage-point gap between Container B's failure rate and Container A's failure rate is 3.75 percentage points (6.25 - 2.5)."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Foam Container B failed temperature control in 6.25 percent of shipments.",
+            "claim": "The rate ratio of Container B's failure rate to Container A's failure rate is 2.5 (6.25 / 2.5)."
+          },
+          {
+            "sha256": "fb268200d2c0289e927f60eb3c01c3213813c5580eaa43df3c0e9938478085b9",
+            "page": 1,
+            "quote": "Insulated Container A failed temperature control in 2.5 percent of shipments.",
+            "claim": "The rate ratio of Container B's failure rate to Container A's failure rate is 2.5 (6.25 / 2.5)."
+          }
+        ],
+        "claims": [
+          "Container B's failure rate is 6.25 percent of shipments.",
+          "Container A's failure rate is 2.5 percent of shipments.",
+          "The percentage-point gap between Container B's failure rate and Container A's failure rate is 3.75 percentage points (6.25 - 2.5).",
+          "The rate ratio of Container B's failure rate to Container A's failure rate is 2.5 (6.25 / 2.5)."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 10094.126899999992,
+        "usage": {
+          "prompt_eval_count": 5047,
+          "eval_count": 818,
+          "total_duration": 0,
+          "estimated_usd": 0.0024957,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Container B's failure rate as a percentage",
+              "Container A's failure rate as a percentage",
+              "Percentage-point gap computed as B minus A",
+              "Rate ratio computed as B divided by A"
+            ],
+            "subquestions": [
+              "What is Container B's failure rate?",
+              "What is Container A's failure rate?",
+              "What is the percentage-point gap between Container B's failure rate and Container A's failure rate?",
+              "What is the rate ratio of Container B's failure rate to Container A's failure rate?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 4,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 9
+        },
+        "answer": "Container B's failure rate is 6.25 percent of shipments. Container A's failure rate is 2.5 percent of shipments. The percentage-point gap between Container B's failure rate and Container A's failure rate is 3.75 percentage points (6.25 - 2.5). The rate ratio of Container B's failure rate to Container A's failure rate is 2.5 (6.25 / 2.5)."
+      },
+      {
+        "id": "P14-03",
+        "type": "multi_hop",
+        "question": "What absolute and relative reduction in mean waiting time did Policy Cedar estimate?",
+        "expected_answer": "Waiting time fell by 3 minutes, a 25% reduction from 12 to 9 minutes.",
+        "abstain_expected": false,
+        "status": "generated_partial",
+        "answered": true,
+        "coverage_complete": false,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": false,
+          "coverage_gaps": [
+            "The evidence states the absolute change (12 to 9 minutes) but does not provide or support the claimed 25% relative reduction; the percentage calculation is derived, not stated in the source."
+          ],
+          "coverage_requirements": [
+            "absolute reduction in mean waiting time",
+            "relative reduction in mean waiting time"
+          ],
+          "subquestions": [
+            "What absolute and relative reduction in mean waiting time did Policy Cedar estimate?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 1,
+          "synthesis_error": null,
+          "refusal_stage": "coverage_partial"
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "Policy Cedar reduced mean depot waiting time from 12 minutes to 9 minutes in a simulation of 60 routes.",
+            "claim": "Policy Cedar estimated an absolute reduction in mean depot waiting time of 3 minutes (from 12 minutes to 9 minutes)."
+          }
+        ],
+        "claims": [
+          "Policy Cedar estimated an absolute reduction in mean depot waiting time of 3 minutes (from 12 minutes to 9 minutes)."
+        ],
+        "rejected_claims": 1,
+        "latency_ms": 4036.5452000000914,
+        "usage": {
+          "prompt_eval_count": 1862,
+          "eval_count": 281,
+          "total_duration": 0,
+          "estimated_usd": 0.0008958,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": false,
+            "coverage_gaps": [
+              "The evidence states the absolute change (12 to 9 minutes) but does not provide or support the claimed 25% relative reduction; the percentage calculation is derived, not stated in the source."
+            ],
+            "coverage_requirements": [
+              "absolute reduction in mean waiting time",
+              "relative reduction in mean waiting time"
+            ],
+            "subquestions": [
+              "What absolute and relative reduction in mean waiting time did Policy Cedar estimate?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 1,
+            "synthesis_error": null,
+            "refusal_stage": "coverage_partial"
+          },
+          "request_count": 4
+        },
+        "answer": "Policy Cedar estimated an absolute reduction in mean depot waiting time of 3 minutes (from 12 minutes to 9 minutes).（部分回答：证据未覆盖问题的全部要点。）"
+      },
+      {
+        "id": "P14-04",
+        "type": "cross_paper",
+        "question": "How does Study A's delivery sample compare with the combined intervention and control sample in Study D?",
+        "expected_answer": "Study A included 240 deliveries; Study D included 200 orders total, so Study A's sample was larger by 40.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Identify Study A's delivery sample (successful delivery rates: 92% intervention, 89% control)",
+            "Identify Study D's combined intervention and control sample (100 synthetic orders in dispatch intervention group, 100 orders in control group)",
+            "Compare Study A's delivery sample with Study D's combined intervention and control sample"
+          ],
+          "subquestions": [
+            "What is the delivery sample in Study A?",
+            "What is the combined intervention and control sample in Study D?",
+            "How does Study A's delivery sample compare with the combined intervention and control sample in Study D?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 3,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 2,
+        "expected_page_coverage": 0.5,
+        "all_expected_pages_cited": false,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "Study A's delivery sample is described by successful delivery rates of 92 percent in the intervention group and 89 percent in the control group."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders.",
+            "claim": "Study D's combined intervention and control sample consists of 100 synthetic orders in the dispatch intervention group and 100 orders in the control group."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "The evidence does not provide a direct comparison between Study A's delivery sample and Study D's combined intervention and control sample."
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders.",
+            "claim": "The evidence does not provide a direct comparison between Study A's delivery sample and Study D's combined intervention and control sample."
+          }
+        ],
+        "claims": [
+          "Study A's delivery sample is described by successful delivery rates of 92 percent in the intervention group and 89 percent in the control group.",
+          "Study D's combined intervention and control sample consists of 100 synthetic orders in the dispatch intervention group and 100 orders in the control group.",
+          "The evidence does not provide a direct comparison between Study A's delivery sample and Study D's combined intervention and control sample."
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 9396.038699999735,
+        "usage": {
+          "prompt_eval_count": 4904,
+          "eval_count": 747,
+          "total_duration": 0,
+          "estimated_usd": 0.0023676,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Identify Study A's delivery sample (successful delivery rates: 92% intervention, 89% control)",
+              "Identify Study D's combined intervention and control sample (100 synthetic orders in dispatch intervention group, 100 orders in control group)",
+              "Compare Study A's delivery sample with Study D's combined intervention and control sample"
+            ],
+            "subquestions": [
+              "What is the delivery sample in Study A?",
+              "What is the combined intervention and control sample in Study D?",
+              "How does Study A's delivery sample compare with the combined intervention and control sample in Study D?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 3,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 9
+        },
+        "answer": "Study A's delivery sample is described by successful delivery rates of 92 percent in the intervention group and 89 percent in the control group. Study D's combined intervention and control sample consists of 100 synthetic orders in the dispatch intervention group and 100 orders in the control group. The evidence does not provide a direct comparison between Study A's delivery sample and Study D's combined intervention and control sample."
+      },
+      {
+        "id": "P14-05",
+        "type": "multi_hop",
+        "question": "Given the reported group sizes and success rates in Study D, how many successful deliveries were observed in each group?",
+        "expected_answer": "There were 92 successful intervention orders and 89 successful control orders, a difference of 3.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "干预组成功配送数：100 × 92% = 92",
+            "对照组成功配送数：100 × 89% = 89"
+          ],
+          "subquestions": [
+            "Given the reported group sizes and success rates in Study D, how many successful deliveries were observed in each group?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "干预组成功配送数为 92（100 × 92%）。"
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders.",
+            "claim": "干预组成功配送数为 92（100 × 92%）。"
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Successful delivery rates were 92 percent in the intervention group and 89 percent in the control group.",
+            "claim": "对照组成功配送数为 89（100 × 89%）。"
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The dispatch intervention group included 100 synthetic orders, and the control group included 100 orders.",
+            "claim": "对照组成功配送数为 89（100 × 89%）。"
+          }
+        ],
+        "claims": [
+          "干预组成功配送数为 92（100 × 92%）。",
+          "对照组成功配送数为 89（100 × 89%）。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 4544.1813000002185,
+        "usage": {
+          "prompt_eval_count": 1975,
+          "eval_count": 243,
+          "total_duration": 0,
+          "estimated_usd": 0.0008841,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "干预组成功配送数：100 × 92% = 92",
+              "对照组成功配送数：100 × 89% = 89"
+            ],
+            "subquestions": [
+              "Given the reported group sizes and success rates in Study D, how many successful deliveries were observed in each group?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 4
+        },
+        "answer": "干预组成功配送数为 92（100 × 92%）。 对照组成功配送数为 89（100 × 89%）。"
+      },
+      {
+        "id": "P14-06",
+        "type": "fact_location",
+        "question": "Study D reports a difference in mean scan-to-door time. Does it establish a statistically reliable intervention effect?",
+        "expected_answer": "The observed means were 17 minutes for intervention and 18.5 for control, but the confidence interval crossed zero, so a statistically reliable improvement was not established.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "报告干预组与对照组的平均扫描到进门时间及其差值",
+            "判断该差异是否具有统计学可靠性（如置信区间是否跨零）",
+            "回答是否确立了统计学可靠的干预效果"
+          ],
+          "subquestions": [
+            "Study D reports a difference in mean scan-to-door time. Does it establish a statistically reliable intervention effect?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "Mean scan-to-door times were 17 minutes for the intervention group and 18.5 minutes for the control group.",
+            "claim": "干预组平均扫描到进门时间为17分钟，对照组为18.5分钟，差值为1.5分钟（17 - 18.5 = -1.5）。"
+          },
+          {
+            "sha256": "79b754fe8b941600908dcbb96e65ad2818ce09504c977292533f7ab70e0c8404",
+            "page": 1,
+            "quote": "The reported confidence interval crossed zero, so the authors did not establish a statistically reliable improvement.",
+            "claim": "报告的置信区间跨过零，因此作者未确立统计学可靠的改善。"
+          }
+        ],
+        "claims": [
+          "干预组平均扫描到进门时间为17分钟，对照组为18.5分钟，差值为1.5分钟（17 - 18.5 = -1.5）。",
+          "报告的置信区间跨过零，因此作者未确立统计学可靠的改善。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 3059.635099999923,
+        "usage": {
+          "prompt_eval_count": 1405,
+          "eval_count": 223,
+          "total_duration": 0,
+          "estimated_usd": 0.0006891,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "报告干预组与对照组的平均扫描到进门时间及其差值",
+              "判断该差异是否具有统计学可靠性（如置信区间是否跨零）",
+              "回答是否确立了统计学可靠的干预效果"
+            ],
+            "subquestions": [
+              "Study D reports a difference in mean scan-to-door time. Does it establish a statistically reliable intervention effect?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 3
+        },
+        "answer": "干预组平均扫描到进门时间为17分钟，对照组为18.5分钟，差值为1.5分钟（17 - 18.5 = -1.5）。 报告的置信区间跨过零，因此作者未确立统计学可靠的改善。"
+      },
+      {
+        "id": "P14-07",
+        "type": "multi_hop",
+        "question": "Do the urban and rural delivery counts reconcile with Study A's total, and how far apart are their medians?",
+        "expected_answer": "The counts sum to 240 (160 urban and 80 rural), matching the reported total; their medians differ by 12 minutes (26 versus 14).",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "判断城乡配送计数（城市160、农村80，合计240）是否与 Study A 的总配送量对账",
+            "给出城乡配送中位扫描到门时间（城市14分钟、农村26分钟）",
+            "计算并给出两个中位数的差值（26−14=12分钟）"
+          ],
+          "subquestions": [
+            "Do the urban and rural delivery counts reconcile with Study A's total, and how far apart are their medians?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "证据未给出 Study A 的总配送量，因此无法判断城乡配送计数（160+80=240）是否与 Study A 的总量对账。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "证据未给出 Study A 的总配送量，因此无法判断城乡配送计数（160+80=240）是否与 Study A 的总量对账。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "城市配送中位扫描到门时间为 14 分钟。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "农村配送中位扫描到门时间为 26 分钟。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "城乡配送中位扫描到门时间相差 26−14=12 分钟。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "城乡配送中位扫描到门时间相差 26−14=12 分钟。"
+          }
+        ],
+        "claims": [
+          "证据未给出 Study A 的总配送量，因此无法判断城乡配送计数（160+80=240）是否与 Study A 的总量对账。",
+          "城市配送中位扫描到门时间为 14 分钟。",
+          "农村配送中位扫描到门时间为 26 分钟。",
+          "城乡配送中位扫描到门时间相差 26−14=12 分钟。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 4762.140900000304,
+        "usage": {
+          "prompt_eval_count": 2107,
+          "eval_count": 379,
+          "total_duration": 0,
+          "estimated_usd": 0.0010869,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "判断城乡配送计数（城市160、农村80，合计240）是否与 Study A 的总配送量对账",
+              "给出城乡配送中位扫描到门时间（城市14分钟、农村26分钟）",
+              "计算并给出两个中位数的差值（26−14=12分钟）"
+            ],
+            "subquestions": [
+              "Do the urban and rural delivery counts reconcile with Study A's total, and how far apart are their medians?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 4,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 4
+        },
+        "answer": "证据未给出 Study A 的总配送量，因此无法判断城乡配送计数（160+80=240）是否与 Study A 的总量对账。 城市配送中位扫描到门时间为 14 分钟。 农村配送中位扫描到门时间为 26 分钟。 城乡配送中位扫描到门时间相差 26−14=12 分钟。"
+      },
+      {
+        "id": "P14-08",
+        "type": "multi_hop",
+        "question": "For Policy Cedar, calculate both the absolute and relative change in fuel use per route.",
+        "expected_answer": "Fuel use fell by 0.3 liters per route, about 7.1%, from 4.2 to 3.9 liters.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "Policy Cedar 的每路线燃料使用量（3.9 升）",
+            "基线每路线燃料使用量（4.2 升）",
+            "绝对变化计算：4.2 − 3.9 = 0.3 升减少",
+            "相对变化计算：0.3 ÷ 4.2 ≈ 7.14% 下降"
+          ],
+          "subquestions": [
+            "What is the fuel use per route for Policy Cedar?",
+            "What is the baseline fuel use per route against which Policy Cedar's fuel use per route is compared?",
+            "How is the absolute change in fuel use per route calculated for Policy Cedar?",
+            "How is the relative change in fuel use per route calculated for Policy Cedar?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 4,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+            "claim": "Policy Cedar 的每路线燃料使用量为 3.9 升。"
+          },
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+            "claim": "Policy Cedar 的每路线燃料使用量所对比的基线为 4.2 升。"
+          },
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+            "claim": "绝对变化按 4.2 升减去 3.9 升计算，结果为每路线减少 0.3 升。"
+          },
+          {
+            "sha256": "74e8389c54facc8d1da8d0e51e1e23982e55f2a27bd3135037ba545f8492b7ac",
+            "page": 1,
+            "quote": "The same simulation estimated fuel consumption fell from 4.2 to 3.9 liters per route.",
+            "claim": "相对变化按绝对变化 0.3 升除以基线 4.2 升计算，结果约为 7.14% 的下降。"
+          }
+        ],
+        "claims": [
+          "Policy Cedar 的每路线燃料使用量为 3.9 升。",
+          "Policy Cedar 的每路线燃料使用量所对比的基线为 4.2 升。",
+          "绝对变化按 4.2 升减去 3.9 升计算，结果为每路线减少 0.3 升。",
+          "相对变化按绝对变化 0.3 升除以基线 4.2 升计算，结果约为 7.14% 的下降。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 11326.212699999815,
+        "usage": {
+          "prompt_eval_count": 5715,
+          "eval_count": 899,
+          "total_duration": 0,
+          "estimated_usd": 0.0027933,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "Policy Cedar 的每路线燃料使用量（3.9 升）",
+              "基线每路线燃料使用量（4.2 升）",
+              "绝对变化计算：4.2 − 3.9 = 0.3 升减少",
+              "相对变化计算：0.3 ÷ 4.2 ≈ 7.14% 下降"
+            ],
+            "subquestions": [
+              "What is the fuel use per route for Policy Cedar?",
+              "What is the baseline fuel use per route against which Policy Cedar's fuel use per route is compared?",
+              "How is the absolute change in fuel use per route calculated for Policy Cedar?",
+              "How is the relative change in fuel use per route calculated for Policy Cedar?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 4,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 10
+        },
+        "answer": "Policy Cedar 的每路线燃料使用量为 3.9 升。 Policy Cedar 的每路线燃料使用量所对比的基线为 4.2 升。 绝对变化按 4.2 升减去 3.9 升计算，结果为每路线减少 0.3 升。 相对变化按绝对变化 0.3 升除以基线 4.2 升计算，结果约为 7.14% 的下降。"
+      },
+      {
+        "id": "P14-09",
+        "type": "unanswerable",
+        "question": "Which city had the highest delivery success rate in Study D?",
+        "expected_answer": "Study D does not report city-level outcomes.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "Which city had the highest delivery success rate in Study D?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        },
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 3733.0097999997633,
+        "usage": {
+          "prompt_eval_count": 1760,
+          "eval_count": 104,
+          "total_duration": 0,
+          "estimated_usd": 0.0006528,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [],
+            "subquestions": [
+              "Which city had the highest delivery success rate in Study D?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 0,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": "synthesis_or_review"
+          },
+          "request_count": 4
+        },
+        "answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。"
+      },
+      {
+        "id": "P14-10",
+        "type": "unanswerable",
+        "question": "What p-value and confidence interval bounds were reported for Study D?",
+        "expected_answer": "The report says the confidence interval crossed zero but gives no p-value or interval bounds.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": false,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": false,
+          "coverage_gaps": [
+            "The p-value for Study D is not provided in the claim or evidence.",
+            "The confidence interval bounds (numeric lower and upper limits) for Study D are not provided in the claim or evidence."
+          ],
+          "coverage_requirements": [
+            "Report the p-value for Study D",
+            "Report the confidence interval bounds for Study D"
+          ],
+          "subquestions": [
+            "What p-value and confidence interval bounds were reported for Study D?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 1,
+          "rejected_claims": 1,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        },
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 1,
+        "latency_ms": 4331.351500000437,
+        "usage": {
+          "prompt_eval_count": 2069,
+          "eval_count": 226,
+          "total_duration": 0,
+          "estimated_usd": 0.0008919,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": false,
+            "coverage_gaps": [
+              "The p-value for Study D is not provided in the claim or evidence.",
+              "The confidence interval bounds (numeric lower and upper limits) for Study D are not provided in the claim or evidence."
+            ],
+            "coverage_requirements": [
+              "Report the p-value for Study D",
+              "Report the confidence interval bounds for Study D"
+            ],
+            "subquestions": [
+              "What p-value and confidence interval bounds were reported for Study D?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 1,
+            "rejected_claims": 1,
+            "synthesis_error": null,
+            "refusal_stage": "synthesis_or_review"
+          },
+          "request_count": 5
+        },
+        "answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。"
+      },
+      {
+        "id": "P14-11",
+        "type": "multi_hop",
+        "question": "Can the exact overall median be derived by weighting the urban and rural medians by parcel count? What overall median did the study report?",
+        "expected_answer": "No. Subgroup medians cannot be combined by a weighted average; the study separately reports an overall median of 18 minutes.",
+        "abstain_expected": false,
+        "status": "generated_claims_reviewed",
+        "answered": true,
+        "coverage_complete": true,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [
+            "判断能否仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数",
+            "报告研究给出的总体中位数（若原文未报告，则说明未报告）"
+          ],
+          "subquestions": [
+            "Can the exact overall median be derived by weighting the urban and rural medians by parcel count? What overall median did the study report?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": false,
+          "reviewed_claims": 2,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": null
+        },
+        "expected_page_cited": true,
+        "expected_pages_cited": 1,
+        "expected_page_count": 1,
+        "expected_page_coverage": 1.0,
+        "all_expected_pages_cited": true,
+        "citations": [
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "无法仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数；原文未提供总体中位数，也未提供可计算总体中位数的完整分布数据。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "无法仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数；原文未提供总体中位数，也未提供可计算总体中位数的完整分布数据。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Rural deliveries included 80 parcels and had a median scan-to-door time of 26 minutes.",
+            "claim": "原文未报告总体中位数（overall median）。"
+          },
+          {
+            "sha256": "e42e12f717811c078897c1a87656125b5e7aeb8cc69b66760f506fe4a48ce970",
+            "page": 1,
+            "quote": "Urban deliveries included 160 parcels and had a median scan-to-door time of 14 minutes.",
+            "claim": "原文未报告总体中位数（overall median）。"
+          }
+        ],
+        "claims": [
+          "无法仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数；原文未提供总体中位数，也未提供可计算总体中位数的完整分布数据。",
+          "原文未报告总体中位数（overall median）。"
+        ],
+        "rejected_claims": 0,
+        "latency_ms": 3524.7472999999445,
+        "usage": {
+          "prompt_eval_count": 1393,
+          "eval_count": 239,
+          "total_duration": 0,
+          "estimated_usd": 0.0007047,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [
+              "判断能否仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数",
+              "报告研究给出的总体中位数（若原文未报告，则说明未报告）"
+            ],
+            "subquestions": [
+              "Can the exact overall median be derived by weighting the urban and rural medians by parcel count? What overall median did the study report?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": false,
+            "reviewed_claims": 2,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": null
+          },
+          "request_count": 3
+        },
+        "answer": "无法仅凭城市和农村的中位数按包裹数量加权得到精确的总体中位数；原文未提供总体中位数，也未提供可计算总体中位数的完整分布数据。 原文未报告总体中位数（overall median）。"
+      },
+      {
+        "id": "P14-12",
+        "type": "unanswerable",
+        "question": "Which weather condition caused the most delays in Study D?",
+        "expected_answer": "Study D does not report weather breakdowns.",
+        "abstain_expected": true,
+        "status": "abstained",
+        "answered": false,
+        "coverage_complete": null,
+        "diagnostics": {
+          "retrieved_pages": 4,
+          "screen_selected_pages": 1,
+          "evidence_pages": 1,
+          "coverage_complete": true,
+          "coverage_gaps": [],
+          "coverage_requirements": [],
+          "subquestions": [
+            "Which weather condition caused the most delays in Study D?"
+          ],
+          "planning_error": null,
+          "generation_retry_used": true,
+          "reviewed_claims": 0,
+          "rejected_claims": 0,
+          "synthesis_error": null,
+          "refusal_stage": "synthesis_or_review"
+        },
+        "expected_page_cited": false,
+        "expected_pages_cited": 0,
+        "expected_page_count": 0,
+        "expected_page_coverage": null,
+        "all_expected_pages_cited": false,
+        "citations": [],
+        "claims": [],
+        "rejected_claims": 0,
+        "latency_ms": 3731.7823000003045,
+        "usage": {
+          "prompt_eval_count": 1664,
+          "eval_count": 99,
+          "total_duration": 0,
+          "estimated_usd": 0.000618,
+          "_diagnostics": {
+            "retrieved_pages": 4,
+            "screen_selected_pages": 1,
+            "evidence_pages": 1,
+            "coverage_complete": true,
+            "coverage_gaps": [],
+            "coverage_requirements": [],
+            "subquestions": [
+              "Which weather condition caused the most delays in Study D?"
+            ],
+            "planning_error": null,
+            "generation_retry_used": true,
+            "reviewed_claims": 0,
+            "rejected_claims": 0,
+            "synthesis_error": null,
+            "refusal_stage": "synthesis_or_review"
+          },
+          "request_count": 4
+        },
+        "answer": "本机模型未能生成通过逐条支持性审查的回答；系统已拒答。"
+      }
+    ]
+  }
+}

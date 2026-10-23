@@ -6,6 +6,8 @@ index/
 cache/
 models/
 *.sqlite
+*.sqlite3
+*.sqlite3-*
 *.db
 *.parquet
 *.arrow
