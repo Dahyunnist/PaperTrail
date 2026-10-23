@@ -254,6 +254,51 @@
       "benchmark_group": "pt9-public-heldout-20261023",
       "benchmark_role": "test_holdout",
       "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+    },
+    {
+      "title": "Good enough practices in scientific computing",
+      "doi": "10.1371/journal.pcbi.1005510",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1005510&type=printable",
+      "source_version": "版本记录；2017-06-22",
+      "local_pdf": "evals/fixtures/pt10-development/good-enough-scientific-computing.pdf",
+      "local_pdf_sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+      "benchmark_group": "pt10-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten quick tips for getting the most scientific value out of numerical data",
+      "doi": "10.1371/journal.pcbi.1006141",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006141",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006141",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1006141&type=printable",
+      "source_version": "版本记录；2018-10-11",
+      "local_pdf": "evals/fixtures/pt10-development/numerical-data-value.pdf",
+      "local_pdf_sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+      "benchmark_group": "pt10-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for leveraging virtual interaction to build higher-level learning into bioinformatics short courses",
+      "doi": "10.1371/journal.pcbi.1010220",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010220",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010220",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010220&type=printable",
+      "source_version": "版本记录；2022-07-28",
+      "local_pdf": "evals/fixtures/pt10-development/virtual-interaction-bioinformatics-courses.pdf",
+      "local_pdf_sha256": "ad4f59ea9b8fa6941db4184ea8b648c099ce55c3db57943206b613a90962d30a",
+      "benchmark_group": "pt10-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
     }
   ]
 }

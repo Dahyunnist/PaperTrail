@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "group_id": "pt10-public-development-20261023",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "a5fa387dc80a977241c7e05fc697d7154134c608058368389a0f565c7b3d5a3f",
+  "index": {
+    "papers": 3,
+    "pdf_pages": 58,
+    "chunks": 795,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4"
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前锁定环境缺少 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4},
+      "vector": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4},
+      "hybrid": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4}
+    },
+    "k10": {
+      "bm25": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4},
+      "vector": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4},
+      "hybrid": {"recall_at_k": 0.5, "mrr_at_k": 0.5, "all_evidence_pages": 0.5, "complete_evidence_coverage": 0.5, "evidence_item_recall": 0.4}
+    }
+  },
+  "by_paper_at_k10": {
+    "good_enough_scientific_computing": {"target_documents_found": true, "target_pages_found": 0, "questions": 2},
+    "numerical_data_value": {"target_documents_found": true, "target_pages_found": 1, "questions": 2},
+    "virtual_interaction_courses": {"target_documents_found": true, "target_pages_found": 1, "questions": 1}
+  },
+  "qa_evidence_path": {
+    "answerable_questions": 4,
+    "model_calls": 0,
+    "verified_excerpt_status": 4,
+    "gold_evidence_pages_cited": 2,
+    "gold_evidence_pages_total": 5,
+    "exact_gold_quotes_cited": 2,
+    "exact_gold_quotes_total": 5
+  },
+  "limitations": [
+    "PT10 是开发诊断组，四道题不能支持泛化结论。",
+    "三种检索模式在本组仅得到 2/4 的问题页命中率。",
+    "QA 最终引用只覆盖 2/5 条目标证据页。"
+  ]
+}
