@@ -299,6 +299,51 @@
       "benchmark_group": "pt10-public-development-20261023",
       "benchmark_role": "development",
       "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "A simple kit to use computational notebooks for more openness, reproducibility, and productivity in research",
+      "doi": "10.1371/journal.pcbi.1010356",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010356",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010356",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010356&type=printable",
+      "source_version": "版本记录；2022-09-15",
+      "local_pdf": "evals/fixtures/pt11-development/computational-notebook-kit.pdf",
+      "local_pdf_sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+      "benchmark_group": "pt11-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for writing and sharing computational analyses in Jupyter Notebooks",
+      "doi": "10.1371/journal.pcbi.1007007",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007007",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007007",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1007007&type=printable",
+      "source_version": "版本记录；2019-07-25",
+      "local_pdf": "evals/fixtures/pt11-development/jupyter-notebook-rules.pdf",
+      "local_pdf_sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+      "benchmark_group": "pt11-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for writing a response to reviewers",
+      "doi": "10.1371/journal.pcbi.1005730",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005730",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005730",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1005730&type=printable",
+      "source_version": "版本记录；2017-10-12",
+      "local_pdf": "evals/fixtures/pt11-development/response-to-reviewers.pdf",
+      "local_pdf_sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+      "benchmark_group": "pt11-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级开发题均登记"
     }
   ]
 }

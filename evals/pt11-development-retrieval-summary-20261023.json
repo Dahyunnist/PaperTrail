@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "group_id": "pt11-public-development-20261023",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "6a5808b12a021d8ee382a9d035fe846ed9ab5f99451281985919222cd06d49b7",
+  "index": {
+    "papers": 3,
+    "pdf_pages": 24,
+    "chunks": 259,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4"
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前环境缺少 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {"recall_at_k": 1.0, "mrr_at_k": 0.7083, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.6},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.55, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.6},
+      "hybrid": {"recall_at_k": 1.0, "mrr_at_k": 0.875, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.6}
+    },
+    "k10": {
+      "bm25": {"recall_at_k": 1.0, "mrr_at_k": 0.7083, "all_evidence_pages": 1.0, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.8},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.55, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.6},
+      "hybrid": {"recall_at_k": 1.0, "mrr_at_k": 0.875, "all_evidence_pages": 1.0, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.8}
+    }
+  },
+  "qa_evidence_path": {
+    "answerable_questions": 4,
+    "model_calls": 0,
+    "verified_excerpt_status": 4,
+    "gold_evidence_pages_cited": 3,
+    "gold_evidence_pages_total": 5,
+    "exact_gold_quotes_cited": 1,
+    "exact_gold_quotes_total": 5
+  },
+  "limitations": [
+    "PT11 是开发诊断组，四题不能支持泛化结论。",
+    "跨论文题有一侧黄金证据在 top-10 检索中仍未命中。",
+    "最终 QA 引用覆盖低于检索页覆盖。"
+  ]
+}
