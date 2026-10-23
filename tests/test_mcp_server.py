@@ -61,7 +61,7 @@ def test_stdio_mcp_tools_and_resources_are_read_only(tmp_path):
             "sha256": "0" * 64, "page": 1}})
         assert outside["result"]["isError"] is True
         unknown_resource = call(9, "resources/read", {"uri": f"papertrail://documents/{'0' * 64}"})
-        assert unknown_resource["result"]["isError"] is True
+        assert unknown_resource["error"]["code"] == -32602
         assert hashlib.sha256(db.read_bytes()).hexdigest() == before
     finally:
         proc.terminate()
