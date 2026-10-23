@@ -76,6 +76,82 @@ def test_quote_relevance_matches_word_forms_without_rewriting_quotes():
     assert _term_overlap({"methodology"}, {"meteorology"}) == 0
 
 
+def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.retrieval import retrieve as real_retrieve
+
+    corpus = tmp_path / "corpus"
+    sources = [
+        ("alpha.pdf", "Alpha Research Paper", "Alpha uses wavelet calibration to process the samples."),
+        ("beta.pdf", "Beta Research Paper", "Beta reports improved recovery after treatment."),
+    ]
+    selections = []
+    for filename, title, text in sources:
+        doc = fitz.open()
+        page = doc.new_page()
+        page.insert_text((40, 60), title, fontsize=16)
+        page.insert_text((40, 100), text, fontsize=11)
+        path = corpus / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        doc.save(path)
+        doc.close()
+        selections.append({"root_id": "papers", "file_name": filename,
+                           "relative_path": filename, "sha256": _hash(path),
+                           "kind": "pdf", "source_type": "original_pdf"})
+
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "papers", "path": str(corpus)}]}),
+                      encoding="utf-8")
+    manifest = tmp_path / "selection.jsonl"
+    manifest.write_text("".join(json.dumps(row) + "\n" for row in selections), encoding="utf-8")
+    db = tmp_path / "local" / "papers.sqlite3"
+    assert index_selection(db, config, manifest)["added"] == 2
+
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "cross-paper-map-test")
+    monkeypatch.setattr(qa, "_plan_subquestions", lambda *_args: {
+        "subquestions": ["What method does Alpha use?", "What result does Beta report?"],
+        "usage": {},
+    })
+
+    def retrieve_for_subquestion(database, query, *args, **kwargs):
+        lookup = "Alpha wavelet" if "Alpha" in query else "Beta recovery"
+        return real_retrieve(database, lookup, *args, **kwargs)
+
+    monkeypatch.setattr(qa, "retrieve", retrieve_for_subquestion)
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": list(range(len(rows))), "targeted_query": "", "sufficient": True, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, _evidence, _model, _subquestions: {
+        "claims": [{"text": "Alpha uses wavelet calibration; Beta reports improved recovery.",
+                    "evidence_ids": [0, 1], "subquestion_ids": [0, 1], "support": "supported",
+                    "relevant": True, "support_method": "test_judge"}],
+        "coverage_complete": True, "covered_subquestions": [0, 1],
+        "coverage_requirements": ["Alpha method", "Beta result"], "coverage_gaps": [],
+        "generation_retry_used": False, "usage": {},
+    })
+
+    result = qa.ask(db, "Compare what Alpha and Beta report.", mode="bm25")
+
+    claim = result["claims"][0]
+    expected_hashes = {_hash(corpus / filename) for filename, _, _ in sources}
+    citations = claim["support_evidence"]
+    assert result["status"] == "generated_claims_reviewed"
+    assert claim["evidence"]["sha256"] == citations[0]["sha256"]
+    assert {citation["sha256"] for citation in citations} == expected_hashes
+    assert {citation["pdf_page"] for citation in citations} == {1}
+    assert any("wavelet calibration" in citation["quote"] for citation in citations
+               if citation["sha256"] == _hash(corpus / "alpha.pdf"))
+    assert any("improved recovery" in citation["quote"] for citation in citations
+               if citation["sha256"] == _hash(corpus / "beta.pdf"))
+    assert all(_validate_quote(citation["path"], citation["sha256"], citation["pdf_page"],
+                               citation["quote"], {}) for citation in citations)
+
+    history = qa.conversation_history(db, result["conversation_id"])
+    saved = history[0]["claims"][0]["evidence"]
+    assert saved["sha256"] == citations[0]["sha256"]
+    assert {citation["sha256"] for citation in saved["support_evidence"]} == expected_hashes
+
+
 def test_qa_does_not_cite_ocr_derived_text(tmp_path, monkeypatch):
     import papertrail.qa as qa
 
@@ -397,6 +473,25 @@ def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeyp
     history = qa.conversation_history(db, result["conversation_id"])
     assert history[0]["coverage_gaps"] == ["missing detail"]
     assert history[0]["coverage_complete"] == 0
+
+
+def test_qa_drops_claim_when_deterministic_evidence_mapping_fails(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "source-map-test")
+    monkeypatch.setattr(qa, "_synthesize_local", lambda _question, _evidence, _model: {
+        "claims": [{"text": "An unsupported cross-slot claim.", "evidence_ids": [0],
+                    "support": "supported", "relevant": True,
+                    "evidence_mapping_valid": False, "support_method": "test_judge"}],
+        "coverage_complete": True, "coverage_requirements": [], "coverage_gaps": [], "usage": {},
+    })
+
+    result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
+
+    assert result["status"] == "abstained"
+    assert result["claims"] == []
+    assert result["usage"]["_diagnostics"]["rejected_claims"] == 1
 
 
 def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):

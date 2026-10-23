@@ -376,6 +376,20 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str,
         coverage_requirements = []
     if decomposed and len(coverage_requirements) < len(subquestions):
         coverage_gaps.append("审查器列出的必答要点少于拆解后的子问题数")
+    evidence_mapping_valid = [True] * len(claims)
+    if decomposed:
+        evidence_mapping_valid = []
+        for claim_index, claim in enumerate(claims):
+            claim_slots = set(claim.get("subquestion_ids", []))
+            citation_slots = [set(evidence[index].get("subquestion_ids", []))
+                              for index in claim["evidence_ids"]]
+            covered_slots = set().union(*citation_slots) if citation_slots else set()
+            aligned = bool(claim_slots) and claim_slots.issubset(covered_slots) and all(
+                slots.intersection(claim_slots) for slots in citation_slots)
+            evidence_mapping_valid.append(aligned)
+            if not aligned:
+                coverage_gaps.append(
+                    f"claim {claim_index + 1} 的引文槽位与对应证据来源不匹配，已拒绝该 claim")
     coverage_complete = judged.get("coverage_complete") is True and not coverage_gaps
     covered_subquestions: list[int] = []
     if decomposed:
@@ -389,6 +403,7 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str,
                 sub_id for index, claim in enumerate(claims)
                 if by_id.get(index, {}).get("supported") is True
                 and by_id.get(index, {}).get("relevant") is True
+                and evidence_mapping_valid[index]
                 for sub_id in claim.get("subquestion_ids", [])
             }
             covered_subquestions = [value for value in dict.fromkeys(covered)
@@ -402,6 +417,7 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str,
     usage = _add_usage(usage, retry_usage)
     return {"claims": [{**claim, "support": "supported" if by_id.get(i, {}).get("supported") is True else "unsupported",
                          "relevant": by_id.get(i, {}).get("relevant") is True,
+                         "evidence_mapping_valid": evidence_mapping_valid[i],
                          "support_method": "local_llm_judge"} for i, claim in enumerate(claims)],
             "coverage_complete": coverage_complete, "coverage_requirements": coverage_requirements,
             "coverage_gaps": coverage_gaps, "covered_subquestions": covered_subquestions,
@@ -669,7 +685,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
                                      for index in missing_evidence_subquestions)
             generation_usage = _add_usage(_add_usage(retrieval_usage, screen_usage), synthesis["usage"])
             generated_claims = [item for item in generated_claims
-                                if item["support"] == "supported" and item.get("relevant", True)]
+                                if item["support"] == "supported" and item.get("relevant", True)
+                                and item.get("evidence_mapping_valid", True)]
             rejected_claim_count = reviewed_claim_count - len(generated_claims)
         except (RuntimeError, ValueError) as exc:
             synthesis_error = str(exc)

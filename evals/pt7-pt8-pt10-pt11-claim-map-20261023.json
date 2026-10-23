@@ -1,0 +1,863 @@
+{
+  "schema_version": 1,
+  "dataset_role": "development_diagnostic",
+  "scope": {
+    "groups": [
+      "pt7",
+      "pt8",
+      "pt10",
+      "pt11"
+    ],
+    "questions": "answerable only",
+    "model_calls": 0
+  },
+  "modes": {
+    "bm25": {
+      "answerable_questions": 16,
+      "gold_pages": 20,
+      "cited_gold_pages": 10,
+      "gold_phrases_contained": 5,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 58,
+      "source_validation_failures": 0,
+      "model_calls": 0
+    },
+    "bm25_expanded": {
+      "answerable_questions": 16,
+      "gold_pages": 20,
+      "cited_gold_pages": 10,
+      "gold_phrases_contained": 4,
+      "exact_gold_quotes": 0,
+      "displayed_citations": 66,
+      "source_validation_failures": 0,
+      "model_calls": 0
+    }
+  },
+  "groups": [
+    {
+      "group_id": "pt7-public-development-20261023",
+      "mode": "bm25",
+      "totals": {
+        "answerable_questions": 5,
+        "gold_pages": 7,
+        "cited_gold_pages": 3,
+        "gold_phrases_contained": 1,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 17,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT7-01",
+          "gold_pages": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-02",
+          "gold_pages": [
+            {
+              "sha256": "629c33befe0160b0cb463799af659a35fdf49203720f55bd0371bef4d55fe073",
+              "pdf_page": 4,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 2,
+          "citation_source_valid": [
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-03",
+          "gold_pages": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 11,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-04",
+          "gold_pages": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-05",
+          "gold_pages": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 2,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt7-public-development-20261023",
+      "mode": "bm25_expanded",
+      "totals": {
+        "answerable_questions": 5,
+        "gold_pages": 7,
+        "cited_gold_pages": 4,
+        "gold_phrases_contained": 1,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 20,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT7-01",
+          "gold_pages": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-02",
+          "gold_pages": [
+            {
+              "sha256": "629c33befe0160b0cb463799af659a35fdf49203720f55bd0371bef4d55fe073",
+              "pdf_page": 4,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 2,
+          "citation_source_valid": [
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-03",
+          "gold_pages": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 11,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-04",
+          "gold_pages": [
+            {
+              "sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT7-05",
+          "gold_pages": [
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 2,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt8-public-development-20261023",
+      "mode": "bm25",
+      "totals": {
+        "answerable_questions": 3,
+        "gold_pages": 3,
+        "cited_gold_pages": 1,
+        "gold_phrases_contained": 0,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 9,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT8-01",
+          "gold_pages": [
+            {
+              "sha256": "91f24205d15596227407fc5ade92c71d37c86dd1fc589b8dc1d64d7c7dd38ed0",
+              "pdf_page": 5,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 2,
+          "citation_source_valid": [
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT8-02",
+          "gold_pages": [
+            {
+              "sha256": "98d6d1458eac6b88fc8f8fd8e376ad1707e053f205db2b71e4a35ecdc2f09f4e",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT8-03",
+          "gold_pages": [
+            {
+              "sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+              "pdf_page": 6,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 2,
+          "citation_source_valid": [
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt8-public-development-20261023",
+      "mode": "bm25_expanded",
+      "totals": {
+        "answerable_questions": 3,
+        "gold_pages": 3,
+        "cited_gold_pages": 1,
+        "gold_phrases_contained": 0,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 10,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT8-01",
+          "gold_pages": [
+            {
+              "sha256": "91f24205d15596227407fc5ade92c71d37c86dd1fc589b8dc1d64d7c7dd38ed0",
+              "pdf_page": 5,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT8-02",
+          "gold_pages": [
+            {
+              "sha256": "98d6d1458eac6b88fc8f8fd8e376ad1707e053f205db2b71e4a35ecdc2f09f4e",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT8-03",
+          "gold_pages": [
+            {
+              "sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+              "pdf_page": 6,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 2,
+          "citation_source_valid": [
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt10-public-development-20261023",
+      "mode": "bm25",
+      "totals": {
+        "answerable_questions": 4,
+        "gold_pages": 5,
+        "cited_gold_pages": 2,
+        "gold_phrases_contained": 2,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 15,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT10-01",
+          "gold_pages": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-02",
+          "gold_pages": [
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-03",
+          "gold_pages": [
+            {
+              "sha256": "ad4f59ea9b8fa6941db4184ea8b648c099ce55c3db57943206b613a90962d30a",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-04",
+          "gold_pages": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 5,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt10-public-development-20261023",
+      "mode": "bm25_expanded",
+      "totals": {
+        "answerable_questions": 4,
+        "gold_pages": 5,
+        "cited_gold_pages": 2,
+        "gold_phrases_contained": 1,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 18,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT10-01",
+          "gold_pages": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-02",
+          "gold_pages": [
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-03",
+          "gold_pages": [
+            {
+              "sha256": "ad4f59ea9b8fa6941db4184ea8b648c099ce55c3db57943206b613a90962d30a",
+              "pdf_page": 8,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 3,
+          "citation_source_valid": [
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT10-04",
+          "gold_pages": [
+            {
+              "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+              "pdf_page": 5,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt11-public-development-20261023",
+      "mode": "bm25",
+      "totals": {
+        "answerable_questions": 4,
+        "gold_pages": 5,
+        "cited_gold_pages": 4,
+        "gold_phrases_contained": 2,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 17,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT11-01",
+          "gold_pages": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 7,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-02",
+          "gold_pages": [
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-03",
+          "gold_pages": [
+            {
+              "sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+              "pdf_page": 3,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-04",
+          "gold_pages": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 6,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt11-public-development-20261023",
+      "mode": "bm25_expanded",
+      "totals": {
+        "answerable_questions": 4,
+        "gold_pages": 5,
+        "cited_gold_pages": 3,
+        "gold_phrases_contained": 2,
+        "exact_gold_quotes": 0,
+        "displayed_citations": 18,
+        "source_validation_failures": 0,
+        "model_calls": 0
+      },
+      "questions": [
+        {
+          "id": "PT11-01",
+          "gold_pages": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 7,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-02",
+          "gold_pages": [
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "page_cited": true,
+              "gold_phrase_contained": true,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 5,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-03",
+          "gold_pages": [
+            {
+              "sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+              "pdf_page": 3,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        },
+        {
+          "id": "PT11-04",
+          "gold_pages": [
+            {
+              "sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+              "pdf_page": 6,
+              "page_cited": true,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            },
+            {
+              "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+              "pdf_page": 2,
+              "page_cited": false,
+              "gold_phrase_contained": false,
+              "exact_gold_quote": false
+            }
+          ],
+          "displayed_citations": 4,
+          "citation_source_valid": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "model_calls": 0
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "仅 PT7/PT8/PT10/PT11 开发题；结果不代表语义正确率或盲测表现。",
+    "生成关闭；输出是可核验摘录，不是模型综合后的答案 claim。",
+    "黄金短语为片段；完全相等衡量边界吻合，不等于引文合法性。"
+  ]
+}

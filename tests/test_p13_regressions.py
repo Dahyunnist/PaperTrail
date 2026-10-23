@@ -88,6 +88,29 @@ def test_invalid_subquestion_ids_get_one_structured_repair_retry(monkeypatch):
     assert result["claims"][0]["support"] == "supported"
 
 
+def test_claim_cannot_cover_subquestion_with_evidence_from_another_slot(monkeypatch):
+    import papertrail.qa as qa
+
+    outputs = iter([
+        {"claims": [{"text": "Paper B reports a result.", "evidence_ids": [0],
+                     "subquestion_ids": [1]}]},
+        {"results": [{"claim_id": 0, "supported": True, "relevant": True}],
+         "coverage_requirements": ["Paper A method", "Paper B result"],
+         "covered_subquestions": [0, 1], "coverage_complete": True, "coverage_gaps": []},
+    ])
+    monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
+
+    result = qa._synthesize_local("Compare Paper A and Paper B.", [{
+        "quote": "Paper A uses calibration.", "title": "Paper A", "pdf_page": 1,
+        "subquestion_ids": [0],
+    }], "test-model", ["What method does Paper A use?", "What result does Paper B report?"])
+
+    assert result["claims"][0]["support"] == "supported"
+    assert result["claims"][0]["evidence_mapping_valid"] is False
+    assert result["coverage_complete"] is False
+    assert any("引文槽位" in gap for gap in result["coverage_gaps"])
+
+
 def test_invalid_evidence_reference_gets_one_schema_repair_retry(monkeypatch):
     import papertrail.qa as qa
 
