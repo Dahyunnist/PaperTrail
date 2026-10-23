@@ -36,7 +36,7 @@
     }
   ],
   "gold_file": "evals/pt5-public-gold-20261023.jsonl",
-  "gold_sha256": "c9aa6f36732229886ec0fe97426ca1a155a629c6474314cdcb1c497e77240ddb",
+  "gold_sha256": "695dd992dd13cd091c9aa384cac97fb8e68c1d962075a3bb70ea6c6eda93584d",
   "question_count": 6,
   "group_note": "3篇许可明确且官方PDF可下载的论文；按论文分组，每篇2题。2篇许可已核验的候选因官方PDF端点不可用而排除。"
 }

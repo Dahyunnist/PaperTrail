@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "group_id": "pt5-public-real-20261023",
-  "gold_sha256": "c9aa6f36732229886ec0fe97426ca1a155a629c6474314cdcb1c497e77240ddb",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "695dd992dd13cd091c9aa384cac97fb8e68c1d962075a3bb70ea6c6eda93584d",
   "index": {
     "papers": 3,
     "chunks": 467,
@@ -18,7 +19,7 @@
       "bm25": {
         "retriever": "BM25",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.7083333333333334,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
@@ -51,7 +52,7 @@
       "vector": {
         "retriever": "字符 TF-IDF + SVD",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.6305555555555555,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
@@ -84,7 +85,7 @@
       "hybrid": {
         "retriever": "BM25 + 字符向量 RRF",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.7222222222222222,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
@@ -119,7 +120,7 @@
       "bm25": {
         "retriever": "BM25",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.7083333333333334,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
@@ -152,7 +153,7 @@
       "vector": {
         "retriever": "字符 TF-IDF + SVD",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.6305555555555555,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
@@ -185,7 +186,7 @@
       "hybrid": {
         "retriever": "BM25 + 字符向量 RRF",
         "recall_at_k": 1.0,
-        "mrr_at_k": 0.7222222222222222,
+        "mrr_at_k": 0.9166666666666666,
         "complete_evidence_coverage": 1.0,
         "evidence_item_recall": 1.0,
         "paper_failures": {
