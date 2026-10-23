@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "dataset_role": "development_diagnostic",
+  "groups": [
+    {
+      "group_id": "pt7-public-development-20261023",
+      "questions": 6,
+      "answerable_questions": 5,
+      "answerable_gold_pages": 7,
+      "parsed_gold_pages": 7,
+      "parsed_gold_quotes": 7,
+      "top20_retrieved_gold_pages": 5,
+      "final_cited_gold_pages": 3,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 1,
+      "unanswerable_questions_with_extractive_candidates": 1,
+      "question_results": [
+        {
+          "id": "PT7-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 0,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT7-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT7-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1
+        },
+        {
+          "id": "PT7-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT7-05",
+          "question_type": "multi_hop",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 2,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT7-06",
+          "question_type": "unanswerable",
+          "abstain": true,
+          "extractive_candidates_returned": true
+        }
+      ]
+    },
+    {
+      "group_id": "pt8-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 3,
+      "answerable_gold_pages": 3,
+      "parsed_gold_pages": 3,
+      "parsed_gold_quotes": 3,
+      "top20_retrieved_gold_pages": 2,
+      "final_cited_gold_pages": 1,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 0,
+      "unanswerable_questions_with_extractive_candidates": 1,
+      "question_results": [
+        {
+          "id": "PT8-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT8-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT8-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 0,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT8-04",
+          "question_type": "unanswerable",
+          "abstain": true,
+          "extractive_candidates_returned": true
+        }
+      ]
+    },
+    {
+      "group_id": "pt10-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 4,
+      "answerable_gold_pages": 5,
+      "parsed_gold_pages": 5,
+      "parsed_gold_quotes": 5,
+      "top20_retrieved_gold_pages": 2,
+      "final_cited_gold_pages": 2,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 2,
+      "unanswerable_questions_with_extractive_candidates": 0,
+      "question_results": [
+        {
+          "id": "PT10-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 0,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT10-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1
+        },
+        {
+          "id": "PT10-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1
+        },
+        {
+          "id": "PT10-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 0,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        }
+      ]
+    },
+    {
+      "group_id": "pt11-public-development-20261023",
+      "questions": 4,
+      "answerable_questions": 4,
+      "answerable_gold_pages": 5,
+      "parsed_gold_pages": 5,
+      "parsed_gold_quotes": 5,
+      "top20_retrieved_gold_pages": 5,
+      "final_cited_gold_pages": 3,
+      "exact_quote_citations": 0,
+      "gold_phrases_contained_in_citations": 1,
+      "unanswerable_questions_with_extractive_candidates": 0,
+      "question_results": [
+        {
+          "id": "PT11-01",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 1
+        },
+        {
+          "id": "PT11-02",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 0,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT11-03",
+          "question_type": "fact_location",
+          "abstain": false,
+          "gold_pages": 1,
+          "parsed_pages": 1,
+          "top20_retrieved_pages": 1,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        },
+        {
+          "id": "PT11-04",
+          "question_type": "cross_paper",
+          "abstain": false,
+          "gold_pages": 2,
+          "parsed_pages": 2,
+          "top20_retrieved_pages": 2,
+          "final_cited_pages": 1,
+          "exact_quote_citations": 0,
+          "gold_phrase_contained": 0
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "questions": 18,
+    "answerable_questions": 16,
+    "answerable_gold_pages": 20,
+    "parsed_gold_pages": 20,
+    "parsed_gold_quotes": 20,
+    "top20_retrieved_gold_pages": 14,
+    "final_cited_gold_pages": 9,
+    "exact_quote_citations": 0,
+    "gold_phrases_contained_in_citations": 4,
+    "unanswerable_questions_with_extractive_candidates": 2
+  },
+  "configuration": {
+    "mode": "bm25",
+    "candidate_limit": 20,
+    "evidence_limit": 5,
+    "generate": false,
+    "model_calls": 0,
+    "estimated_model_cost_usd": 0
+  },
+  "limitations": [
+    "仅覆盖 PT7、PT8、PT10、PT11 共 18 题，属于开发诊断，不能外推。",
+    "检索页命中与原文摘录覆盖不代表答案语义正确。",
+    "不可回答题的非空摘录仅表示关闭生成时返回候选，不代表模型拒答失败。"
+  ]
+}
