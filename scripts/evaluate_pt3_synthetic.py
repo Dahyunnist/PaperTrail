@@ -14,6 +14,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv:
+    load_dotenv(ROOT / ".env", override=False)
+
 from papertrail.gold import load_gold, verify_quotes
 from papertrail.qa import ask
 from papertrail.s1_index import index_selection

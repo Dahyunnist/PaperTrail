@@ -1,0 +1,1261 @@
+{
+  "dataset_id": "PT3-synthetic-cross-page-v1-20261023",
+  "gold_sha256": "127308b31462b44a3ffd787d779e206edf09fd38b4b19de949168a91cef5e90d",
+  "source_sha256": {
+    "study-alpha.pdf": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+    "study-beta.pdf": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da"
+  },
+  "synthetic_only": true,
+  "model": "deepseek-flash",
+  "provider": "openai-compatible",
+  "budget_start_usd": 0.3959673,
+  "budget_ceiling_usd": 0.5,
+  "cases": [
+    {
+      "id": "pt3-syn-01",
+      "question": "How many adults did Synthetic Study Alpha enroll?",
+      "expected_answer": "120 adults.",
+      "abstain_expected": false,
+      "human_review": {
+        "rating": "正确",
+        "note": "回答 120 人，与原文一致；PDF SHA、页码和引文均已验证。"
+      },
+      "status": "generated_claims_reviewed",
+      "answer": "Synthetic Study Alpha enrolled 120 adults.",
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "coverage_requirements": [
+        "Number of adults enrolled in Synthetic Study Alpha"
+      ],
+      "missing_subquestions": [],
+      "claims": [
+        {
+          "text": "Synthetic Study Alpha enrolled 120 adults.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+            "quote": "The trial enrolled 120 adults.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 3.8185239129003707,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": []
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "The trial enrolled 120 adults.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 3.8185239129003707,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": []
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+          "quote": "The trial enrolled 120 adults.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 3.8185239129003707,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": []
+        }
+      ],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "Number of adults enrolled in Synthetic Study Alpha"
+        ],
+        "subquestions": [
+          "How many adults did Synthetic Study Alpha enroll?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 1,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "latency_ms": 3457.75,
+      "api_requests": 3,
+      "prompt_tokens": 1159,
+      "completion_tokens": 124,
+      "cost_upper_bound_usd": 0.0004965
+    },
+    {
+      "id": "pt3-syn-02",
+      "question": "What was Alpha's prespecified primary outcome?",
+      "expected_answer": "Time from order entry to medicine delivery.",
+      "abstain_expected": false,
+      "human_review": {
+        "rating": "正确",
+        "note": "主要结局含义正确；PDF SHA、页码和引文均已验证。"
+      },
+      "status": "generated_claims_reviewed",
+      "answer": "Alpha 的预设主要结局是从医嘱录入到药品配送的时间。",
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "coverage_requirements": [
+        "识别 Alpha 的预设主要结局"
+      ],
+      "missing_subquestions": [],
+      "claims": [
+        {
+          "text": "Alpha 的预设主要结局是从医嘱录入到药品配送的时间。",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "fb7ed24c19ab18103927ef11a11eca3b84be1f7c0c63ce19130f5603ce29c523",
+            "quote": "The prespecified primary outcome was time from order entry to medicine delivery.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 6.722541655459823,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": []
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "fb7ed24c19ab18103927ef11a11eca3b84be1f7c0c63ce19130f5603ce29c523",
+              "quote": "The prespecified primary outcome was time from order entry to medicine delivery.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 6.722541655459823,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": []
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "fb7ed24c19ab18103927ef11a11eca3b84be1f7c0c63ce19130f5603ce29c523",
+          "quote": "The prespecified primary outcome was time from order entry to medicine delivery.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 6.722541655459823,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": []
+        }
+      ],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "识别 Alpha 的预设主要结局"
+        ],
+        "subquestions": [
+          "What was Alpha's prespecified primary outcome?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 1,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "latency_ms": 3143.71,
+      "api_requests": 3,
+      "prompt_tokens": 1150,
+      "completion_tokens": 125,
+      "cost_upper_bound_usd": 0.000495
+    },
+    {
+      "id": "pt3-syn-03",
+      "question": "Compare Alpha care with usual care. What were the absolute and relative reductions in median delivery time, using usual care as the baseline?",
+      "expected_answer": "The absolute reduction was 6 minutes. The relative reduction was 25% (6/24).",
+      "abstain_expected": false,
+      "human_review": {
+        "rating": "部分正确",
+        "note": "18/24 分钟、绝对差 6 分钟和相对差 25% 均正确；把 medicine delivery 语境中的 delivery 译作“分娩”，改变了指标含义。引用有效，自动支持审查未发现此语义错误。"
+      },
+      "status": "generated_claims_reviewed",
+      "answer": "Alpha care 的中位分娩时间为 18 分钟（IQR 12-24）。 常规护理的中位分娩时间为 24 分钟（IQR 16-30）。 以常规护理为基线，Alpha care 相比常规护理的中位分娩时间绝对减少为 24 − 18 = 6 分钟。 以常规护理为基线，Alpha care 相比常规护理的中位分娩时间相对减少为 (24 − 18) / 24 = 25%。",
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "coverage_requirements": [
+        "Alpha care 的中位分娩时间（18 分钟）",
+        "常规护理的中位分娩时间（24 分钟）",
+        "绝对减少量：24 − 18 = 6 分钟",
+        "相对减少量：(24 − 18) / 24 = 25%"
+      ],
+      "missing_subquestions": [],
+      "claims": [
+        {
+          "text": "Alpha care 的中位分娩时间为 18 分钟（IQR 12-24）。",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            0
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 2,
+            "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+            "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 4.8760438616379576,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+              "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "常规护理的中位分娩时间为 24 分钟（IQR 16-30）。",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            1
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 2,
+            "chunk_id": "511a141f151486e7afa6a9e7303241ed10f147927ff22fbf8b11dcd7dd57a1af",
+            "quote": "In usual care, median delivery time was 24 minutes (IQR 16-30).",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 4.8760438616379576,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              1,
+              0,
+              2,
+              3
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "511a141f151486e7afa6a9e7303241ed10f147927ff22fbf8b11dcd7dd57a1af",
+              "quote": "In usual care, median delivery time was 24 minutes (IQR 16-30).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                1,
+                0,
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "text": "以常规护理为基线，Alpha care 相比常规护理的中位分娩时间绝对减少为 24 − 18 = 6 分钟。",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            2
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 2,
+            "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+            "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 4.8760438616379576,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+              "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "511a141f151486e7afa6a9e7303241ed10f147927ff22fbf8b11dcd7dd57a1af",
+              "quote": "In usual care, median delivery time was 24 minutes (IQR 16-30).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                1,
+                0,
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "text": "以常规护理为基线，Alpha care 相比常规护理的中位分娩时间相对减少为 (24 − 18) / 24 = 25%。",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            3
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 2,
+            "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+            "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 4.8760438616379576,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+              "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 2,
+              "chunk_id": "511a141f151486e7afa6a9e7303241ed10f147927ff22fbf8b11dcd7dd57a1af",
+              "quote": "In usual care, median delivery time was 24 minutes (IQR 16-30).",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 4.8760438616379576,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                1,
+                0,
+                2,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 2,
+          "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+          "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 4.8760438616379576,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            2,
+            3,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 2,
+          "chunk_id": "511a141f151486e7afa6a9e7303241ed10f147927ff22fbf8b11dcd7dd57a1af",
+          "quote": "In usual care, median delivery time was 24 minutes (IQR 16-30).",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 4.8760438616379576,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            1,
+            0,
+            2,
+            3
+          ]
+        },
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 2,
+          "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+          "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 4.8760438616379576,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            2,
+            3,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 2,
+          "chunk_id": "84b41194228abf5909b2d9632637b54a7c6d199939c14340847e08304f5ca4b8",
+          "quote": "In Alpha care, median delivery time was 18 minutes (IQR 12-24).",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 4.8760438616379576,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            2,
+            3,
+            1
+          ]
+        }
+      ],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 2,
+        "evidence_pages": 2,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "Alpha care 的中位分娩时间（18 分钟）",
+          "常规护理的中位分娩时间（24 分钟）",
+          "绝对减少量：24 − 18 = 6 分钟",
+          "相对减少量：(24 − 18) / 24 = 25%"
+        ],
+        "subquestions": [
+          "What was the median delivery time for Alpha care?",
+          "What was the median delivery time for usual care?",
+          "What was the absolute reduction in median delivery time when comparing Alpha care with usual care, using usual care as the baseline?",
+          "What was the relative reduction in median delivery time when comparing Alpha care with usual care, using usual care as the baseline?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": true,
+        "reviewed_claims": 4,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "latency_ms": 10208.63,
+      "api_requests": 9,
+      "prompt_tokens": 5742,
+      "completion_tokens": 877,
+      "cost_upper_bound_usd": 0.002775
+    },
+    {
+      "id": "pt3-syn-04",
+      "question": "Compare the enrollment totals and per-arm allocations in Studies Alpha and Beta.",
+      "expected_answer": "Alpha enrolled 120 adults, 60 per arm. Beta enrolled 80 adults, 40 per arm.",
+      "abstain_expected": false,
+      "human_review": {
+        "rating": "正确",
+        "note": "两项研究的样本量、分组人数及差值均符合合成原文；所有引文有效。"
+      },
+      "status": "generated_claims_reviewed",
+      "answer": "Study Alpha enrolled 120 adults. Study Beta enrolled 80 adults. Study Alpha enrolled 40 more adults than Study Beta (120 − 80 = 40). Study Alpha allocated 60 participants to Alpha care and 60 to usual care. Study Beta allocated 40 participants to Beta care and 40 to usual care. Each arm in Study Alpha had 20 more participants than the corresponding arm in Study Beta (60 − 40 = 20).",
+      "coverage_complete": true,
+      "coverage_gaps": [],
+      "coverage_requirements": [
+        "Study Alpha enrollment total (120 adults)",
+        "Study Beta enrollment total (80 adults)",
+        "Study Alpha per-arm allocation (60 to Alpha care and 60 to usual care)",
+        "Study Beta per-arm allocation (40 to Beta care and 40 to usual care)",
+        "Comparison of enrollment totals (difference of 40)",
+        "Comparison of per-arm allocations (difference of 20 per arm)"
+      ],
+      "missing_subquestions": [],
+      "claims": [
+        {
+          "text": "Study Alpha enrolled 120 adults.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            0
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+            "quote": "The trial enrolled 120 adults.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 3.577325225651118,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "The trial enrolled 120 adults.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 3.577325225651118,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Study Beta enrolled 80 adults.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            0
+          ],
+          "evidence": {
+            "paper_id": "p_f7560d75ed10432d8946eace",
+            "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "pdf_page": 1,
+            "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+            "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Beta",
+            "relevance_score": 4.15221448936569,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_f7560d75ed10432d8946eace",
+              "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "pdf_page": 1,
+              "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+              "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Beta",
+              "relevance_score": 4.15221448936569,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Study Alpha enrolled 40 more adults than Study Beta (120 − 80 = 40).",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            0
+          ],
+          "evidence": {
+            "paper_id": "p_f7560d75ed10432d8946eace",
+            "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "pdf_page": 1,
+            "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+            "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Beta",
+            "relevance_score": 4.15221448936569,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_f7560d75ed10432d8946eace",
+              "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "pdf_page": 1,
+              "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+              "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Beta",
+              "relevance_score": 4.15221448936569,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            },
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "The trial enrolled 120 adults.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 3.577325225651118,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Study Alpha allocated 60 participants to Alpha care and 60 to usual care.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            1
+          ],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+            "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 3.577325225651118,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 3.577325225651118,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Study Beta allocated 40 participants to Beta care and 40 to usual care.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            1
+          ],
+          "evidence": {
+            "paper_id": "p_f7560d75ed10432d8946eace",
+            "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "pdf_page": 1,
+            "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+            "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Beta",
+            "relevance_score": 4.15221448936569,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_f7560d75ed10432d8946eace",
+              "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "pdf_page": 1,
+              "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+              "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Beta",
+              "relevance_score": 4.15221448936569,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Each arm in Study Alpha had 20 more participants than the corresponding arm in Study Beta (60 − 40 = 20).",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [
+            1
+          ],
+          "evidence": {
+            "paper_id": "p_f7560d75ed10432d8946eace",
+            "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+            "pdf_page": 1,
+            "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+            "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Beta",
+            "relevance_score": 4.15221448936569,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": [
+              0,
+              1
+            ]
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_f7560d75ed10432d8946eace",
+              "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+              "pdf_page": 1,
+              "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+              "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Beta",
+              "relevance_score": 4.15221448936569,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            },
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 3.577325225651118,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+          "quote": "The trial enrolled 120 adults.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 3.577325225651118,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_f7560d75ed10432d8946eace",
+          "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "pdf_page": 1,
+          "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+          "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Beta",
+          "relevance_score": 4.15221448936569,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_f7560d75ed10432d8946eace",
+          "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "pdf_page": 1,
+          "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+          "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Beta",
+          "relevance_score": 4.15221448936569,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+          "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 3.577325225651118,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_f7560d75ed10432d8946eace",
+          "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "pdf_page": 1,
+          "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+          "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Beta",
+          "relevance_score": 4.15221448936569,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "paper_id": "p_f7560d75ed10432d8946eace",
+          "version_id": "v_29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "sha256": "29da2c0a46fd1b045216ce05f46445f522ddd39c99e1e819af4b9d788dce29da",
+          "pdf_page": 1,
+          "chunk_id": "cec00014fcbea5141fade83a51d7427cfe7fe6534bee4fcb6bec34438d767668",
+          "quote": "The Beta trial enrolled 80 adults, randomized equally: 40 to Beta care and 40 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Beta",
+          "relevance_score": 4.15221448936569,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-beta.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": [
+            0,
+            1
+          ]
+        }
+      ],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 2,
+        "evidence_pages": 2,
+        "coverage_complete": true,
+        "coverage_gaps": [],
+        "coverage_requirements": [
+          "Study Alpha enrollment total (120 adults)",
+          "Study Beta enrollment total (80 adults)",
+          "Study Alpha per-arm allocation (60 to Alpha care and 60 to usual care)",
+          "Study Beta per-arm allocation (40 to Beta care and 40 to usual care)",
+          "Comparison of enrollment totals (difference of 40)",
+          "Comparison of per-arm allocations (difference of 20 per arm)"
+        ],
+        "subquestions": [
+          "What are the enrollment totals in Study Alpha and Study Beta?",
+          "What are the per-arm allocations in Study Alpha and Study Beta?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 6,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": null
+      },
+      "latency_ms": 7175.0,
+      "api_requests": 6,
+      "prompt_tokens": 3465,
+      "completion_tokens": 532,
+      "cost_upper_bound_usd": 0.0016779
+    },
+    {
+      "id": "pt3-syn-05",
+      "question": "Summarize Alpha's enrollment and its reported median follow-up duration.",
+      "expected_answer": "Alpha enrolled 120 adults. The evidence does not report a median follow-up duration.",
+      "abstain_expected": false,
+      "human_review": {
+        "rating": "部分正确",
+        "note": "保留已支持的样本量，并明确指出缺少中位随访时长；缺项说明与评测预期一致。"
+      },
+      "status": "generated_partial",
+      "answer": "The trial enrolled 120 adults. Participants were randomized equally: 60 to Alpha care and 60 to usual care.（部分回答；未覆盖：未提供 Alpha 报告的中位随访时长（median follow-up duration）。）",
+      "coverage_complete": false,
+      "coverage_gaps": [
+        "未提供 Alpha 报告的中位随访时长（median follow-up duration）"
+      ],
+      "coverage_requirements": [
+        "Alpha 的入组人数（enrollment）",
+        "Alpha 报告的中位随访时长（median follow-up duration）"
+      ],
+      "missing_subquestions": [],
+      "claims": [
+        {
+          "text": "The trial enrolled 120 adults.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+            "quote": "The trial enrolled 120 adults.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 2.5669097154048743,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": []
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "The trial enrolled 120 adults.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 2.5669097154048743,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": []
+            }
+          ]
+        },
+        {
+          "text": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+          "kind": "locally_synthesized_claim",
+          "support": "supported",
+          "support_method": "local_llm_judge",
+          "subquestion_ids": [],
+          "evidence": {
+            "paper_id": "p_e276b1ff5fab8a2403850a6c",
+            "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+            "pdf_page": 1,
+            "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+            "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+            "parser_version": "papertrail-s1-3",
+            "title": "Synthetic Study Alpha",
+            "relevance_score": 2.5669097154048743,
+            "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+            "text_origin": "native_text",
+            "subquestion_ids": []
+          },
+          "support_evidence": [
+            {
+              "paper_id": "p_e276b1ff5fab8a2403850a6c",
+              "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+              "pdf_page": 1,
+              "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+              "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+              "parser_version": "papertrail-s1-3",
+              "title": "Synthetic Study Alpha",
+              "relevance_score": 2.5669097154048743,
+              "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+              "text_origin": "native_text",
+              "subquestion_ids": []
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+          "quote": "The trial enrolled 120 adults.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 2.5669097154048743,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": []
+        },
+        {
+          "paper_id": "p_e276b1ff5fab8a2403850a6c",
+          "version_id": "v_05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "sha256": "05897f36b77659180460e7908bfbc98f40a769f5e727c64eb972859e98802410",
+          "pdf_page": 1,
+          "chunk_id": "e758e3736c9e2eeecbcb240c1d2dc16a9544099833040677e05938a3ee6fce80",
+          "quote": "Participants were randomized equally: 60 to Alpha care and 60 to usual care.",
+          "parser_version": "papertrail-s1-3",
+          "title": "Synthetic Study Alpha",
+          "relevance_score": 2.5669097154048743,
+          "path": "E:\\job\\papertrail\\evals\\fixtures\\pt3-synthetic\\study-alpha.pdf",
+          "text_origin": "native_text",
+          "subquestion_ids": []
+        }
+      ],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 1,
+        "evidence_pages": 1,
+        "coverage_complete": false,
+        "coverage_gaps": [
+          "未提供 Alpha 报告的中位随访时长（median follow-up duration）"
+        ],
+        "coverage_requirements": [
+          "Alpha 的入组人数（enrollment）",
+          "Alpha 报告的中位随访时长（median follow-up duration）"
+        ],
+        "subquestions": [
+          "Summarize Alpha's enrollment and its reported median follow-up duration."
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 2,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": "coverage_partial"
+      },
+      "latency_ms": 4272.26,
+      "api_requests": 4,
+      "prompt_tokens": 1765,
+      "completion_tokens": 249,
+      "cost_upper_bound_usd": 0.0008283
+    },
+    {
+      "id": "pt3-syn-06",
+      "question": "What attrition rate did Synthetic Study Beta report?",
+      "expected_answer": "The frozen evidence contains no attrition rate.",
+      "abstain_expected": true,
+      "human_review": {
+        "rating": "正确拒答",
+        "note": "资料没有 attrition rate；系统拒答，没有产生无依据 claim。"
+      },
+      "status": "abstained",
+      "answer": "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。",
+      "coverage_complete": null,
+      "coverage_gaps": [],
+      "coverage_requirements": [],
+      "missing_subquestions": [],
+      "claims": [],
+      "citations": [],
+      "diagnostics": {
+        "retrieved_pages": 4,
+        "screen_selected_pages": 0,
+        "evidence_pages": 0,
+        "coverage_complete": null,
+        "coverage_gaps": [],
+        "coverage_requirements": [],
+        "subquestions": [
+          "What attrition rate did Synthetic Study Beta report?"
+        ],
+        "planning_error": null,
+        "generation_retry_used": false,
+        "reviewed_claims": 0,
+        "rejected_claims": 0,
+        "synthesis_error": null,
+        "refusal_stage": "evidence_organization"
+      },
+      "latency_ms": 1786.7,
+      "api_requests": 2,
+      "prompt_tokens": 784,
+      "completion_tokens": 62,
+      "cost_upper_bound_usd": 0.0003096
+    }
+  ],
+  "budget_end_usd": 0.4025496,
+  "summary": {
+    "completed_questions": 6,
+    "api_requests": 27,
+    "prompt_tokens": 14065,
+    "completion_tokens": 1969,
+    "cost_upper_bound_usd": 0.0065823,
+    "budget_end_usd": 0.4025496,
+    "median_latency_ms": 3865.01,
+    "human_review": {
+      "answerable_questions": 5,
+      "fully_correct": 3,
+      "partially_correct": 2,
+      "incorrect": 0,
+      "answerable_response_rate": 1.0,
+      "auto_complete_answer_rate": 0.8,
+      "correct_abstentions": 1,
+      "unanswerable_questions": 1,
+      "false_answers": 0,
+      "supported_claims_accepted_by_model_judge": 14,
+      "supported_claims_rejected_by_model_judge": 0,
+      "claim_evidence_pointers_verified": 18,
+      "claim_evidence_pointers_total": 18
+    },
+    "limitations": [
+      "Synthetic-only; six questions and two PDFs do not estimate performance on real papers.",
+      "The automatic support judge accepted all 14 claims but missed the delivery-versus-childbirth translation error in PT3-SYN-03.",
+      "Human full correctness was 3/5 answerable questions; two responses were partial."
+    ]
+  }
+}

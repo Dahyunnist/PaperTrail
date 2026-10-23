@@ -10,7 +10,7 @@ S0–S5 已完成。最终产品体验与证据边界见 [产品契约](docs/pro
 
 真实论文诊断因许可可核验范围有限，仅冻结 1 篇论文、8 道本地开发题；不构成测试集或泛化证明。设计、许可边界和复现方式见 [PT1 记录](docs/learning/stage-PT1.md)。PT2 的离线检索比较与失败分析见 [PT2 记录](docs/learning/stage-PT2.md)。题目、引文和来源路径保存在忽略目录 `.local/`，不会提交或上传。
 
-PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻结清单在 `evals/pt3-synthetic-manifest-20261023.json`；生成器会拒绝覆盖现有冻结文件。模型评测脚本仅索引这两份合成 PDF，并将请求费用写入去重后的本地总账。
+PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻结清单在 `evals/pt3-synthetic-manifest-20261023.json`；生成器会拒绝覆盖现有冻结文件。模型评测脚本仅索引这两份合成 PDF，并将请求费用写入去重后的本地总账。结果和逐题复核见 [PT3 记录](docs/learning/stage-PT3.md)，演示步骤见 [五分钟演示](docs/demo-5-minutes.md)。
 
 ## 源资料
 
