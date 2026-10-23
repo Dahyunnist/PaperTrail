@@ -22,8 +22,8 @@
 - 来源：Ten simple rules for research with humans；PDF 第 3 页；SHA-256 `2ac2337b4a485c4c3b54bde3f25498bcbe24f09194de77aec4468a0d4d7c9c42`
 - 原文：> While this increases session time, this investment reduces overall study costs through decreased dropout and re-collection needs.
 
-独立判断：支持 / 部分支持 / 不支持
-理由：
+独立判断：支持
+理由：两项陈述均被所引原文直接支持；时间范围和预期收益均准确，未见额外推断。
 
 ## PT15-02
 
@@ -33,8 +33,8 @@
 
 模型回答：没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。
 
-独立判断：支持 / 部分支持 / 不支持
-理由：
+独立判断：支持（正确拒答）
+理由：本文为研究建议类 perspective，介绍参与者研究的方法，不报告本文自己的招募实验或样本量。问题前提不适用；拒答符合原文内容。
 
 ## PT15-03
 
@@ -52,8 +52,8 @@
 - 来源：Measuring data rot: An analysis of the continued availability of shared data from a Single University；PDF 第 1 页；SHA-256 `244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b`
 - 原文：> After testing, 5.4% the 2166 sup- plemental data links were found to be no longer available.
 
-独立判断：支持 / 部分支持 / 不支持
-理由：
+独立判断：支持
+理由：回答中的 5.4% 和 2,166 均与引文一致，直接回答了失效链接比例问题。
 
 ## PT15-04
 
@@ -83,8 +83,8 @@
 - 来源：Measuring data rot: An analysis of the continued availability of shared data from a Single University；PDF 第 1 页；SHA-256 `244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b`
 - 原文：> DOIs were the type of shared link that was least likely to disappear with a 1.7% loss, with URL loss at 5.9% averaged over time.
 
-独立判断：支持 / 部分支持 / 不支持
-理由：
+独立判断：支持
+理由：DOI 为最不易失效的链接类型；1.7% 与 URL 的 5.9% 均由同一引文直接支持，差值 4.2 个百分点计算正确。
 
 ## PT15-05
 
@@ -100,4 +100,13 @@
 
 ## Gold 解封后的对照
 
-完成人工判断并提交后，再比对 `evals/pt15-heldout-gold-20261023.jsonl`。人审前不汇报语义准确率。
+人工判断完成后，逐题对照 `evals/pt15-heldout-gold-20261023.jsonl`：
+
+| 题目 | Gold 判定与要点 | 人工判定 | 一致 |
+| --- | --- | --- | --- |
+| PT15-01 | 可答；15–30 分钟，并预期减少退出和重复收集成本 | 支持；两项均有直接原文 | 是 |
+| PT15-02 | 不可答；文章没有报告原创招募实验或样本量 | 正确拒答；文章为研究建议 perspective | 是 |
+| PT15-03 | 可答；2,166 条补充数据链接中 5.4% 失效 | 支持；数字和范围一致，gold 页 1 原文被引用 | 是 |
+| PT15-04 | 可答；DOI 失效率 1.7%，低于 URL 的 5.9% | 支持；原文直接给出两数，4.2 个百分点差值正确 | 是 |
+
+已完成人工审阅的 4 项与 gold **4/4 一致**，其中 3 项为可答、1 项为正确拒答。PT15-05 因预算未生成回答，PT15-06 未运行，均不计入。此比例只描述这 4 项，不外推为整体准确率。
