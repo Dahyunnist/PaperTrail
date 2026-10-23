@@ -34,8 +34,13 @@ def validate(path: Path = REGISTRY) -> list[str]:
             parsed = urlparse(str(paper.get(field, "")))
             if parsed.scheme != "https" or not parsed.netloc:
                 errors.append(f"{label} {field} 必须是 HTTPS 官方来源")
-            elif parsed.netloc not in {"nature.com", "www.nature.com", "pmc.ncbi.nlm.nih.gov"}:
+            elif parsed.netloc not in {"nature.com", "www.nature.com", "pmc.ncbi.nlm.nih.gov", "journals.plos.org", "ai.jmir.org", "academic.oup.com"}:
                 errors.append(f"{label} {field} 不属于登记的官方来源域")
+        download_url = paper.get("download_url")
+        if download_url:
+            parsed = urlparse(str(download_url))
+            if parsed.scheme != "https" or parsed.netloc not in {"journals.plos.org", "ai.jmir.org", "pmc.ncbi.nlm.nih.gov", "academic.oup.com", "www.nature.com"}:
+                errors.append(f"{label} download_url 不属于 HTTPS 官方来源域")
         source_hash = paper.get("local_pdf_sha256")
         if source_hash is not None and not re.fullmatch(r"[a-f0-9]{64}", source_hash):
             errors.append(f"{label} local_pdf_sha256 格式无效")
@@ -43,9 +48,10 @@ def validate(path: Path = REGISTRY) -> list[str]:
             errors.append(f"{label} 冻结基准缺少本地 PDF SHA-256")
         local_file = paper.get("local_pdf")
         if local_file:
-            pdf_path = (path.parent / local_file).resolve()
-            if not pdf_path.is_relative_to(path.parent.resolve()) or not pdf_path.is_file():
-                errors.append(f"{label} 本地来源文件缺失或越出登记目录")
+            project_root = path.resolve().parents[1]
+            pdf_path = (project_root / local_file).resolve()
+            if not pdf_path.is_relative_to(project_root) or not pdf_path.is_file():
+                errors.append(f"{label} 本地来源文件缺失或越出项目目录")
             elif source_hash and hashlib.sha256(pdf_path.read_bytes()).hexdigest() != source_hash:
                 errors.append(f"{label} 本地 PDF SHA-256 不匹配")
     return errors

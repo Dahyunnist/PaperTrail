@@ -69,11 +69,11 @@ def load_gold(path: Path, minimum_questions: int = 30) -> list[dict[str, Any]]:
 
 
 def verify_quotes(items: list[dict[str, Any]], sources_path: Path) -> int:
-    import fitz
+    import pymupdf
 
     config = yaml.safe_load(sources_path.read_text(encoding="utf-8"))
     roots = {root["id"]: Path(root["path"]) for root in config.get("roots", [])}
-    cache: dict[str, fitz.Document] = {}
+    cache: dict[str, pymupdf.Document] = {}
     verified = 0
     try:
         for item in items:
@@ -86,7 +86,7 @@ def verify_quotes(items: list[dict[str, Any]], sources_path: Path) -> int:
                 if source is None:
                     raise ValueError(f"{item['id']}: 找不到哈希匹配的只读源 PDF {pointer['file_name']}")
                 if pointer["sha256"] not in cache:
-                    cache[pointer["sha256"]] = fitz.open(source)
+                    cache[pointer["sha256"]] = pymupdf.open(source)
                 doc = cache[pointer["sha256"]]
                 page_number = pointer["pdf_page"]
                 if page_number > doc.page_count:

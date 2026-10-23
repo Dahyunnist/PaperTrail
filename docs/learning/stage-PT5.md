@@ -1,24 +1,32 @@
-# PT5：公开许可来源登记
+# PT5：公开许可论文组与页级黄金题
 
 日期：2026-10-23
 
-## 登记范围
+## 冻结范围
 
-新增 4 条候选来源；与 PT1 的 1 篇已核验真实论文合计 5 条。只登记官方 Nature / PubMed Central 文章页明确列出 CC BY 4.0 的条目。来源记录、许可核对链接和复核日期在 `configs/public-paper-license-registry.json`。
+冻结组 `pt5-public-real-20261023` 含 3 篇公开论文、6 道人工编写题，每篇 2 题。三篇均由 PLOS 官方出版者端点下载，官方文章页标明 CC BY 4.0。PDF 来源版本、官方记录、许可证据、下载地址、本地路径及 SHA-256 均登记在 `configs/public-paper-license-registry.json` 与 `evals/pt5-public-source-manifest-20261023.json`。
 
-新增来源：
+| 论文 | 来源版本 | PDF 页数 | SHA-256 |
+|---|---|---:|---|
+| Workflow for detecting biomedical articles with underlying open and restricted-access datasets | 版本记录；2024-05-08 | 20 | `2aa23da30ca26e61ecff0389045f2f04110f093343b60312144211037b20baa4` |
+| Ten simple rules to make computable knowledge shareable and reusable | 版本记录；2024-06-20 | 9 | `e887af39e1982b7e164100bf591409340fdbed78153fc11f8a04696518123122` |
+| Ten quick tips for ensuring machine learning model validity | 版本记录；2024-09-19 | 12 | `176e2321b47a2cf1c726372eafeb24f47b73e9b3d75c91c98545af4dcc5835b5` |
 
-- [Learning to explain is a good biomedical few-shot learner](https://pmc.ncbi.nlm.nih.gov/articles/PMC11483110/)：PMC 页面列明 DOI 和 CC BY 4.0。
-- [Workflow for detecting biomedical articles with underlying open and restricted-access datasets](https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/)：PMC 搜索记录列明 CC Attribution 与 DOI。
-- [Enhancing Clinical Relevance of Pretrained Language Models Through Integration of External Knowledge](https://pmc.ncbi.nlm.nih.gov/articles/PMC11336492/)：PMC 权限声明列明 CC BY 4.0。
-- [Ten simple rules to make computable knowledge shareable and reusable](https://pmc.ncbi.nlm.nih.gov/articles/PMC11189186/)：PMC 权限声明列明 CC BY 4.0。
+公开出版者记录：[Workflow](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0302787)、[Computable knowledge](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012179)、[Machine-learning validity](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012402)。每篇页面列出 DOI 与 CC BY 4.0 许可。语料仅从上述官方出版者页面下载，不含私人 PDF。
 
-PT1 已有来源为 Shumailov 等人的 [AI models collapse when trained on recursively generated data](https://www.nature.com/articles/s41586-024-07566-y)，Nature 页面列明 CC BY 4.0。该来源的 8 道本地题仍只是开发诊断集。
+## 黄金题与复现
 
-## 校验和边界
+题目位于 `evals/pt5-public-gold-20261023.jsonl`，来源配置位于 `evals/pt5-public-sources.yaml`。每题证据指针绑定来源 ID、文件名、SHA-256、PDF 物理页码和短引文。每篇所用原文摘录总长少于 25 个英文词；题目按论文分组，不跨组复用证据。
 
-离线命令 `python scripts/validate_public_license_registry.py` 校验字段、许可枚举、官方域名和登记的本地 PDF 哈希。它不联网读取网页。上述 4 篇目前未导入本地文件，没有 PDF SHA-256，也没有人工确认的页码证据和黄金问题；因此只进入候选来源注册表，**没有**扩成冻结论文组基准。
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_public_license_registry.py
+.\.venv\Scripts\python.exe -m papertrail.gold --sources evals/pt5-public-sources.yaml --gold evals/pt5-public-gold-20261023.jsonl --minimum-questions 1
+```
 
-真实论文基准验收仍未达成：当前可复核的本地真实论文仍为 1 篇、8 道开发题。只有完成本地 PDF 哈希与逐条页码黄金题、冻结文件清单后，才可报告扩大后的基准。
+冻结清单同时记录黄金文件 SHA-256、问题数和来源 PDF 哈希。验证器逐页抽取 PDF 并比对引文；它不调用模型。`fetch_pt5_public_group.py` 仅允许 CC BY 4.0 与 PLOS 官方域，校验 PDF MIME、文件头、重定向域和哈希，并拒绝写出项目目录。
 
-本阶段未下载 PDF、未访问私有资料、未调用模型。剩余模型 API 预算 `$0.0974504` 保持不变。
+## 排除项与范围
+
+另外两篇候选的许可虽已核验为 CC BY 4.0，但官方 PDF 端点分别返回浏览器 PoW 页面/403 和空 HTTP 202，故未纳入冻结组；没有尝试绕过验证，也没有使用第三方镜像。PT1 的 Nature 论文仍是另一组 8 题开发集，不计入本组。
+
+PT5 目前只有 3 篇论文、6 道题，是可复现的公开论文小型诊断组；不能据此宣称独立测试集、广泛论文覆盖或泛化能力。PT1–PT3 的评测与账本未改动，本阶段没有模型调用，API 预算仍为 `$0.0974504 / $0.50`。

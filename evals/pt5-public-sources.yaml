@@ -1,0 +1,3 @@
+roots:
+  - id: pt5_public
+    path: evals/fixtures/pt5-public

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "group_id": "pt5-public-real-20261023",
+  "status": "frozen_public_source_group",
+  "license": "CC BY 4.0",
+  "sources": [
+    {
+      "title": "Workflow for detecting biomedical articles with underlying open and restricted-access datasets",
+      "doi": "10.1371/journal.pone.0302787",
+      "source_version": "版本记录；2024-05-08",
+      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/",
+      "license_evidence": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0302787",
+      "download_url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0302787&type=printable",
+      "local_pdf": "evals/fixtures/pt5-public/workflow-open-restricted-datasets.pdf",
+      "local_pdf_sha256": "2aa23da30ca26e61ecff0389045f2f04110f093343b60312144211037b20baa4"
+    },
+    {
+      "title": "Ten simple rules to make computable knowledge shareable and reusable",
+      "doi": "10.1371/journal.pcbi.1012179",
+      "source_version": "版本记录；2024-06-20",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012179",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012179",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1012179&type=printable",
+      "local_pdf": "evals/fixtures/pt5-public/computable-knowledge-sharing.pdf",
+      "local_pdf_sha256": "e887af39e1982b7e164100bf591409340fdbed78153fc11f8a04696518123122"
+    },
+    {
+      "title": "Ten quick tips for ensuring machine learning model validity",
+      "doi": "10.1371/journal.pcbi.1012402",
+      "source_version": "版本记录；2024-09-19",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012402",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012402",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1012402&type=printable",
+      "local_pdf": "evals/fixtures/pt5-public/machine-learning-model-validity.pdf",
+      "local_pdf_sha256": "176e2321b47a2cf1c726372eafeb24f47b73e9b3d75c91c98545af4dcc5835b5"
+    }
+  ],
+  "gold_file": "evals/pt5-public-gold-20261023.jsonl",
+  "gold_sha256": "c9aa6f36732229886ec0fe97426ca1a155a629c6474314cdcb1c497e77240ddb",
+  "question_count": 6,
+  "group_note": "3篇许可明确且官方PDF可下载的论文；按论文分组，每篇2题。2篇许可已核验的候选因官方PDF端点不可用而排除。"
+}

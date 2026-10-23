@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "checked_on": "2026-10-23",
-  "license_policy": "只纳入官方记录明确显示 CC BY 4.0 的论文；缺少本地 PDF 哈希和页级黄金题前，不得用于冻结基准。",
+  "license_policy": "只纳入官方记录明确显示 CC BY 4.0 的论文；冻结题须绑定本地 PDF SHA-256 与逐页可核验的短证据。",
   "papers": [
     {
       "title": "AI models collapse when trained on recursively generated data",
@@ -10,7 +10,7 @@
       "license": "CC BY 4.0",
       "license_evidence": "https://www.nature.com/articles/s41586-024-07566-y#rightslink",
       "local_pdf_sha256": null,
-      "benchmark_status": "已有 PT1 单篇开发集；不计入新增论文"
+      "benchmark_status": "已有 PT1 单篇开发集；不计入新增论文组"
     },
     {
       "title": "Learning to explain is a good biomedical few-shot learner",
@@ -20,7 +20,8 @@
       "license": "CC BY 4.0",
       "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11483110/#copyright-information",
       "local_pdf_sha256": null,
-      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+      "download_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11483110/pdf/btae589.pdf",
+      "benchmark_status": "许可已核验；PMC 下载端点返回浏览器 PoW 页，Oxford Academic 返回 403，未纳入论文组"
     },
     {
       "title": "Workflow for detecting biomedical articles with underlying open and restricted-access datasets",
@@ -28,27 +29,51 @@
       "pmcid": "PMC11078384",
       "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/",
       "license": "CC BY 4.0",
-      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11078384/",
-      "local_pdf_sha256": null,
-      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+      "license_evidence": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0302787",
+      "download_url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0302787&type=printable",
+      "source_version": "版本记录；2024-05-08",
+      "local_pdf": "evals/fixtures/pt5-public/workflow-open-restricted-datasets.pdf",
+      "local_pdf_sha256": "2aa23da30ca26e61ecff0389045f2f04110f093343b60312144211037b20baa4",
+      "benchmark_group": "pt5-public-real-20261023",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级黄金题均登记"
     },
     {
       "title": "Enhancing Clinical Relevance of Pretrained Language Models Through Integration of External Knowledge: Case Study on Cardiovascular Diagnosis From Electronic Health Records",
+      "doi": "10.2196/56932",
       "pmcid": "PMC11336492",
-      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11336492/",
+      "public_record": "https://ai.jmir.org/2024/1/e56932/",
       "license": "CC BY 4.0",
-      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11336492/#permissions",
+      "license_evidence": "https://ai.jmir.org/2024/1/e56932/",
+      "download_url": "https://ai.jmir.org/2024/1/e56932/PDF",
       "local_pdf_sha256": null,
-      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+      "benchmark_status": "许可已核验；PDF 端点返回空 HTTP 202，未纳入论文组"
     },
     {
       "title": "Ten simple rules to make computable knowledge shareable and reusable",
+      "doi": "10.1371/journal.pcbi.1012179",
       "pmcid": "PMC11189186",
-      "public_record": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11189186/",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012179",
       "license": "CC BY 4.0",
-      "license_evidence": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11189186/",
-      "local_pdf_sha256": null,
-      "benchmark_status": "候选；需本地来源哈希及人工页级题目"
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012179",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1012179&type=printable",
+      "source_version": "版本记录；2024-06-20",
+      "local_pdf": "evals/fixtures/pt5-public/computable-knowledge-sharing.pdf",
+      "local_pdf_sha256": "e887af39e1982b7e164100bf591409340fdbed78153fc11f8a04696518123122",
+      "benchmark_group": "pt5-public-real-20261023",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级黄金题均登记"
+    },
+    {
+      "title": "Ten quick tips for ensuring machine learning model validity",
+      "doi": "10.1371/journal.pcbi.1012402",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012402",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012402",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1012402&type=printable",
+      "source_version": "版本记录；2024-09-19",
+      "local_pdf": "evals/fixtures/pt5-public/machine-learning-model-validity.pdf",
+      "local_pdf_sha256": "176e2321b47a2cf1c726372eafeb24f47b73e9b3d75c91c98545af4dcc5835b5",
+      "benchmark_group": "pt5-public-real-20261023",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级黄金题均登记"
     }
   ]
 }
