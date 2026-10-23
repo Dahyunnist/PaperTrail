@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "group_id": "pt13-public-development-20261023",
+  "status": "development_sources_and_gold_frozen",
+  "license": "CC BY 4.0",
+  "dataset_role": "development",
+  "gold_file": "evals/pt13-development-gold-20261023.jsonl",
+  "gold_sha256": "e74729376879b3465497f93f1ee38c3e89d39820c4c37a82409b16c1f27fcaf7",
+  "question_count": 4,
+  "group_note": "三篇 PT5-PT12 之外的新许可明确论文；开发诊断组，含跨文献题，不用于独立测试。",
+  "sources": [
+    {
+      "title": "Ten simple rules for humane data science",
+      "doi": "10.1371/journal.pcbi.1011698",
+      "source_version": "版本记录；2023-12-21",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011698",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011698",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1011698&type=printable",
+      "local_pdf": "evals/fixtures/pt13-development/humane-data-science.pdf",
+      "local_pdf_sha256": "34466c3a60a651172a015a948148b063e627ab288438d0b4897241d3515dd303",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten simple rules for improving research data discovery",
+      "doi": "10.1371/journal.pcbi.1009768",
+      "source_version": "版本记录；2022-02-10",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009768",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009768",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1009768&type=printable",
+      "local_pdf": "evals/fixtures/pt13-development/research-data-discovery.pdf",
+      "local_pdf_sha256": "7bc4ddf60ed24be41d5b3337de2a4c1294a8295e1f2ecc798806326c36e3cde8",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten simple rules for creating a global network in computational biology",
+      "doi": "10.1371/journal.pcbi.1010528",
+      "source_version": "版本记录；2022-10-27",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010528",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010528",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010528&type=printable",
+      "local_pdf": "evals/fixtures/pt13-development/global-computational-biology-network.pdf",
+      "local_pdf_sha256": "22a5065918ae639b88a4bfb58e3b634c98f406340fc199448feacea6c992f1ed",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development"
+    }
+  ]
+}

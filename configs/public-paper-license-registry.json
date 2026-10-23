@@ -389,6 +389,51 @@
       "benchmark_group": "pt12-public-heldout-20261023",
       "benchmark_role": "test_holdout",
       "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；尚未评测"
+    },
+    {
+      "title": "Ten simple rules for humane data science",
+      "doi": "10.1371/journal.pcbi.1011698",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011698",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011698",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1011698&type=printable",
+      "source_version": "版本记录；2023-12-21",
+      "local_pdf": "evals/fixtures/pt13-development/humane-data-science.pdf",
+      "local_pdf_sha256": "34466c3a60a651172a015a948148b063e627ab288438d0b4897241d3515dd303",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for improving research data discovery",
+      "doi": "10.1371/journal.pcbi.1009768",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009768",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009768",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1009768&type=printable",
+      "source_version": "版本记录；2022-02-10",
+      "local_pdf": "evals/fixtures/pt13-development/research-data-discovery.pdf",
+      "local_pdf_sha256": "7bc4ddf60ed24be41d5b3337de2a4c1294a8295e1f2ecc798806326c36e3cde8",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules for creating a global network in computational biology",
+      "doi": "10.1371/journal.pcbi.1010528",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010528",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010528",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1010528&type=printable",
+      "source_version": "版本记录；2022-10-27",
+      "local_pdf": "evals/fixtures/pt13-development/global-computational-biology-network.pdf",
+      "local_pdf_sha256": "22a5065918ae639b88a4bfb58e3b634c98f406340fc199448feacea6c992f1ed",
+      "benchmark_group": "pt13-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
     }
   ]
 }
