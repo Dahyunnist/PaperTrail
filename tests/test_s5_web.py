@@ -46,6 +46,33 @@ def _wait_for_job(client, response) -> dict:
     raise AssertionError("索引任务未及时结束")
 
 
+def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
+    import papertrail.web as web
+
+    primary = {"quote": "Primary source quote.", "title": "Paper A", "version_id": "v1",
+               "pdf_page": 2, "sha256": "a" * 64}
+    secondary = {"quote": "Secondary source quote.", "title": "Paper B", "version_id": "v2",
+                 "pdf_page": 7, "sha256": "b" * 64}
+    duplicate = dict(primary)
+    primary["support_evidence"] = [duplicate, secondary]
+    monkeypatch.setattr(web, "conversation_history", lambda *_args: [{
+        "question": "Compare both papers.", "answer": "A supported comparison.",
+        "claims": [{"text": "Shared claim.", "evidence": primary}],
+        "coverage_complete": True, "coverage_gaps": [],
+    }])
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True)
+
+    response = app.test_client().get("/?conversation_id=example")
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert html.count("Primary source quote.") == 1
+    assert html.count("Secondary source quote.") == 1
+    assert "PDF 第 2 页" in html
+    assert "PDF 第 7 页" in html
+
+
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):
     db = tmp_path / "workspace.sqlite3"
     uploads = tmp_path / "uploads"
