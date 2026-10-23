@@ -434,6 +434,7 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     assert queries == ["What method does Paper A use?", "What result does Paper B report?"]
     assert search_modes == ["bm25_expanded", "bm25_expanded"]
     assert result["status"] == "generated_partial"
+    assert result["completion_state"] == "partial"
     assert result["claims"][0]["subquestion_ids"] == [0]
     assert "Paper B evidence missing" in result["answer"]
     assert result["missing_subquestions"] == ["What result does Paper B report?"]
@@ -490,8 +491,46 @@ def test_qa_drops_claim_when_deterministic_evidence_mapping_fails(tmp_path, monk
     result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
 
     assert result["status"] == "abstained"
+    assert result["completion_state"] == "refused"
     assert result["claims"] == []
     assert result["usage"]["_diagnostics"]["rejected_claims"] == 1
+
+
+def test_qa_marks_budget_blocked_separately_from_model_refusal(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "budget-test")
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": [0], "targeted_query": "", "sufficient": True, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_sentences", lambda _text: [
+        "CTGAN evaluates mixed continuous and discrete columns with reliable likelihood and utility measurements."])
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+
+    def blocked(*_args, **_kwargs):
+        raise RuntimeError("费用门禁拦截请求；未发送")
+
+    monkeypatch.setattr(qa, "_synthesize_local", blocked)
+    result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
+
+    assert result["status"] == "abstained"
+    assert result["completion_state"] == "budget_blocked"
+    assert result["usage"]["_diagnostics"]["completion_state"] == "budget_blocked"
+
+
+def test_unanswerable_no_evidence_is_a_refusal_not_budget_block(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "refusal-test")
+    monkeypatch.setattr(qa, "retrieve", lambda *_args, **_kwargs: [])
+
+    result = qa.ask(db, "How many participants did an unreported trial recruit?", mode="bm25")
+
+    assert result["status"] == "abstained"
+    assert result["completion_state"] == "refused"
+    assert result["usage"]["_diagnostics"]["completion_state"] == "refused"
 
 
 def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):

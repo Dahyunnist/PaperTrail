@@ -44,6 +44,47 @@ def test_two_named_sources_joined_by_and_trigger_decomposition():
     )
 
 
+def test_candidate_excerpt_keeps_recommendation_after_problem_sentence():
+    from papertrail.qa import _candidate_excerpt
+
+    question = "What do authors recommend for external package version tracking?"
+    text = ("Updates to external packages might affect or break your code, and you might be "
+            "working on different projects that each require different versions of certain "
+            "packages. To address this issue, it is advisable to set up a virtual environment "
+            "using Conda or Docker to track which packages and versions you are using.")
+
+    excerpt = _candidate_excerpt(question, text, limit=200)
+
+    assert "it is advisable to set up a virtual environment" in excerpt
+    assert "track which packages and versions" in excerpt
+    assert len(excerpt) <= 200
+
+
+def test_candidate_excerpt_keeps_cross_paper_reuse_recommendation():
+    from papertrail.qa import _candidate_excerpt
+
+    question = "How do the AI navigation paper and research data management paper recommend making models and datasets easier to reuse?"
+    text = ("For machine-learning applications, also consider sharing your model and its weights "
+            "so that others can run your model without having to train it.")
+
+    excerpt = _candidate_excerpt(question, text, limit=200)
+
+    assert "consider sharing your model and its weights" in excerpt
+
+
+def test_candidate_excerpt_keeps_common_metadata_forms():
+    from papertrail.qa import _candidate_excerpt
+
+    question = "What file forms can serve as metadata in a research data management article?"
+    text = ("Metadata may include file sizes and formats. Metadata may come in various forms; "
+            "common forms are readme-files, data dictionaries, or computer-readable XML/JSON files.")
+
+    excerpt = _candidate_excerpt(question, text, limit=200)
+
+    assert "common forms are readme-files" in excerpt
+    assert "data dictionaries" in excerpt
+
+
 def test_decomposed_same_paper_evidence_keeps_each_required_slot(tmp_path, monkeypatch):
     import papertrail.qa as qa
     from papertrail.s1_index import open_database

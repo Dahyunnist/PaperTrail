@@ -139,14 +139,33 @@ def _term_overlap(query_terms: set[str], sentence_terms: set[str]) -> int:
 
 
 def _candidate_excerpt(question: str, text: str, limit: int = 480) -> str:
-    """Give the evidence screener complete, query-relevant sentences, not an arbitrary prefix."""
+    """Give the evidence screener query-relevant, answer-bearing sentences."""
     sentences = _sentences(text)
     if not sentences:
         return text[:limit]
-    terms = {term for term in re.findall(r"[\w]+", question.casefold())
+    folded_question = question.casefold()
+    terms = {term for term in re.findall(r"[\w]+", folded_question)
              if term not in QUESTION_STOPWORDS and len(term) > 1}
+    action_query = bool(re.search(
+        r"\b(?:recommend(?:ation)?|suggest(?:ion)?|should|how (?:do|can|should)|what (?:should|can))\b",
+        folded_question))
+    descriptor_query = bool(re.search(
+        r"\b(?:what|which)\b.{0,60}\b(?:forms?|formats?|types?|ways?)\b", folded_question))
+
+    def sentence_score(sentence: str) -> int:
+        words = set(re.findall(r"[\w]+", sentence.casefold()))
+        score = _term_overlap(terms, words)
+        if action_query and re.search(
+                r"\b(?:advisable|should|recommend|consider|must|need to|set up|share|assign|"
+                r"prepare|seek|record|create)\b", sentence.casefold()):
+            score += 4
+        if descriptor_query and re.search(
+                r"\bcommon\s+(?:forms?|formats?|types?)\b", sentence.casefold()):
+            score += 4
+        return score
+
     ranked = sorted(enumerate(sentences), key=lambda item: (
-        -len(terms.intersection(re.findall(r"[\w]+", item[1].casefold()))), item[0]))
+        -sentence_score(item[1]), item[0]))
     selected: list[tuple[int, str]] = []
     used = 0
     for index, sentence in ranked:
@@ -743,6 +762,18 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
                   "没有找到通过原 PDF 哈希、页码和原文校验的证据；系统已拒答。")
         claims = []
 
+    budget_errors = (planning_error, synthesis_error)
+    budget_blocked = any(isinstance(error, str) and any(
+        marker in error.casefold() for marker in ("budget", "费用门禁", "预算", "上限", "未发送"))
+        for error in budget_errors)
+    if model:
+        completion_state = ("budget_blocked" if budget_blocked else
+                            "complete" if claims and coverage_complete else
+                            "partial" if claims else
+                            "failed" if synthesis_error else "refused")
+    else:
+        completion_state = "evidence_only" if evidence else "no_evidence"
+
     if generation_usage is not None:
         generation_usage["_diagnostics"] = {
             "retrieved_pages": len(set(retrieval_pages)),
@@ -757,6 +788,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             "reviewed_claims": reviewed_claim_count,
             "rejected_claims": rejected_claim_count,
             "synthesis_error": synthesis_error,
+            "completion_state": completion_state,
             "refusal_stage": ("exact_serial_guard" if model and exact_serial_guard else
                               "retrieval" if model and not evidence and not result_rows else
                               "evidence_organization" if model and not evidence else
@@ -810,6 +842,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         conn.close()
     return {"conversation_id": conversation_id, "turn_id": turn_id, "question": question,
             "answer": answer, "status": status, "retrieval_mode": mode,
+            "completion_state": completion_state,
             "context_query": context_query, "claims": claims,
             "subquestions": subquestions,
             "coverage_complete": coverage_complete if coverage_assessed else None,

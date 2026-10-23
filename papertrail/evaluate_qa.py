@@ -47,6 +47,11 @@ def _gold_page_coverage(expected_pages: set[tuple[str, int]], citations: list[di
             "all_expected_pages_cited": bool(expected_pages) and expected_pages.issubset(cited_pages)}
 
 
+def _correct_abstention(row: dict[str, Any]) -> bool:
+    return (not row["answered"] and
+            row.get("completion_state") in {"refused", "no_evidence"})
+
+
 def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
               model: bool, artifact: Path | None = None, limit: int = 5) -> dict[str, Any]:
     if model and not os.environ.get("PAPERTRAIL_LLM_MODEL"):
@@ -81,6 +86,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
         cases.append({"id": item["id"], "type": item["question_type"], "question": item["question"],
                       "expected_answer": item["expected_answer"], "abstain_expected": item["abstain"],
                       "status": result["status"], "answered": bool(result["claims"]),
+                      "completion_state": result.get("completion_state"),
                       "coverage_complete": result.get("coverage_complete"),
                       "diagnostics": (result.get("usage") or {}).get("_diagnostics", {}),
                       "expected_page_cited": bool(expected_pages & cited_pages),
@@ -108,7 +114,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                                      if group_answerable else None),
                          "all_expected_pages_cited_rate": (sum(row["all_expected_pages_cited"] for row in group_answerable) / len(group_answerable)
                                                            if group_answerable else None),
-                         "correct_abstention_rate": (sum(not row["answered"] for row in group_unanswerable) / len(group_unanswerable)
+                         "correct_abstention_rate": (sum(_correct_abstention(row) for row in group_unanswerable) / len(group_unanswerable)
                                                      if group_unanswerable else None)}
     citations = [citation for row in answerable for citation in row["citations"]]
     gold_pages_by_id = {item["id"]: {(e["sha256"], e["pdf_page"]) for e in item["evidence"]} for item in items}
@@ -127,7 +133,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
             "gold_page_coverage": (sum(row["expected_pages_cited"] for row in answerable) /
                                    sum(row["expected_page_count"] for row in answerable)
                                    if sum(row["expected_page_count"] for row in answerable) else None),
-            "correct_abstention_rate": sum(not row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
+            "correct_abstention_rate": sum(_correct_abstention(row) for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "false_answer_rate": sum(row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "mean_latency_ms": statistics.mean(latencies) if latencies else 0,
             "median_latency_ms": statistics.median(latencies) if latencies else 0,

@@ -58,3 +58,12 @@ def test_expected_page_metrics_require_all_pages_for_multi_source_answers():
         "covered_pages": 2, "expected_pages": 2, "coverage": 1.0,
         "all_expected_pages_cited": True,
     }
+
+
+def test_budget_block_is_not_scored_as_correct_abstention():
+    from papertrail.evaluate_qa import _correct_abstention
+
+    assert _correct_abstention({"answered": False, "completion_state": "refused"})
+    assert _correct_abstention({"answered": False, "completion_state": "no_evidence"})
+    assert not _correct_abstention({"answered": False, "completion_state": "budget_blocked"})
+    assert not _correct_abstention({"answered": True, "completion_state": "refused"})
