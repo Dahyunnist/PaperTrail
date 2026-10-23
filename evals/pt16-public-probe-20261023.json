@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "dataset_role": "one_question_public_paper_probe",
+  "status": "completed",
+  "doi": "10.1371/journal.pcbi.1005510",
+  "title": "Good enough practices in scientific computing",
+  "license": "CC BY 4.0",
+  "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510",
+  "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+  "source_pdf_sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+  "question": "Where should researchers put input data versus files produced during analysis?",
+  "oracle": {
+    "expected_pages": [
+      10
+    ],
+    "expected_facets": [
+      "raw data and metadata belong in a data directory",
+      "files generated during cleanup and analysis belong in a results directory",
+      "generated files include intermediate and final results"
+    ],
+    "review_status": "assistant_checked_against_preregistered_oracle",
+    "semantic_claims": [
+      "Put raw data and metadata in a data directory.",
+      "Put files generated during cleanup and analysis in a results directory.",
+      "\"Generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables."
+    ],
+    "claim_support_review": "All three claims match the pre-registered page-10 oracle facets; their shared citation passes the PDF hash, page, and exact-quote checks. This check is not an independent human review.",
+    "claim_reviews": [
+      {
+        "claim_index": 0,
+        "oracle_facet": "Raw data and metadata belong in a data directory.",
+        "claim_supported_by_quote": true,
+        "citation_page": 10,
+        "citation_valid": true
+      },
+      {
+        "claim_index": 1,
+        "oracle_facet": "Files generated during cleanup and analysis belong in a results directory.",
+        "claim_supported_by_quote": true,
+        "citation_page": 10,
+        "citation_valid": true
+      },
+      {
+        "claim_index": 2,
+        "oracle_facet": "Generated files include intermediate and final results.",
+        "claim_supported_by_quote": true,
+        "citation_page": 10,
+        "citation_valid": true
+      }
+    ]
+  },
+  "claims": [
+    {
+      "text": "Put raw data and metadata in a data directory.",
+      "support": "supported",
+      "evidence": {
+        "paper_id": "p_3a8d62ba333cd91ec93aea85",
+        "version_id": "v_ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "pdf_page": 10,
+        "chunk_id": "122dca1638b607b6e1865a2d7257b9300b3428962e5af3e9923925900f4225f3",
+        "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+        "parser_version": "papertrail-s1-4",
+        "title": "Good enough practices in scientific computing",
+        "relevance_score": 0.04918032786885246,
+        "path": "E:\\job\\papertrail\\evals\\fixtures\\pt10-development\\good-enough-scientific-computing.pdf",
+        "text_origin": "native_text",
+        "subquestion_ids": [
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "text": "Put files generated during cleanup and analysis in a results directory.",
+      "support": "supported",
+      "evidence": {
+        "paper_id": "p_3a8d62ba333cd91ec93aea85",
+        "version_id": "v_ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "pdf_page": 10,
+        "chunk_id": "122dca1638b607b6e1865a2d7257b9300b3428962e5af3e9923925900f4225f3",
+        "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+        "parser_version": "papertrail-s1-4",
+        "title": "Good enough practices in scientific computing",
+        "relevance_score": 0.04918032786885246,
+        "path": "E:\\job\\papertrail\\evals\\fixtures\\pt10-development\\good-enough-scientific-computing.pdf",
+        "text_origin": "native_text",
+        "subquestion_ids": [
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "text": "\"Generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+      "support": "supported",
+      "evidence": {
+        "paper_id": "p_3a8d62ba333cd91ec93aea85",
+        "version_id": "v_ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+        "pdf_page": 10,
+        "chunk_id": "122dca1638b607b6e1865a2d7257b9300b3428962e5af3e9923925900f4225f3",
+        "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+        "parser_version": "papertrail-s1-4",
+        "title": "Good enough practices in scientific computing",
+        "relevance_score": 0.04918032786885246,
+        "path": "E:\\job\\papertrail\\evals\\fixtures\\pt10-development\\good-enough-scientific-computing.pdf",
+        "text_origin": "native_text",
+        "subquestion_ids": [
+          1,
+          0
+        ]
+      }
+    }
+  ],
+  "citation_checks": [
+    {
+      "sha256_matches": true,
+      "expected_page_matches": true,
+      "quote_in_pdf_page": true,
+      "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+      "page": 10
+    },
+    {
+      "sha256_matches": true,
+      "expected_page_matches": true,
+      "quote_in_pdf_page": true,
+      "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+      "page": 10
+    },
+    {
+      "sha256_matches": true,
+      "expected_page_matches": true,
+      "quote_in_pdf_page": true,
+      "quote": "• Put raw data and metadata in a data directory and files generated during cleanup and analysis in a results directory (4c), where \"generated files\" includes intermediate results such as cleaned data sets or simulated data, as well as final results such as figures and tables.",
+      "page": 10
+    }
+  ],
+  "all_citations_hash_page_quote_valid": true,
+  "model": "deepseek-flash",
+  "model_calls": 6,
+  "reserved_usd": 0.0171144,
+  "stage_cap_usd": 0.04,
+  "charged_usd": 0.0012942,
+  "master_spent_after_usd": 0.43485948,
+  "master_remaining_after_usd": 0.06514052,
+  "index": {
+    "indexed_chunks": 275,
+    "database_sha256": "9570b2e579d9e98716f1cdcff40dca76fb2ab7290c00f03bdae674ebe3e54f95"
+  },
+  "failure": null,
+  "limitations": [
+    "单篇开放许可论文的单题探针，不是基准分数或泛化结论。",
+    "模型内置审查与回答同源，不是独立语义审阅。",
+    "引用支持需按报告中人工核验 oracle 逐条检查。"
+  ]
+}
