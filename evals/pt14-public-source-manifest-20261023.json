@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "group_id": "pt14-public-development-20261023",
+  "status": "development_sources_and_gold_frozen",
+  "license": "CC BY 4.0",
+  "dataset_role": "development",
+  "gold_file": "evals/pt14-development-gold-20261023.jsonl",
+  "gold_sha256": "dbe99316c71830fc530ac5b48b2064b1370aab56b13bee68d38d636d6ad87a7a",
+  "question_count": 4,
+  "group_note": "三篇 PT5-PT13 之外的新许可明确论文；开发诊断组，含跨文献题，不用于独立测试。",
+  "sources": [
+    {
+      "title": "Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "source_version": "版本记录；2013-10-24",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1003285&type=printable",
+      "local_pdf": "evals/fixtures/pt14-development/reproducible-computational-research.pdf",
+      "local_pdf_sha256": "35648a3880bdd8bf30e8212a3847b7bd35f504ee5ccbd1ad3856d206acd181db",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten simple rules on how to write a standard operating procedure",
+      "doi": "10.1371/journal.pcbi.1008095",
+      "source_version": "版本记录；2020-09-03",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008095",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008095",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008095&type=printable",
+      "local_pdf": "evals/fixtures/pt14-development/standard-operating-procedure.pdf",
+      "local_pdf_sha256": "9b75c0de267d149fc598bd4cc960e9bb4ef388e4795afb0a4365825b4436e21b",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development"
+    },
+    {
+      "title": "Ten quick tips for making things findable",
+      "doi": "10.1371/journal.pcbi.1008469",
+      "source_version": "版本记录；2020-12-31",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008469",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008469",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008469&type=printable",
+      "local_pdf": "evals/fixtures/pt14-development/quick-tips-findable.pdf",
+      "local_pdf_sha256": "4828b5f780bfc00f0d62aff0d45c3cdd366023dd83858682486dcf3827382877",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development"
+    }
+  ]
+}

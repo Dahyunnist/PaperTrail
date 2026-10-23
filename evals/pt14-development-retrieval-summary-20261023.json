@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "group_id": "pt14-public-development-20261023",
+  "dataset_role": "development_diagnostic",
+  "gold_sha256": "dbe99316c71830fc530ac5b48b2064b1370aab56b13bee68d38d636d6ad87a7a",
+  "index": {
+    "papers": 3,
+    "pdf_pages": 24,
+    "chunks": 364,
+    "revision": 1,
+    "parser_version": "papertrail-s1-4"
+  },
+  "dense_bge": {
+    "status": "not_run",
+    "reason": "当前环境未安装 sentence_transformers 与 torch；未下载依赖或调用模型。"
+  },
+  "runs": {
+    "k5": {
+      "bm25": {"recall_at_k": 0.75, "mrr_at_k": 0.583, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667},
+      "vector": {"recall_at_k": 0.75, "mrr_at_k": 0.55, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667},
+      "hybrid": {"recall_at_k": 0.75, "mrr_at_k": 0.583, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667}
+    },
+    "k10": {
+      "bm25": {"recall_at_k": 0.75, "mrr_at_k": 0.583, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667},
+      "vector": {"recall_at_k": 1.0, "mrr_at_k": 0.578, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667},
+      "hybrid": {"recall_at_k": 0.75, "mrr_at_k": 0.583, "all_evidence_pages": 0.75, "complete_evidence_coverage": 0.75, "evidence_item_recall": 0.667}
+    }
+  },
+  "qa_evidence_path": {
+    "answerable_questions": 4,
+    "model_calls": 0,
+    "verified_excerpt_status": 4,
+    "gold_evidence_pages_cited": 2,
+    "gold_evidence_pages_total": 3,
+    "exact_gold_quotes_cited": 0,
+    "exact_gold_quotes_total": 5
+  },
+  "limitations": [
+    "PT14 是四题开发诊断组，不能支持泛化结论。",
+    "k=10 下三种模式只有向量模式找到四题至少一个黄金页；所有模式完整覆盖均为 3/4。",
+    "QA 最终引用路径覆盖 2/3 条黄金页，未显示任何与黄金短引文完全相同的引文。"
+  ]
+}

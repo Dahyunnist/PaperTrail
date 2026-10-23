@@ -434,6 +434,51 @@
       "benchmark_group": "pt13-public-development-20261023",
       "benchmark_role": "development",
       "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003285",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1003285&type=printable",
+      "source_version": "版本记录；2013-10-24",
+      "local_pdf": "evals/fixtures/pt14-development/reproducible-computational-research.pdf",
+      "local_pdf_sha256": "35648a3880bdd8bf30e8212a3847b7bd35f504ee5ccbd1ad3856d206acd181db",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten simple rules on how to write a standard operating procedure",
+      "doi": "10.1371/journal.pcbi.1008095",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008095",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008095",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008095&type=printable",
+      "source_version": "版本记录；2020-09-03",
+      "local_pdf": "evals/fixtures/pt14-development/standard-operating-procedure.pdf",
+      "local_pdf_sha256": "9b75c0de267d149fc598bd4cc960e9bb4ef388e4795afb0a4365825b4436e21b",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
+    },
+    {
+      "title": "Ten quick tips for making things findable",
+      "doi": "10.1371/journal.pcbi.1008469",
+      "public_record": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008469",
+      "license": "CC BY 4.0",
+      "license_evidence": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008469",
+      "license_detail": "https://creativecommons.org/licenses/by/4.0/",
+      "download_url": "https://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1008469&type=printable",
+      "source_version": "版本记录；2020-12-31",
+      "local_pdf": "evals/fixtures/pt14-development/quick-tips-findable.pdf",
+      "local_pdf_sha256": "4828b5f780bfc00f0d62aff0d45c3cdd366023dd83858682486dcf3827382877",
+      "benchmark_group": "pt14-public-development-20261023",
+      "benchmark_role": "development",
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级开发题均登记"
     }
   ]
 }
