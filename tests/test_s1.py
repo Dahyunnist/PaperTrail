@@ -1,4 +1,5 @@
 import json
+import sqlite3
 import shutil
 from pathlib import Path
 
@@ -7,7 +8,7 @@ import yaml
 
 from papertrail.audit import _hash
 from papertrail.s1_index import (_reading_order_blocks, _title_from_pdf, database_summary,
-                                index_selection, inspect_document, parse_pdf, search)
+                                index_selection, inspect_document, parse_pdf, search, PARSER_VERSION)
 from papertrail.retrieval import build_vector_index, hybrid_search, vector_search
 
 
@@ -131,6 +132,33 @@ def test_two_column_blocks_are_ordered_by_column_with_full_width_anchor():
         "left paragraph three", "right paragraph one", "right paragraph two",
         "right paragraph three",
     ]
+
+
+def test_parser_version_change_reindexes_existing_source(tmp_path):
+    source = tmp_path / "corpus" / "paper.pdf"
+    _pdf(source)
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "papers", "path": str(source.parent)}]}),
+                      encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+    selection.write_text(json.dumps({"root_id": "papers", "file_name": source.name,
+                                     "relative_path": source.name, "sha256": _hash(source),
+                                     "kind": "pdf", "source_type": "original_pdf"}) + "\n",
+                         encoding="utf-8")
+    db = tmp_path / "local" / "paper.sqlite3"
+    index_selection(db, config, selection)
+    conn = sqlite3.connect(db)
+    conn.execute("UPDATE paper_versions SET parser_version='papertrail-s1-3'")
+    conn.commit()
+    conn.close()
+
+    result = index_selection(db, config, selection)
+
+    conn = sqlite3.connect(db)
+    stored_version = conn.execute("SELECT parser_version FROM paper_versions").fetchone()[0]
+    conn.close()
+    assert result["added"] == 1
+    assert stored_version == PARSER_VERSION == "papertrail-s1-4"
 
 
 def test_ocr_fallback_records_unavailable_engine(tmp_path, monkeypatch):

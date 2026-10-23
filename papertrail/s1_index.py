@@ -18,7 +18,7 @@ import yaml
 
 from .audit import _candidate_title, _hash, normalize_title
 
-PARSER_VERSION = "papertrail-s1-3"
+PARSER_VERSION = "papertrail-s1-4"
 MAX_CHUNK_CHARS = 1800
 DOI_RE = re.compile(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.I)
 WORD_RE = re.compile(r"[\w]+", re.UNICODE)
