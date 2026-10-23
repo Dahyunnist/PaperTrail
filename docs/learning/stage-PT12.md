@@ -14,7 +14,7 @@ PT12 新增三篇 PLOS Computational Biology 论文。官方出版者页面明�
 
 冻结六道题：四道事实定位题、一题跨论文比较题和一道不可回答题。六条页级短证据均通过来源 SHA-256、PDF 物理页码与原文核验。黄金集 SHA-256 为 `d1ee0919a8bcddb3b040b573dc53b871f46e2dc54aa674d63d29d35d1d1ea01f`。
 
-PT12 是未暴露测试组。冻结前没有创建检索索引，也没有运行检索、问答或生成模型。不得在最终一次性评测前使用 PT12 调参。
+PT12 冻结时未暴露。冻结前没有创建检索索引，也没有运行检索、问答或生成模型。PT14 达标后，PT12 与 PT9 合并完成一次最终评测；结果未用于调参。两组评测后不再称为盲测。详见[最终 holdout 评测](final-public-holdout-evaluation-20261023.md)。
 
 ## 复现与冻结校验
 
@@ -23,4 +23,4 @@ PT12 是未暴露测试组。冻结前没有创建检索索引，也没有运行
 .\.venv\Scripts\python.exe -m papertrail.gold --sources evals/pt12-heldout-sources.yaml --gold evals/pt12-heldout-gold-20261023.jsonl --minimum-questions 1
 ```
 
-PT12 后公开组累计 24 篇论文、42 道题；PT9 与 PT12 共 6 篇、12 道题仍未评测。距离 30 篇下限还差 6 篇。
+冻结 PT12 时，公开组累计 24 篇论文、42 道题；当时测试集仍未评测，距离 30 篇下限还差 6 篇。PT13/PT14 后达到目标，并完成一次最终合并评测。该阶段冻结数据未变。

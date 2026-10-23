@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "group_id": "pt9-pt12-final-heldout-20261023",
+  "status": "one_time_evaluation_complete_no_tuning_after",
+  "dataset_role": "final_paper_disjoint_holdout",
+  "corpus": {
+    "papers": 30,
+    "pdf_pages": 352,
+    "chunks": 4553,
+    "sections": 841,
+    "parser_version": "papertrail-s1-4"
+  },
+  "heldout": {
+    "groups": ["pt9-public-heldout-20261023", "pt12-public-heldout-20261023"],
+    "papers": 6,
+    "questions": 12,
+    "answerable_questions": 10,
+    "unanswerable_questions": 2,
+    "pt9_gold_sha256": "efe19dd142381ad36e36d928e37c0bfa4292c2423faacdb5e230054961160c39",
+    "pt12_gold_sha256": "d1ee0919a8bcddb3b040b573dc53b871f46e2dc54aa674d63d29d35d1d1ea01f",
+    "combined_gold_sha256": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c"
+  },
+  "retrieval": {
+    "k5": {
+      "bm25": {"page_recall": 0.6, "mrr": 0.315, "all_evidence_pages": 0.6, "complete_evidence": 0.5, "evidence_item_recall": 0.462},
+      "vector": {"page_recall": 0.4, "mrr": 0.192, "all_evidence_pages": 0.4, "complete_evidence": 0.3, "evidence_item_recall": 0.308},
+      "hybrid": {"page_recall": 0.6, "mrr": 0.312, "all_evidence_pages": 0.6, "complete_evidence": 0.5, "evidence_item_recall": 0.462}
+    },
+    "k10": {
+      "bm25": {"page_recall": 0.7, "mrr": 0.329, "all_evidence_pages": 0.7, "complete_evidence": 0.6, "evidence_item_recall": 0.538},
+      "vector": {"page_recall": 0.7, "mrr": 0.231, "all_evidence_pages": 0.5, "complete_evidence": 0.5, "evidence_item_recall": 0.538},
+      "hybrid": {"page_recall": 0.7, "mrr": 0.395, "all_evidence_pages": 0.7, "complete_evidence": 0.7, "evidence_item_recall": 0.615}
+    },
+    "k10_question_types": {
+      "fact_location": {"page_hits": 6, "total": 7},
+      "cross_paper": {"page_hits": 0, "total": 2},
+      "multi_hop": {"page_hits": 1, "total": 1}
+    }
+  },
+  "qa_evidence_path": {
+    "questions": 12,
+    "verified_excerpt_status": 12,
+    "model_calls": 0,
+    "distinct_gold_pages_cited": 5,
+    "distinct_gold_pages_total": 11,
+    "exact_gold_quotes_cited": 0,
+    "exact_gold_quotes_total": 13,
+    "gold_quotes_contained_in_displayed_excerpts": 3,
+    "unanswerable_questions_returning_candidate_excerpts": 2
+  },
+  "limitations": [
+    "PT9/PT12 were evaluated once; do not call them blind after this run.",
+    "The two cross-paper questions missed at least one target page under all three k=10 retrieval modes.",
+    "The extractive QA path returned candidate excerpts for both unanswerable questions; no generation model ran, so this run does not measure generated-answer abstention.",
+    "Only 30 papers and 12 test questions; these results do not establish broad-domain generalization.",
+    "No system tuning followed the holdout evaluation."
+  ]
+}

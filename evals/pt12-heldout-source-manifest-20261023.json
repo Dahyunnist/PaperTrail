@@ -1,13 +1,14 @@
 {
   "schema_version": 1,
   "group_id": "pt12-public-heldout-20261023",
-  "status": "heldout_sources_frozen_gold_frozen_not_evaluated",
+  "status": "heldout_sources_and_gold_frozen_evaluated_once_2026-10-23",
   "license": "CC BY 4.0",
   "dataset_role": "test_holdout",
   "gold_file": "evals/pt12-heldout-gold-20261023.jsonl",
   "gold_sha256": "d1ee0919a8bcddb3b040b573dc53b871f46e2dc54aa674d63d29d35d1d1ea01f",
   "question_count": 6,
-  "group_note": "三篇未用于 PT5-PT11 开发诊断的新论文；六道黄金题已冻结，尚未运行索引、检索或问答评测。",
+  "group_note": "三篇未用于开发诊断的新论文；与 PT9 合并完成一次最终评测，未据此调参。",
+  "evaluation_report": "docs/learning/final-public-holdout-evaluation-20261023.md",
   "sources": [
     {
       "title": "Ten simple rules to cultivate transdisciplinary collaboration in data science",

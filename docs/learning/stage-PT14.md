@@ -38,4 +38,4 @@ k=10 时，只有向量检索在四题均命中至少一个黄金页，但完整
 .\.venv\Scripts\python.exe -m papertrail.evaluate --compare --db .local/pt14-development.sqlite3 --gold evals/pt14-development-gold-20261023.jsonl --k 10 --minimum-questions 1 --modes bm25 vector hybrid --vector-artifact .local/pt14-development.vectors.joblib
 ```
 
-PT14 后公开组达到 30 篇论文、50 道题。PT9 与 PT12 共 6 篇测试论文、12 道题仍未评测。最终测试评测前不再调整系统。
+PT14 阶段结束时，公开组达到 30 篇论文、50 道题；PT9 与 PT12 共 6 篇测试论文、12 道题尚未评测。随后按计划完成一次合并评测，结果见[最终 holdout 评测](final-public-holdout-evaluation-20261023.md)。测试结果未用于调参。

@@ -1,0 +1,21 @@
+roots:
+- id: pt5_public
+  path: evals/fixtures/pt5-public
+- id: pt6_heldout
+  path: evals/fixtures/pt6-heldout
+- id: pt7_development
+  path: evals/fixtures/pt7-development
+- id: pt8_development
+  path: evals/fixtures/pt8-development
+- id: pt9_heldout
+  path: evals/fixtures/pt9-heldout
+- id: pt10_development
+  path: evals/fixtures/pt10-development
+- id: pt11_development
+  path: evals/fixtures/pt11-development
+- id: pt12_heldout
+  path: evals/fixtures/pt12-heldout
+- id: pt13_development
+  path: evals/fixtures/pt13-development
+- id: pt14_development
+  path: evals/fixtures/pt14-development

@@ -223,7 +223,7 @@
       "local_pdf_sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
       "benchmark_group": "pt9-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Ten simple rules for getting started with statistics in graduate school",
@@ -238,7 +238,7 @@
       "local_pdf_sha256": "53e867793aa1f3a710004ee3c10346b4c1b8e2e5fdf9abfdf700ec3d3e09cbb1",
       "benchmark_group": "pt9-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Ten simple rules for large-scale data processing",
@@ -253,7 +253,7 @@
       "local_pdf_sha256": "2f0758d577a8d09dbf45dc0c370ab303a2978858e0e2c0a0b979755c39f308bc",
       "benchmark_group": "pt9-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 Creative Commons Attribution License、本地 PDF SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Good enough practices in scientific computing",
@@ -358,7 +358,7 @@
       "local_pdf_sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
       "benchmark_group": "pt12-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Ten simple rules for navigating the computational aspect of an interdisciplinary PhD",
@@ -373,7 +373,7 @@
       "local_pdf_sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
       "benchmark_group": "pt12-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Ten simple rules for building and maintaining a responsible data science workflow",
@@ -388,7 +388,7 @@
       "local_pdf_sha256": "f8e2af70e399923198b253109e255d3a818f732ce97dbd5092cf7c6accead567",
       "benchmark_group": "pt12-public-heldout-20261023",
       "benchmark_role": "test_holdout",
-      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；尚未评测"
+      "benchmark_status": "已冻结：官方 CC BY 4.0 PDF、本地 SHA-256 与人工页级测试题均登记；已参加一次 PT9/PT12 合并评测"
     },
     {
       "title": "Ten simple rules for humane data science",
