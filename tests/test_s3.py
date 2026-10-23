@@ -5,7 +5,7 @@ import fitz
 import yaml
 
 from papertrail.audit import _hash
-from papertrail.qa import ask, conversation_history
+from papertrail.qa import ask, conversation_history, _term_overlap, _validate_quote
 from papertrail.s1_index import index_selection
 
 
@@ -49,6 +49,11 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     citation = first["claims"][0]["evidence"]
     assert citation["text_origin"] == "native_text"
     assert citation["sha256"] == _hash(source)
+    page_cache = {}
+    assert _validate_quote(str(source), _hash(source), citation["pdf_page"], citation["quote"], page_cache)
+    assert not _validate_quote(str(source), _hash(source), citation["pdf_page"],
+                               "A fabricated quotation.", page_cache)
+    assert not _validate_quote(str(source), "0" * 64, citation["pdf_page"], citation["quote"], {})
     with fitz.open(source) as doc:
         page = " ".join(doc[citation["pdf_page"] - 1].get_text("text").split()).casefold()
     assert " ".join(citation["quote"].split()).casefold() in page
@@ -63,6 +68,12 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     stale = ask(db, "What does CTGAN evaluate?")
     assert stale["status"] == "abstained"
     assert stale["claims"] == []
+
+
+def test_quote_relevance_matches_word_forms_without_rewriting_quotes():
+    assert _term_overlap({"disseminating", "audience"}, {"dissemination", "audiences"}) == 2
+    assert _term_overlap({"citation", "citations"}, {"citations"}) == 1
+    assert _term_overlap({"methodology"}, {"meteorology"}) == 0
 
 
 def test_qa_does_not_cite_ocr_derived_text(tmp_path, monkeypatch):

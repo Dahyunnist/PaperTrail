@@ -9,6 +9,7 @@ import re
 import sqlite3
 import time
 import uuid
+from difflib import SequenceMatcher
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -102,6 +103,25 @@ def _sentences(text: str) -> list[str]:
     text = " ".join(text.split())
     return [part.strip() for part in re.split(r"(?<=[.!?。！？])\s+", text)
             if 20 <= len(part.strip()) <= 500 and re.search(r"[.!?。！？]$", part.strip())]
+
+
+def _term_overlap(query_terms: set[str], sentence_terms: set[str]) -> int:
+    """Count exact or close word-form matches without changing source quotations."""
+    exact = query_terms & sentence_terms
+    unmatched = query_terms - exact
+    candidates = sorted(
+        ((SequenceMatcher(None, query, term).ratio(), query, term)
+         for query in unmatched if len(query) >= 5
+         for term in sentence_terms if len(term) >= 5), reverse=True)
+    matched_queries: set[str] = set()
+    matched_terms: set[str] = set(exact)
+    for similarity, query, term in candidates:
+        if similarity < 0.88:
+            break
+        if query not in matched_queries and term not in matched_terms:
+            matched_queries.add(query)
+            matched_terms.add(term)
+    return len(exact) + len(matched_queries)
 
 
 def _candidate_excerpt(question: str, text: str, limit: int = 480) -> str:
@@ -556,21 +576,23 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             continue
         sentences = _sentences(row["text"])
         for sentence in sentences:
-            overlap = len(query_terms.intersection(re.findall(r"[\w]+", sentence.casefold())))
+            sentence_tokens = set(re.findall(r"[\w]+", sentence.casefold()))
+            overlap = _term_overlap(query_terms, sentence_tokens)
             if not query_terms or overlap < minimum_overlap:
                 continue
-            sentence_terms = set(re.findall(r"[\w]+", sentence.casefold()))
+            sentence_terms = sentence_tokens
             row_subquestion_ids = row.get("_subquestion_ids", [])
             if row_subquestion_ids:
-                subquestion_overlap = max((len(subquestion_terms[index] & sentence_terms)
+                subquestion_overlap = max((_term_overlap(subquestion_terms[index], sentence_terms)
                                            for index in row_subquestion_ids), default=0)
                 score_overlap = max(overlap, subquestion_overlap)
             else:
                 score_overlap = overlap
-            title_overlap = len(query_terms.intersection(re.findall(r"[\w]+", row["title"].casefold())))
+            title_terms = set(re.findall(r"[\w]+", row["title"].casefold()))
+            title_overlap = _term_overlap(query_terms, title_terms)
             candidates.append((score_overlap + 2 * title_overlap, result_rank, row, sentence,
                                row_subquestion_ids))
-    candidates.sort(key=lambda item: (-item[0], item[1], -len(item[3])))
+    candidates.sort(key=lambda item: (-item[0], item[1], len(item[3])))
     if len(subquestions) > 1:
         balanced: list[tuple[int, int, dict[str, Any], str, list[int]]] = []
         used: set[tuple[str, int, str]] = set()

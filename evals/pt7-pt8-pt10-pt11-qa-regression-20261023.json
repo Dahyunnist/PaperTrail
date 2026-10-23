@@ -60,8 +60,8 @@
               "exact_quote_cited": false,
               "gold_phrase_contained": false,
               "final_quotes": [
-                "in addition to being clear about the sampling sites, informing the size of the team of data collectors, as well as how the team was divided across sites and treatments, can help the readers to understand sampling effort and potential biases.",
-                "understanding those key points can pre- vent serious biases as, for example, the number of nodes and links in an ecological network tends to increase with sampling effort."
+                "understanding those key points can pre- vent serious biases as, for example, the number of nodes and links in an ecological network tends to increase with sampling effort.",
+                "in addition to being clear about the sampling sites, informing the size of the team of data collectors, as well as how the team was divided across sites and treatments, can help the readers to understand sampling effort and potential biases."
               ]
             }
           ]
@@ -231,7 +231,8 @@
               "exact_quote_cited": false,
               "gold_phrase_contained": false,
               "final_quotes": [
-                "importantly, consideration and respect of accents or linguistic mistakes can make a significant difference in the confer- ence experience of non-native english speakers."
+                "importantly, consideration and respect of accents or linguistic mistakes can make a significant difference in the confer- ence experience of non-native english speakers.",
+                "non-native english speakers may miss opportunities to attend or to actively par- ticipate in conferences (e.g., presenting, asking questions, or taking part in discussions), and conferences may in turn miss innovative contributions."
               ]
             }
           ]
@@ -403,9 +404,9 @@
       "parsed_gold_pages": 5,
       "parsed_gold_quotes": 5,
       "top20_retrieved_gold_pages": 5,
-      "final_cited_gold_pages": 3,
+      "final_cited_gold_pages": 4,
       "exact_quote_citations": 0,
-      "gold_phrases_contained_in_citations": 1,
+      "gold_phrases_contained_in_citations": 2,
       "unanswerable_questions_with_extractive_candidates": 0,
       "question_results": [
         {
@@ -441,9 +442,9 @@
           "gold_pages": 1,
           "parsed_pages": 1,
           "top20_retrieved_pages": 1,
-          "final_cited_pages": 0,
+          "final_cited_pages": 1,
           "exact_quote_citations": 0,
-          "gold_phrase_contained": 0,
+          "gold_phrase_contained": 1,
           "evidence_path": [
             {
               "sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
@@ -451,10 +452,12 @@
               "parsed_page": true,
               "gold_quote_in_parsed_chunks": true,
               "top20_retrieval_rank": 2,
-              "final_page_cited": false,
+              "final_page_cited": true,
               "exact_quote_cited": false,
-              "gold_phrase_contained": false,
-              "final_quotes": []
+              "gold_phrase_contained": true,
+              "final_quotes": [
+                "analyses documented in notebooks cannot be easily rerun if users do not first freeze their dependencies, share their data, and adequately describe their computing environment [13]."
+              ]
             }
           ]
         },
@@ -506,7 +509,7 @@
               "gold_phrase_contained": false,
               "final_quotes": [
                 "schematics of the organization of a research project (proj_name) around a computational notebook (proj_name.rmd/jl, referring to an rmarkdown or julia file).",
-                "the notebook contains narrative text supplementary to the manuscript’s main text, as well as text explaining the reasoning behind the computational work (included as code blocks) and its respective outputs (either kept on the notebook or saved as figures or tables)."
+                "the notebook, along with all the files in the project’s folder, can be subjected to version control and be referenced in a lab notebook, thanks to the nested structure of the project."
               ]
             },
             {
@@ -532,9 +535,9 @@
     "parsed_gold_pages": 20,
     "parsed_gold_quotes": 20,
     "top20_retrieved_gold_pages": 18,
-    "final_cited_gold_pages": 9,
+    "final_cited_gold_pages": 10,
     "exact_quote_citations": 0,
-    "gold_phrases_contained_in_citations": 4,
+    "gold_phrases_contained_in_citations": 5,
     "unanswerable_questions_with_extractive_candidates": 2
   },
   "configuration": {
