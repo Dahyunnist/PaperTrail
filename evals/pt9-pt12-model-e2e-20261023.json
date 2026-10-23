@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_not_run",
+  "dataset_role": "final_paper_disjoint_holdout",
+  "dataset": "pt9-pt12-final-heldout-20261023",
+  "gold_sha256": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c",
+  "database_sha256": "f92e0edbf52efcede69e1c1119f13575726a20ea0c0cf4e6994539e1fda0e7f8",
+  "questions": 12,
+  "locked_config": {
+    "provider": "openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "temperature": 0.0,
+    "retrieval_mode": "bm25",
+    "evidence_limit": 5,
+    "generate": true,
+    "scorer": "same-model support and coverage review in _synthesize_local",
+    "scorer_calls_are_part_of_budget": true,
+    "post_evaluation_tuning": false
+  },
+  "locked_source_sha256": {
+    "papertrail/qa.py": "016c248b59c71e577c70d9b5c7849c6ce22645c486a90e14aaba66fb506e37ad",
+    "papertrail/local_llm.py": "bd634caf59099971ee361ac5e8e81316c9553c287ec1d04844cf374aecd1503f",
+    "papertrail/retrieval.py": "568a0c5fc42f63a830293d73fc03513d9fe1c99edb3151881bec817556be151c",
+    "papertrail/s1_index.py": "5178d49744232b8226b82edea1dd92cb9ab481e354a924fccf5f12a8c03b96d1",
+    "papertrail/templates/index.html": "3eb93c4e160f71e1b7cdc98d99e3271560a4d25170b0f470a235988cb96e2017"
+  },
+  "budget_gate": {
+    "cap_usd": 0.5,
+    "repriced_spent_upper_bound_usd": 0.41873892,
+    "remaining_usd": 0.08126108,
+    "evaluation_reserve_ceiling_usd": 0.075,
+    "unallocated_margin_usd": 0.00626108,
+    "ledger": ".local/pt-master-usage.json",
+    "request_reserves_checked_before_send": true
+  },
+  "model_usage": null,
+  "results": null,
+  "limitations": [
+    "PT9/PT12 冻结组仅执行本登记的一次生成式端到端评测；不得据此调参或重跑。",
+    "同一模型负责生成和支持性审查，审查不是独立盲评。",
+    "检索召回、页码引用和模型自审通过均不等于答案正确。",
+    "仅 12 题，结果只描述本测试集。"
+  ]
+}
