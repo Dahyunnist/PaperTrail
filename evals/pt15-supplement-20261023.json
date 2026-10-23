@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "status": "completed_once_nonblind_addendum",
+  "dataset_role": "PT15补测；已暴露题目与检索页，非盲且不独立",
+  "preregistration": "pt15-supplement-prereg-20261023.json",
+  "question_ids": [
+    "PT15-05",
+    "PT15-06"
+  ],
+  "results": [
+    {
+      "id": "PT15-05",
+      "status": "generated_claims_reviewed",
+      "claims": [
+        "在进入新代码库之前，应明确自己的目标。"
+      ],
+      "gold_abstain": false,
+      "gold_pages_cited": 1,
+      "gold_pages_total": 1,
+      "displayed_citations": 3,
+      "citation_validity": [
+        true,
+        true,
+        true
+      ],
+      "all_citations_source_valid": true,
+      "citations": [
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 2,
+          "quote": "Clarifying your goals is a useful practice to do before jumping into a new codebase."
+        },
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 2,
+          "quote": "Clarifying your goals is a useful practice to do before jumping into a new codebase."
+        },
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 1,
+          "quote": "Before jumping in, it is a good idea to think about what you actually want to achieve."
+        }
+      ]
+    },
+    {
+      "id": "PT15-06",
+      "status": "generated_claims_reviewed",
+      "claims": [
+        "发布代码将使他人（以及你自己）在未来更容易复现你的工作。",
+        "在研究和工业界共享代码的标准是 GitHub。",
+        "不要使用 PDF 共享数据，因为 PDF 中共享的数据是“死数据”，几乎无法提取和复用。"
+      ],
+      "gold_abstain": false,
+      "gold_pages_cited": 0,
+      "gold_pages_total": 2,
+      "displayed_citations": 6,
+      "citation_validity": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all_citations_source_valid": true,
+      "citations": [
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 10,
+          "quote": "Publish- ing code will also make it easier for others, and yourself, to replicate your work at a future date."
+        },
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 10,
+          "quote": "Publish- ing code will also make it easier for others, and yourself, to replicate your work at a future date."
+        },
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 10,
+          "quote": "The standard for sharing code in both research and industry is GitHub (see Rule 9: Use ver- sion control)."
+        },
+        {
+          "sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828",
+          "pdf_page": 10,
+          "quote": "The standard for sharing code in both research and industry is GitHub (see Rule 9: Use ver- sion control)."
+        },
+        {
+          "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+          "pdf_page": 12,
+          "quote": "There are many reasons not to use PDFs for sharing data, the chief of which is that data shared in PDFs is dead data that can be almost impossible to extract and reuse."
+        },
+        {
+          "sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b",
+          "pdf_page": 12,
+          "quote": "There are many reasons not to use PDFs for sharing data, the chief of which is that data shared in PDFs is dead data that can be almost impossible to extract and reuse."
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "model_usage": {
+    "api_calls": 7,
+    "summed_request_reserves_usd": 0.0214032,
+    "charged_upper_bound_usd": 0.0016533,
+    "master_spent_after_usd": 0.43651278,
+    "master_remaining_after_usd": 0.06348722,
+    "stage_cap_usd": 0.038
+  }
+}
