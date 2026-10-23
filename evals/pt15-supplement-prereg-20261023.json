@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_not_run",
+  "dataset_role": "PT15补测；已暴露题目与检索页，非盲且不独立",
+  "registered_at": "2026-10-23",
+  "question_ids": [
+    "PT15-05",
+    "PT15-06"
+  ],
+  "gold_sha256": "ca3f6a9cf6533b0755fd9402f3ed0ab0327f74ed758615d98ebc592825e9bc30",
+  "source_database": ".local/pt15-heldout.sqlite3",
+  "source_database_sha256": "49878ed3e4b7a1a7976db148ec062d2278c4ae9679e7103924f0ceb594ef3313",
+  "supplement_database": ".local/pt15-supplement-20261023.sqlite3",
+  "supplement_database_sha256": "e7aa512af88c52205359e6fcb7143788b272a4df7af90269ef90395036605a94",
+  "qa_sha256": "0d838b636b4d83e250af8756de666f48ddca9d8863aae7eece4ef61e53a4c278",
+  "local_llm_sha256": "bd634caf59099971ee361ac5e8e81316c9553c287ec1d04844cf374aecd1503f",
+  "baseline_spent_usd": 0.43485948,
+  "master_cap_usd": 0.5,
+  "stage_cap_usd": 0.038,
+  "max_calls": 8,
+  "max_request_chars": 2400,
+  "max_output_tokens": 800,
+  "request_reserve_usd": 0.003936,
+  "max_model_reserve_usd": 0.031488,
+  "minimum_master_remaining_after_stage_usd": 0.02714052,
+  "locked_config": {
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "mode": "bm25",
+    "evidence_limit": 5
+  },
+  "limitations": [
+    "PT15-05来源摘录此前已暴露；PT15-06文章曾出现在此前输出。",
+    "补测不具盲性，不计入PT15原单次结果或4/4人工审阅。",
+    "仅作检索、筛选、生成链路诊断；不得外推准确率。"
+  ],
+  "sources": [
+    {
+      "file_name": "research-with-humans.pdf",
+      "local_pdf": "evals/fixtures/pt15-blind/research-with-humans.pdf",
+      "local_pdf_sha256": "2ac2337b4a485c4c3b54bde3f25498bcbe24f09194de77aec4468a0d4d7c9c42"
+    },
+    {
+      "file_name": "measuring-data-rot.pdf",
+      "local_pdf": "evals/fixtures/pt15-blind/measuring-data-rot.pdf",
+      "local_pdf_sha256": "244d7114730d1285dc6a082845c42c8e7bef8a7a96a1df371706f6b266dea87b"
+    },
+    {
+      "file_name": "working-with-other-peoples-code.pdf",
+      "local_pdf": "evals/fixtures/pt15-blind/working-with-other-peoples-code.pdf",
+      "local_pdf_sha256": "af48e61cc7c4e53596f918cd68f98b5984063c8710a67f9d506b06d8bee2f828"
+    }
+  ],
+  "runner_sha256": "6a083f364fb190a2666c1d943b12a0d6d491ec2df05888636d5703683bcdc1aa"
+}
