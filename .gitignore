@@ -43,3 +43,7 @@ Desktop.ini
 docs/corpus-audit.md
 reports/*raw*.jsonl
 evals/fixtures/pt18-heldout/*.pdf
+evals/pt18-heldout-gold-20261024.jsonl
+evals/pt18-heldout-selection.jsonl
+evals/pt18-heldout-source-manifest-20261024.json
+evals/pt18-heldout-sources.yaml
