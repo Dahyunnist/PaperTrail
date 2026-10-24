@@ -76,6 +76,30 @@ def test_quote_relevance_matches_word_forms_without_rewriting_quotes():
     assert _term_overlap({"methodology"}, {"meteorology"}) == 0
 
 
+def test_no_model_qa_keeps_single_strong_term_match(tmp_path):
+    source = tmp_path / "corpus" / "synthetic-alpha.pdf"
+    source.parent.mkdir(parents=True)
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((40, 60), "Synthetic Study Alpha", fontsize=16)
+    page.insert_text((40, 100), "The trial enrolled 120 adults.", fontsize=11)
+    doc.save(source)
+    doc.close()
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "papers", "path": str(source.parent)}]}), encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+    selection.write_text(json.dumps({"root_id": "papers", "file_name": source.name,
+        "relative_path": source.name, "sha256": _hash(source), "kind": "pdf",
+        "source_type": "original_pdf"}) + "\n", encoding="utf-8")
+    db = tmp_path / "local" / "papers.sqlite3"
+    index_selection(db, config, selection)
+
+    result = ask(db, "How many adults did Synthetic Study Alpha enroll?", generate=False)
+
+    assert result["status"] == "verified_excerpts"
+    assert any("120 adults" in claim["evidence"]["quote"] for claim in result["claims"])
+
+
 def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path, monkeypatch):
     import papertrail.qa as qa
     from papertrail.retrieval import retrieve as real_retrieve

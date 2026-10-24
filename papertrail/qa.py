@@ -617,7 +617,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
     subquestion_terms = [{term for term in re.findall(r"[\w]+", value.casefold())
                           if term not in QUESTION_STOPWORDS and len(term) > 1}
                          for value in subquestions]
-    minimum_overlap = 0 if model else (2 if len(query_terms) >= 3 else 1)
+    minimum_overlap = 0 if model else 1
     for result_rank, row in enumerate(result_rows, 1):
         if model and screen and row["chunk_id"] not in screen.get("selected_chunk_ids", set()):
             continue
