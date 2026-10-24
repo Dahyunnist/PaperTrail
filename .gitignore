@@ -42,3 +42,4 @@ Desktop.ini
 *.partial
 docs/corpus-audit.md
 reports/*raw*.jsonl
+evals/fixtures/pt18-heldout/*.pdf
