@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import fitz
+import pytest
 import yaml
 
 from papertrail.audit import _hash
@@ -98,6 +99,41 @@ def test_no_model_qa_keeps_single_strong_term_match(tmp_path):
 
     assert result["status"] == "verified_excerpts"
     assert any("120 adults" in claim["evidence"]["quote"] for claim in result["claims"])
+
+
+def test_no_model_qa_abstains_when_retrieval_has_no_evidence(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setattr(qa, "retrieve", lambda *_args, **_kwargs: [])
+
+    result = ask(db, "What does CTGAN evaluate?", generate=False)
+
+    assert result["status"] == "abstained"
+    assert result["completion_state"] == "no_evidence"
+    assert result["claims"] == []
+
+
+@pytest.mark.parametrize("mismatch", ["hash", "page"])
+def test_no_model_qa_rejects_evidence_with_invalid_source_pointer(tmp_path, monkeypatch, mismatch):
+    import papertrail.qa as qa
+
+    db, source = _indexed_db(tmp_path)
+    row = {
+        "chunk_id": "candidate", "version_id": "version", "paper_id": "paper",
+        "source_type": "original_pdf", "title": "CTGAN Mixed Data Generation",
+        "section": "Results", "pdf_page": 1 if mismatch == "hash" else 2,
+        "path": str(source), "sha256": "0" * 64 if mismatch == "hash" else _hash(source),
+        "parse_status": "text", "text_origin": "native_text", "rank_score": 1.0,
+        "text": "CTGAN evaluates mixed continuous and discrete columns with reliable likelihood and utility measurements.",
+    }
+    monkeypatch.setattr(qa, "retrieve", lambda *_args, **_kwargs: [row])
+
+    result = ask(db, "What does CTGAN evaluate?", generate=False)
+
+    assert result["status"] == "abstained"
+    assert result["completion_state"] == "no_evidence"
+    assert result["claims"] == []
 
 
 def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path, monkeypatch):
