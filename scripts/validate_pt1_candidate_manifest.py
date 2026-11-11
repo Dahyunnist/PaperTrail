@@ -1,6 +1,7 @@
 from pathlib import Path
 import hashlib
 import json
+from urllib.parse import urlparse
 
 
 def validate(manifest_path=None, project_root=None):
@@ -14,22 +15,32 @@ def validate(manifest_path=None, project_root=None):
     except (OSError, json.JSONDecodeError) as exc:
         return [f'manifest unavailable or invalid: {exc}']
     sources = manifest.get('sources', [])
-    if manifest.get('source_count') != len(sources) or len(sources) < 3:
-        errors.append('source_count must match at least 3 source records')
+    if manifest.get('source_count') != len(sources) or len(sources) < 30:
+        errors.append('source_count must match at least 30 source records')
     ids = [source.get('doi', '') for source in sources]
     if len(set(ids)) != len(ids) or any(not doi.startswith('10.') for doi in ids):
         errors.append('DOI missing or duplicate')
     for source in sources:
+        article_url = source.get('public_record', '')
+        license_url = source.get('license_evidence', '')
+        download_url = source.get('download_url', '')
         if (source.get('license') != 'CC BY 4.0'
                 or source.get('paper_split') != 'development_seen'
-                or source.get('annotation_status') != '待人工标注'):
+                or source.get('annotation_status') != '待人工标注'
+                or urlparse(article_url).hostname not in {'journals.plos.org'}
+                or license_url != article_url
+                or urlparse(download_url).hostname not in {'journals.plos.org'}):
             errors.append(f"metadata invalid: {source.get('doi')}")
         try:
             path = (root / source['local_pdf']).resolve()
             if not path.is_relative_to(root) or not path.is_file():
                 errors.append(f"PDF unavailable: {source.get('doi')}")
-            elif hashlib.sha256(path.read_bytes()).hexdigest() != source['pdf_sha256']:
-                errors.append(f"PDF hash mismatch: {source.get('doi')}")
+            else:
+                data = path.read_bytes()
+                if not data.startswith(b'%PDF-'):
+                    errors.append(f"not a PDF file: {source.get('doi')}")
+                if hashlib.sha256(data).hexdigest() != source['pdf_sha256']:
+                    errors.append(f"PDF hash mismatch: {source.get('doi')}")
         except (KeyError, OSError):
             errors.append(f"PDF unavailable: {source.get('doi')}")
     try:
@@ -51,4 +62,5 @@ if __name__ == '__main__':
     if issues:
         print('\n'.join(issues))
         raise SystemExit(1)
-    print('PT1 candidate source/hash/license metadata and pending-gold checks passed (6 sources; 0 annotations).')
+    manifest = json.loads((Path(__file__).resolve().parents[1] / 'evals/pt1-candidate-manifest-20261111.json').read_text(encoding='utf8'))
+    print(f"PT1 candidate source/hash/license metadata and pending-gold checks passed ({len(manifest['sources'])} sources; 0 annotations).")

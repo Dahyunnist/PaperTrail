@@ -21,10 +21,13 @@ def _fixture(tmp_path):
     sources = [{
         'doi': f'10.1/{i}', 'license': 'CC BY 4.0', 'paper_split': 'development_seen',
         'annotation_status': '待人工标注', 'local_pdf': 'pdfs/paper.pdf', 'pdf_sha256': sha,
-    } for i in range(3)]
+        'public_record': f'https://journals.plos.org/ploscompbiol/article?id=10.1/{i}',
+        'license_evidence': f'https://journals.plos.org/ploscompbiol/article?id=10.1/{i}',
+        'download_url': f'https://journals.plos.org/ploscompbiol/article/file?id=10.1/{i}&type=printable',
+    } for i in range(30)]
     manifest = tmp_path / 'evals' / 'manifest.json'
     manifest.write_text(json.dumps({
-        'source_count': 3, 'sources': sources, 'gold_file': 'evals/gold.jsonl',
+        'source_count': 30, 'sources': sources, 'gold_file': 'evals/gold.jsonl',
         'gold_file_sha256': hashlib.sha256(b'').hexdigest(), 'gold_schema': 'evals/schema.json',
     }), encoding='utf-8')
     return manifest, pdf
@@ -40,4 +43,18 @@ def test_candidate_manifest_rejects_pdf_hash_tampering(tmp_path):
 
     issues = validate(manifest, tmp_path)
 
-    assert sum('PDF hash mismatch' in issue for issue in issues) == 3
+    assert sum('PDF hash mismatch' in issue for issue in issues) == 30
+
+
+def test_candidate_manifest_rejects_non_pdf_file(tmp_path):
+    manifest, pdf = _fixture(tmp_path)
+    pdf.write_bytes(b'not a PDF')
+    payload = json.loads(manifest.read_text(encoding='utf-8'))
+    digest = hashlib.sha256(pdf.read_bytes()).hexdigest()
+    for source in payload['sources']:
+        source['pdf_sha256'] = digest
+    manifest.write_text(json.dumps(payload), encoding='utf-8')
+
+    issues = validate(manifest, tmp_path)
+
+    assert sum('not a PDF file' in issue for issue in issues) == 30
