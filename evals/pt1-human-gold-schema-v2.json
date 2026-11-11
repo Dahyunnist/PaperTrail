@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PT-1 human-verified annotation format",
+  "type": "object",
+  "required": ["id", "paper_ids", "split", "question_type", "question", "expected_answer", "answerability", "evidence", "minimumCompleteEvidenceSet", "annotation_status", "annotator", "reviewer"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "paper_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^10\\."}},
+    "split": {"const": "development"},
+    "question_type": {"enum": ["fact_location", "method_comparison", "cross_paper", "multi_hop", "conflict", "unanswerable"]},
+    "question": {"type": "string", "minLength": 1},
+    "expected_answer": {"type": "string", "minLength": 1},
+    "answerability": {"enum": ["answerable", "unanswerable"]},
+    "evidence": {"type": "array", "items": {"type": "object", "required": ["doi", "pdf_sha256", "pdf_page", "start_char", "end_char", "quote", "relation"], "properties": {"doi": {"type": "string", "pattern": "^10\\."}, "pdf_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "pdf_page": {"type": "integer", "minimum": 1}, "start_char": {"type": "integer", "minimum": 0}, "end_char": {"type": "integer", "minimum": 1}, "quote": {"type": "string", "minLength": 1}, "relation": {"enum": ["supports", "contradicts", "context"]}}, "additionalProperties": false}},
+    "minimumCompleteEvidenceSet": {"const": true},
+    "annotation_status": {"const": "human_verified"},
+    "annotator": {"type": "string", "minLength": 1},
+    "reviewer": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}
