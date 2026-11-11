@@ -29,3 +29,10 @@ gold schema 在 `evals/pt1-gold-schema-v1.json`。空文件 `evals/pt1-candidate
 运行 `python scripts/validate_pt1_candidate_manifest.py` 可核验来源数量、DOI 唯一性、状态、PDF 路径/哈希、空 gold 哈希和 schema。当前结果：通过，6 个来源，0 条标注。校验器支持临时项目目录；定向测试覆盖 PDF 哈希篡改。
 
 本阶段未调用模型。账本上限 `$0.50`、历史已用约 `$0.44008`；剩余额度保留，不用于此阶段。PT-1 规模目标仍未完成。
+
+
+## PT-2/PT-3 与测试边界
+
+本轮未改冻结评测基线。PT-2 完整证据覆盖仍为 7/10；PT-3 真实集完整可答回答仍为 0/4、不可答正确拒答为 0/1。定向回归 `tests/test_s3.py` 与 `tests/test_p13_regressions.py`：41 项通过。
+
+全套测试在受限运行中为 75 项通过、1 项受本机回环权限拦截：`tests/test_local_llm.py::test_local_chat_client_uses_loopback_ollama_json_api`。本地假服务绑定 `127.0.0.1` 的临时端口；连接失败链为 `urllib.error.URLError`，底层 `WinError 10013`（套接字访问被拒），最终 `papertrail/local_llm.py:82` 抛出 `RuntimeError`。该用例获准单独运行后通过；不涉及外网或模型。PT-1 定向测试为 2 项通过。
