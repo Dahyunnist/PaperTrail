@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -12,7 +11,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .s1_index import search
+from .access import LOCAL_PRINCIPAL, Principal, document_metadata, read_evidence, search_papers
+from .s1_index import open_database
 
 SERVER_INFO = {"name": "papertrail", "version": "0.1.0"}
 TOOLS = [
@@ -45,52 +45,19 @@ def _readonly(database: Path) -> sqlite3.Connection:
     return conn
 
 
-def _document_path(database: Path, sha256: str) -> tuple[dict[str, Any], Path] | None:
-    conn = _readonly(database)
-    try:
-        row = conn.execute("SELECT v.version_id,v.sha256,v.parse_status,v.page_count,p.title_candidate "
-                           "FROM paper_versions v JOIN papers p ON p.paper_id=v.paper_id "
-                           "WHERE v.sha256=? AND v.source_type='original_pdf'", (sha256,)).fetchone()
-        if not row:
-            return None
-        location = conn.execute("SELECT absolute_path FROM source_locations WHERE version_id=? LIMIT 1",
-                                (row["version_id"],)).fetchone()
-        if not location:
-            return None
-        return dict(row), Path(location["absolute_path"])
-    finally:
-        conn.close()
+def get_evidence(database: Path, sha256: str, page_number: int,
+                 principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
+    return read_evidence(database, sha256, page_number, principal)
 
 
-def get_evidence(database: Path, sha256: str, page_number: int) -> dict[str, Any]:
-    if (not isinstance(sha256, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", sha256)
-            or not isinstance(page_number, int) or isinstance(page_number, bool) or page_number < 1):
-        raise ValueError("invalid SHA-256 or page")
-    match = _document_path(database, sha256.lower())
-    if not match:
-        raise ValueError("original paper not found")
-    metadata, path = match
-    if not path.is_file():
-        raise ValueError("source file changed or is unavailable")
-    with path.open("rb") as stream:
-        actual_hash = hashlib.file_digest(stream, "sha256").hexdigest()
-    if actual_hash != sha256.lower():
-        raise ValueError("source file changed or is unavailable")
-    import pymupdf
-    with pymupdf.open(path) as doc:
-        if page_number > doc.page_count:
-            raise ValueError("page is outside source document")
-        text = doc[page_number - 1].get_text("text")
-    return {"sha256": sha256.lower(), "page": page_number, "title": metadata["title_candidate"],
-            "text": text, "text_origin": "native_pdf_page"}
-
-
-def _resource_list(database: Path) -> list[dict[str, Any]]:
+def _resource_list(database: Path, principal: Principal = LOCAL_PRINCIPAL) -> list[dict[str, Any]]:
     conn = _readonly(database)
     try:
         rows = conn.execute("SELECT v.sha256,v.page_count,p.title_candidate FROM paper_versions v "
-                            "JOIN papers p ON p.paper_id=v.paper_id WHERE v.source_type='original_pdf' "
-                            "ORDER BY p.title_candidate").fetchall()
+                            "JOIN papers p ON p.paper_id=v.paper_id "
+                            "JOIN collections col ON col.collection_id=v.collection_id "
+                            "WHERE v.source_type='original_pdf' AND col.owner_id=? "
+                            "ORDER BY p.title_candidate", (principal.user_id,)).fetchall()
         return [{"uri": f"papertrail://documents/{row['sha256']}", "name": row["title_candidate"],
                  "description": f"Original PDF metadata; {row['page_count']} pages",
                  "mimeType": "application/json"} for row in rows]
@@ -98,27 +65,23 @@ def _resource_list(database: Path) -> list[dict[str, Any]]:
         conn.close()
 
 
-def _resource_read(database: Path, uri: str) -> dict[str, Any]:
+def _resource_read(database: Path, uri: str, principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
     parsed = urlparse(uri)
     parts = parsed.path.strip("/").split("/")
     if parsed.scheme != "papertrail" or parsed.netloc not in {"documents", "evidence"}:
         raise ValueError("unknown resource URI")
     if parsed.netloc == "evidence" and len(parts) == 2 and parts[1].isdigit():
-        value = get_evidence(database, parts[0], int(parts[1]))
+        value = get_evidence(database, parts[0], int(parts[1]), principal)
     elif parsed.netloc == "documents" and len(parts) == 1 and re.fullmatch(r"[a-fA-F0-9]{64}", parts[0]):
-        match = _document_path(database, parts[0].lower())
-        if not match:
-            raise ValueError("original paper not found")
-        metadata, _ = match
-        value = {"sha256": metadata["sha256"], "title": metadata["title_candidate"],
-                 "page_count": metadata["page_count"], "parse_status": metadata["parse_status"]}
+        value = document_metadata(database, parts[0].lower(), principal)
     else:
         raise ValueError("malformed resource URI")
     return {"contents": [{"uri": uri, "mimeType": "application/json" if "title" in value else "text/plain",
                            "text": json.dumps(value, ensure_ascii=False)}]}
 
 
-def _call(database: Path, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+def _call(database: Path, name: str, arguments: dict[str, Any],
+          principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
     if not isinstance(arguments, dict):
         raise ValueError("tool arguments must be an object")
     if name == "search_papers":
@@ -128,7 +91,7 @@ def _call(database: Path, name: str, arguments: dict[str, Any]) -> dict[str, Any
         limit = arguments.get("limit", 5)
         if not isinstance(query, str) or not query.strip() or not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 20:
             raise ValueError("query and limit do not match tool schema")
-        hits = search(database, query, limit=limit, source_type="original_pdf", readonly=True)
+        hits = search_papers(database, query, principal, limit=limit)
         safe = [{"title": row["title"], "sha256": row["sha256"], "page": row["pdf_page"],
                  "section": row["section"], "score": row["rank_score"], "chunk_id": row["chunk_id"]}
                 for row in hits]
@@ -137,12 +100,13 @@ def _call(database: Path, name: str, arguments: dict[str, Any]) -> dict[str, Any
     if name == "get_evidence":
         if set(arguments) != {"sha256", "page"}:
             raise ValueError("get_evidence requires sha256 and page only")
-        value = get_evidence(database, arguments.get("sha256", ""), arguments.get("page", 0))
+        value = get_evidence(database, arguments.get("sha256", ""), arguments.get("page", 0), principal)
         return {"content": [{"type": "text", "text": value["text"]}], "structuredContent": value}
     raise ValueError("unknown tool")
 
 
-def handle(database: Path, message: dict[str, Any]) -> dict[str, Any] | None:
+def handle(database: Path, message: dict[str, Any],
+           principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any] | None:
     method = message.get("method")
     request_id = message.get("id")
     params = message.get("params", {})
@@ -159,13 +123,13 @@ def handle(database: Path, message: dict[str, Any]) -> dict[str, Any] | None:
             result = {"tools": TOOLS}
         elif method == "tools/call":
             try:
-                result = _call(database, params.get("name", ""), params.get("arguments", {}))
+                result = _call(database, params.get("name", ""), params.get("arguments", {}), principal)
             except (ValueError, OSError, sqlite3.Error) as exc:
                 result = {"content": [{"type": "text", "text": str(exc)}], "isError": True}
         elif method == "resources/list":
-            result = {"resources": _resource_list(database)}
+            result = {"resources": _resource_list(database, principal)}
         elif method == "resources/read":
-            result = _resource_read(database, params.get("uri", ""))
+            result = _resource_read(database, params.get("uri", ""), principal)
         else:
             return {"jsonrpc": "2.0", "id": request_id,
                     "error": {"code": -32601, "message": "Method not found"}}
@@ -177,18 +141,20 @@ def handle(database: Path, message: dict[str, Any]) -> dict[str, Any] | None:
                 "error": {"code": -32602, "message": str(exc)}}
 
 
-def main(database_path: Path | None = None) -> None:
+def main(database_path: Path | None = None, principal: Principal = LOCAL_PRINCIPAL) -> None:
     try:
         database = database_path.resolve() if database_path else _database()
         if not database.is_file():
             raise ValueError("indexed database does not exist")
+        schema_conn = open_database(database)
+        schema_conn.close()
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(2) from exc
     for line in sys.stdin:
         try:
             request = json.loads(line)
-            response = handle(database, request)
+            response = handle(database, request, principal)
             if response is not None:
                 sys.stdout.write(json.dumps(response, ensure_ascii=False, separators=(",", ":")) + "\n")
                 sys.stdout.flush()

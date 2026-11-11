@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from .s1_index import database_summary, index_selection, inspect_document, search
+from .s1_index import database_summary, index_selection, inspect_document, open_database, search
 from .retrieval import build_vector_index, retrieve
 from .qa import ask, conversation_history
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
@@ -112,6 +112,9 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     args = _parser().parse_args(argv)
     try:
+        if hasattr(args, "db") and args.db.is_file():
+            schema_conn = open_database(args.db)
+            schema_conn.close()
         if args.command == "index":
             _print_json(index_selection(args.db, args.sources, args.selection, args.ocr_fallback))
         elif args.command == "search":

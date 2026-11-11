@@ -459,7 +459,7 @@ def _synthesize_local(question: str, evidence: list[dict[str, Any]], model: str,
 
 def _ask(database: Path, question: str, conversation_id: str | None = None,
         limit: int = 5, mode: str = "bm25", generate: bool = True,
-        artifact: Path | None = None) -> dict[str, Any]:
+        artifact: Path | None = None, principal_id: str = "local-dev") -> dict[str, Any]:
     question = question.strip()
     if not question:
         raise ValueError("问题不能为空")
@@ -495,7 +495,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         search_queries = subquestions if len(subquestions) > 1 else [retrieval_query]
         search_mode = "bm25_expanded" if model and mode == "bm25" else mode
         per_query_rows = [retrieve(database, query, max(limit * 4, 12),
-                                   source_type="original_pdf", mode=search_mode, artifact=artifact)
+                                   source_type="original_pdf", mode=search_mode, artifact=artifact,
+                                   principal_id=principal_id)
                           for query in search_queries]
         result_rows: list[dict[str, Any]] = []
         row_by_chunk: dict[str, dict[str, Any]] = {}
@@ -552,7 +553,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             screen["selected_chunk_ids"] = initially_selected
             if not screen["sufficient"] and screen["targeted_query"]:
                 focused = retrieve(database, screen_question + " " + screen["targeted_query"], max(limit * 4, 12),
-                                   source_type="original_pdf", mode=search_mode, artifact=artifact)
+                                   source_type="original_pdf", mode=search_mode, artifact=artifact,
+                                   principal_id=principal_id)
                 known = {row["chunk_id"] for row in result_rows}
                 result_rows.extend(row for row in focused if row["chunk_id"] not in known)
                 if focused:
@@ -576,7 +578,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
                     relevant_ids = set(targeted["relevant_ids"])
                     if not relevant_ids:
                         focused = retrieve(database, subquestion, max(limit * 4, 12),
-                                           source_type="original_pdf", mode=search_mode, artifact=artifact)
+                                           source_type="original_pdf", mode=search_mode, artifact=artifact,
+                                           principal_id=principal_id)
                         by_chunk = {row["chunk_id"]: row for row in result_rows}
                         focused_rows = []
                         for incoming in focused:
@@ -855,9 +858,9 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
 
 def ask(database: Path, question: str, conversation_id: str | None = None,
         limit: int = 5, mode: str = "bm25", generate: bool = True,
-        artifact: Path | None = None) -> dict[str, Any]:
+        artifact: Path | None = None, principal_id: str = "local-dev") -> dict[str, Any]:
     with model_turn_budget() as budget:
-        result = _ask(database, question, conversation_id, limit, mode, generate, artifact)
+        result = _ask(database, question, conversation_id, limit, mode, generate, artifact, principal_id)
         result["model_budget"] = {**budget, "reserved_usd": round(budget["reserved_usd"], 8)}
         return result
 

@@ -45,7 +45,7 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
 
 
 def compare_papers(database: Path, topic: str, claim: str, limit_papers: int = 8,
-                   mode: str = "bm25") -> dict[str, Any]:
+                   mode: str = "bm25", principal_id: str = "local-dev") -> dict[str, Any]:
     topic, claim = topic.strip(), claim.strip()
     if not topic or not claim:
         raise ValueError("主题和待比较论断都不能为空")
@@ -57,7 +57,7 @@ def compare_papers(database: Path, topic: str, claim: str, limit_papers: int = 8
     rows_by_chunk: dict[str, dict[str, Any]] = {}
     for token in sorted(topic_terms or terms):
         token_rows = retrieve(database, token, max(limit_papers * 12, 48),
-                              source_type="original_pdf", mode=mode)
+                              source_type="original_pdf", mode=mode, principal_id=principal_id)
         for row in token_rows:
             prior = rows_by_chunk.get(row["chunk_id"])
             if prior is None or row["rank_score"] > prior["rank_score"]:

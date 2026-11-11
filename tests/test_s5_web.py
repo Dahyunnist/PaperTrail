@@ -175,9 +175,9 @@ def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeyp
     import papertrail.web as web
 
     seen = {}
-    def fake_ask(database, question, conversation_id, *, limit, mode):
+    def fake_ask(database, question, conversation_id, *, limit, mode, principal_id):
         seen.update(database=database, question=question, conversation_id=conversation_id,
-                    limit=limit, mode=mode)
+                    limit=limit, mode=mode, principal_id=principal_id)
         return {"claims": [{}], "conversation_id": "demo-conversation"}
     monkeypatch.setattr(web, "ask", fake_ask)
     app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
@@ -188,3 +188,4 @@ def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeyp
     assert response.status_code == 302
     assert seen["mode"] == "hybrid_bge_wide"
     assert seen["limit"] == 8
+    assert seen["principal_id"] == "local-dev"

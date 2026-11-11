@@ -271,6 +271,11 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(
         """
+        CREATE TABLE IF NOT EXISTS collections (
+            collection_id TEXT PRIMARY KEY,
+            owner_id TEXT NOT NULL
+        );
+        INSERT OR IGNORE INTO collections(collection_id,owner_id) VALUES('local-dev-default','local-dev');
         CREATE TABLE IF NOT EXISTS papers (
             paper_id TEXT PRIMARY KEY,
             title_candidate TEXT NOT NULL,
@@ -281,6 +286,7 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         CREATE TABLE IF NOT EXISTS paper_versions (
             version_id TEXT PRIMARY KEY,
             paper_id TEXT NOT NULL REFERENCES papers(paper_id),
+            collection_id TEXT NOT NULL DEFAULT 'local-dev-default' REFERENCES collections(collection_id),
             sha256 TEXT NOT NULL UNIQUE,
             source_type TEXT NOT NULL,
             file_name TEXT NOT NULL,
@@ -342,14 +348,18 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
             chunk_id UNINDEXED, title, section_title, body,
             tokenize='unicode61 remove_diacritics 2'
         );
-        PRAGMA user_version=1;
         """
     )
     version_columns = {row[1] for row in conn.execute("PRAGMA table_info(paper_versions)")}
+    if "collection_id" not in version_columns:
+        conn.execute("ALTER TABLE paper_versions ADD COLUMN collection_id TEXT NOT NULL DEFAULT 'local-dev-default'")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_versions_collection ON paper_versions(collection_id)")
     if "ocr_pages_json" not in version_columns:
         conn.execute("ALTER TABLE paper_versions ADD COLUMN ocr_pages_json TEXT NOT NULL DEFAULT '[]'")
     if "ocr_errors_json" not in version_columns:
         conn.execute("ALTER TABLE paper_versions ADD COLUMN ocr_errors_json TEXT NOT NULL DEFAULT '[]'")
+    if conn.execute("PRAGMA user_version").fetchone()[0] < 2:
+        conn.execute("PRAGMA user_version=2")
     chunk_columns = {row[1] for row in conn.execute("PRAGMA table_info(chunks)")}
     if "text_origin" not in chunk_columns:
         conn.execute("ALTER TABLE chunks ADD COLUMN text_origin TEXT NOT NULL DEFAULT 'native_text'")
@@ -437,18 +447,20 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
         "ON CONFLICT(paper_id) DO UPDATE SET title_candidate=excluded.title_candidate",
         (paper_id, parsed.title, identity_basis, identity_value, "provisional"),
     )
-    existing = conn.execute("SELECT parser_version FROM paper_versions WHERE sha256=?", (sha256,)).fetchone()
+    existing = conn.execute("SELECT parser_version,collection_id FROM paper_versions WHERE sha256=?",
+                             (sha256,)).fetchone()
     if existing and existing["parser_version"] == PARSER_VERSION:
         conn.execute("INSERT OR IGNORE INTO source_locations(version_id,root_id,absolute_path) VALUES(?,?,?)",
                      (version_id, item["root_id"], str(path)))
         return {"added": 0, "duplicate": 1, "sections": 0, "chunks": 0}
     if existing:
         _remove_version_content(conn, version_id)
+    collection_id = existing["collection_id"] if existing else "local-dev-default"
     stat = path.stat()
     conn.execute(
-        "INSERT OR REPLACE INTO paper_versions(version_id,paper_id,sha256,source_type,file_name,file_size,page_count,parseable_pages,low_text_pages_json,parse_status,doi_candidates_json,ocr_pages_json,ocr_errors_json,parser_version,indexed_at) "
-        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (version_id, paper_id, sha256, item["source_type"], path.name, stat.st_size,
+        "INSERT OR REPLACE INTO paper_versions(version_id,paper_id,collection_id,sha256,source_type,file_name,file_size,page_count,parseable_pages,low_text_pages_json,parse_status,doi_candidates_json,ocr_pages_json,ocr_errors_json,parser_version,indexed_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (version_id, paper_id, collection_id, sha256, item["source_type"], path.name, stat.st_size,
          parsed.page_count, parsed.parseable_pages, json.dumps(parsed.low_text_pages), parsed.parse_status,
          json.dumps(parsed.doi_candidates), json.dumps(parsed.ocr_pages), json.dumps(parsed.ocr_errors),
          PARSER_VERSION, datetime.now(timezone.utc).isoformat()),
@@ -564,7 +576,7 @@ def _query_terms(query: str) -> list[str]:
 
 
 def search_or(database: Path, query: str, limit: int = 5, source_type: str | None = None,
-              readonly: bool = False) -> list[dict[str, Any]]:
+              readonly: bool = True, principal_id: str = "local-dev") -> list[dict[str, Any]]:
     """Return lexical candidates matching any query token, ordered by FTS5 BM25."""
     terms = _query_terms(query)
     if not terms:
@@ -582,8 +594,9 @@ def search_or(database: Path, query: str, limit: int = 5, source_type: str | Non
             "FROM chunks_fts JOIN chunks c ON c.chunk_id=chunks_fts.chunk_id "
             "JOIN paper_versions v ON v.version_id=c.version_id JOIN papers p ON p.paper_id=v.paper_id "
             "JOIN source_locations l ON l.version_id=v.version_id "
-            "WHERE chunks_fts MATCH ?")
-        params: list[Any] = [or_query]
+            "WHERE chunks_fts MATCH ? AND EXISTS (SELECT 1 FROM collections col "
+            "WHERE col.collection_id=v.collection_id AND col.owner_id=?)")
+        params: list[Any] = [or_query, principal_id]
         if source_type:
             sql += " AND c.source_type=?"
             params.append(source_type)
@@ -614,7 +627,7 @@ def search_or(database: Path, query: str, limit: int = 5, source_type: str | Non
 
 
 def search(database: Path, query: str, limit: int = 5, source_type: str | None = None,
-           readonly: bool = False) -> list[dict[str, Any]]:
+           readonly: bool = True, principal_id: str = "local-dev") -> list[dict[str, Any]]:
     terms = _query_terms(query)
     if not terms:
         return []
@@ -628,9 +641,10 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
                 "p.paper_id,v.sha256,v.parse_status,l.absolute_path FROM version_dois d "
                 "JOIN paper_versions v ON v.version_id=d.version_id JOIN papers p ON p.paper_id=v.paper_id "
                 "JOIN chunks c ON c.version_id=v.version_id JOIN source_locations l ON l.version_id=v.version_id "
-                "WHERE d.doi=?"
+                "WHERE d.doi=? AND EXISTS (SELECT 1 FROM collections col "
+                "WHERE col.collection_id=v.collection_id AND col.owner_id=?)"
             )
-            params: list[Any] = [exact_doi]
+            params: list[Any] = [exact_doi, principal_id]
             if source_type:
                 sql += " AND c.source_type=?"
                 params.append(source_type)
@@ -660,9 +674,10 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
             "FROM chunks_fts JOIN chunks c ON c.chunk_id=chunks_fts.chunk_id "
             "JOIN paper_versions v ON v.version_id=c.version_id JOIN papers p ON p.paper_id=v.paper_id "
             "JOIN source_locations l ON l.version_id=v.version_id "
-            "WHERE chunks_fts MATCH ?"
+            "WHERE chunks_fts MATCH ? AND EXISTS (SELECT 1 FROM collections col "
+            "WHERE col.collection_id=v.collection_id AND col.owner_id=?)"
         )
-        params: list[Any] = [and_query]
+        params: list[Any] = [and_query, principal_id]
         filtered_sql = sql
         if source_type:
             filtered_sql += " AND c.source_type=?"
@@ -671,7 +686,7 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
         params.append(max(1, limit) * 4)
         rows = conn.execute(filtered_sql, params).fetchall()
         if not rows and len(terms) > 1:
-            fallback_params: list[Any] = [or_query]
+            fallback_params: list[Any] = [or_query, principal_id]
             if source_type:
                 fallback_params.append(source_type)
             fallback_params.append(max(1, limit) * 4)
@@ -685,9 +700,10 @@ def search(database: Path, query: str, limit: int = 5, source_type: str | None =
                 "p.paper_id,p.title_candidate,v.sha256,v.parse_status,l.absolute_path "
                 "FROM paper_versions v JOIN papers p ON p.paper_id=v.paper_id "
                 "JOIN chunks c ON c.version_id=v.version_id JOIN source_locations l ON l.version_id=v.version_id "
-                f"WHERE {title_filter}"
+                f"WHERE {title_filter} AND EXISTS (SELECT 1 FROM collections col "
+                "WHERE col.collection_id=v.collection_id AND col.owner_id=?)"
             )
-            title_params: list[Any] = title_terms
+            title_params: list[Any] = [*title_terms, principal_id]
             if source_type:
                 title_sql += " AND c.source_type=?"
                 title_params.append(source_type)

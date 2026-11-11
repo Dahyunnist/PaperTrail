@@ -9,11 +9,12 @@ import secrets
 from pathlib import Path
 from typing import Any
 
-from flask import Flask, abort, flash, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
 
 import yaml
 
+from .access import LOCAL_PRINCIPAL, Principal, read_evidence, search_papers
 from .audit import _hash
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 from .qa import ask, conversation_history
@@ -36,6 +37,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     project_root = Path(__file__).resolve().parent.parent
     sources_config = Path(sources_config).resolve() if sources_config else project_root / "configs" / "sources.example.yaml"
     selection_manifest = Path(selection_manifest).resolve() if selection_manifest else project_root / "configs" / "s1-pilot.jsonl"
+    schema_conn = open_database(database)
+    schema_conn.close()
     try:
         qa_limit = min(8, max(1, int(os.environ.get("PAPERTRAIL_EVIDENCE_LIMIT", "5"))))
     except ValueError:
@@ -43,6 +46,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     app = Flask(__name__)
     app.config.update(SECRET_KEY=secrets.token_hex(32), MAX_CONTENT_LENGTH=100 * 1024 * 1024,
                       DATABASE=database, UPLOAD_ROOT=upload_root, CSRF_ENABLED=True,
+                      PRINCIPAL_PROVIDER=None,
                       QA_MODE=os.environ.get("PAPERTRAIL_RETRIEVAL_MODE", "bm25"),
                       QA_LIMIT=qa_limit)
     if app.config["QA_MODE"] not in WEB_RETRIEVAL_MODES:
@@ -50,6 +54,11 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
 
     @app.before_request
     def csrf_guard() -> None:
+        provider = app.config["PRINCIPAL_PROVIDER"]
+        principal = provider() if provider else request.environ.get("papertrail.principal", LOCAL_PRINCIPAL)
+        if not isinstance(principal, Principal):
+            abort(401, "服务端未提供有效身份。")
+        g.principal = principal
         if "_csrf" not in session:
             session["_csrf"] = secrets.token_urlsafe(32)
         if request.method == "POST" and app.config["CSRF_ENABLED"]:
@@ -98,12 +107,33 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
         job = get_job(app.config["DATABASE"], job_id)
         return (jsonify(job), 200) if job else (jsonify({"error": "job_not_found"}), 404)
 
+    @app.get("/api/search")
+    def search_api() -> Any:
+        try:
+            limit = min(20, max(1, int(request.args.get("limit", "5"))))
+            results = search_papers(app.config["DATABASE"], request.args.get("q", ""),
+                                   g.principal, limit=limit)
+            safe = [{"title": row["title"], "sha256": row["sha256"], "page": row["pdf_page"],
+                     "section": row["section"], "score": row["rank_score"], "chunk_id": row["chunk_id"]}
+                    for row in results]
+            return jsonify({"results": safe})
+        except (TypeError, ValueError) as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.get("/api/evidence/<sha256>/<int:page_number>")
+    def evidence_api(sha256: str, page_number: int) -> Any:
+        try:
+            return jsonify(read_evidence(app.config["DATABASE"], sha256, page_number, g.principal))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 404
+
     @app.post("/ask")
     def ask_question() -> Any:
         try:
             result = ask(app.config["DATABASE"], request.form.get("question", ""),
                          request.form.get("conversation_id") or None,
-                         limit=app.config["QA_LIMIT"], mode=app.config["QA_MODE"])
+                         limit=app.config["QA_LIMIT"], mode=app.config["QA_MODE"],
+                         principal_id=g.principal.user_id)
             flash("已保存本轮问题与逐条核验的原文摘录。" if result["claims"] else
                   "未找到通过文件版本和页码核验的证据，系统已拒答。", "success" if result["claims"] else "warning")
             return redirect(url_for("home", conversation_id=result["conversation_id"]) + "#assistant")
@@ -179,7 +209,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     def run_comparison() -> Any:
         try:
             result = compare_papers(app.config["DATABASE"], request.form.get("topic", ""),
-                                   request.form.get("claim", ""), 8)
+                                   request.form.get("claim", ""), 8,
+                                   principal_id=g.principal.user_id)
             flash(f"已找到 {result['paper_count']} 篇论文的候选证据；立场尚未分类。", "success")
             return redirect(url_for("home", comparison_id=result["comparison_id"]) + "#compare")
         except ValueError as exc:

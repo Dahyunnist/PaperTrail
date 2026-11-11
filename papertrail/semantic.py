@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 
+from .access import authorized_version_ids
 from .retrieval import _revision, _rows, bm25_search
 
 MODEL_ID = "BAAI/bge-small-zh-v1.5"
@@ -82,17 +83,24 @@ def _load(database: Path, artifact: Path) -> dict[str, Any]:
 
 
 def bge_search(database: Path, query: str, limit: int = 5,
-               source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+               source_type: str | None = None, artifact: Path | None = None,
+               principal_id: str = "local-dev") -> list[dict[str, Any]]:
     if not query.strip() or limit <= 0:
         return []
     artifact = artifact or database.with_name(database.stem + ".bge.joblib")
     bundle = _load(database, artifact)
     query_vector = _encode([f"为这个句子生成表示以用于检索相关文章：{query}"])[0]
-    scores = bundle["vectors"] @ query_vector
+    allowed = authorized_version_ids(database, principal_id)
+    eligible = [index for index, row in enumerate(bundle["rows"])
+                if row["version_id"] in allowed]
+    if not eligible:
+        return []
+    scores = bundle["vectors"][eligible] @ query_vector
     order = np.argsort(scores)[::-1]
     result = []
-    for ix in order:
-        row = bundle["rows"][int(ix)]
+    for ranked_index in order:
+        index = eligible[int(ranked_index)]
+        row = bundle["rows"][index]
         if source_type and row["source_type"] != source_type:
             continue
         result.append({"paper_id": row["paper_id"], "version_id": row["version_id"],
@@ -100,7 +108,7 @@ def bge_search(database: Path, query: str, limit: int = 5,
                        "title": row["title"], "section": row["section_title"],
                        "pdf_page": row["page_number"], "path": row["absolute_path"],
                        "parse_status": row["parse_status"], "text_origin": row["text_origin"],
-                       "rank_score": float(scores[int(ix)]), "text": row["body"],
+                       "rank_score": float(scores[int(ranked_index)]), "text": row["body"],
                        "chunk_id": row["chunk_id"]})
         if len(result) >= limit:
             break
@@ -108,11 +116,12 @@ def bge_search(database: Path, query: str, limit: int = 5,
 
 
 def hybrid_bge_search(database: Path, query: str, limit: int = 5,
-                      source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+                      source_type: str | None = None, artifact: Path | None = None,
+                      principal_id: str = "local-dev") -> list[dict[str, Any]]:
     if limit <= 0:
         return []
-    lexical = bm25_search(database, query, max(limit * 5, 30), source_type)
-    semantic = bge_search(database, query, max(limit * 5, 30), source_type, artifact)
+    lexical = bm25_search(database, query, max(limit * 5, 30), source_type, principal_id=principal_id)
+    semantic = bge_search(database, query, max(limit * 5, 30), source_type, artifact, principal_id)
     fused: dict[str, dict[str, Any]] = {}
     for rows, signal, weight in ((lexical, "bm25", 2.0), (semantic, "bge", 1.0)):
         for rank, row in enumerate(rows, 1):
@@ -141,21 +150,25 @@ def _unique_page_rows(rows: list[dict[str, Any]], limit: int) -> list[dict[str, 
 
 
 def hybrid_bge_wide_search(database: Path, query: str, limit: int = 5,
-                           source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+                           source_type: str | None = None, artifact: Path | None = None,
+                           principal_id: str = "local-dev") -> list[dict[str, Any]]:
     if limit <= 0:
         return []
-    candidate_chunks = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
+    candidate_chunks = hybrid_bge_search(database, query, max(limit * 4, 100), source_type,
+                                         artifact, principal_id)
     return _unique_page_rows(candidate_chunks, limit)
 
 
 def hybrid_bge_dense_rerank_search(database: Path, query: str, limit: int = 5,
                                    source_type: str | None = None,
-                                   artifact: Path | None = None) -> list[dict[str, Any]]:
+                                   artifact: Path | None = None,
+                                   principal_id: str = "local-dev") -> list[dict[str, Any]]:
     """Rerank the hybrid candidate pool by cached BGE query-to-chunk similarity."""
     if limit <= 0:
         return []
     artifact = artifact or database.with_name(database.stem + ".bge.joblib")
-    candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
+    candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type,
+                                   artifact, principal_id)
     bundle = _load(database, artifact)
     row_index = {row["chunk_id"]: index for index, row in enumerate(bundle["rows"])}
     query_vector = _encode([f"为这个句子生成表示以用于检索相关文章：{query}"])[0]
@@ -174,7 +187,8 @@ def hybrid_bge_dense_rerank_search(database: Path, query: str, limit: int = 5,
 
 
 def llm_rerank_search(database: Path, query: str, limit: int = 5,
-                      source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+                      source_type: str | None = None, artifact: Path | None = None,
+                      principal_id: str = "local-dev") -> list[dict[str, Any]]:
     """Rerank the same hybrid-BGE chunk pool by a hosted model, then return unique pages."""
     if limit <= 0:
         return []
@@ -183,7 +197,8 @@ def llm_rerank_search(database: Path, query: str, limit: int = 5,
     model = configured_model()
     if not model:
         raise RuntimeError("PAPERTRAIL_LLM_MODEL is required for LLM reranking")
-    candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
+    candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type,
+                                   artifact, principal_id)
     pages = _unique_page_rows(candidates, 12)
     if len(pages) < 2:
         return pages[:limit]

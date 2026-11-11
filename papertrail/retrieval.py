@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .access import authorized_version_ids
 from .s1_index import open_database, search as bm25_search, search_or as bm25_or_search
 
 VECTOR_INDEX_FORMAT = 2
@@ -18,12 +19,13 @@ _BUNDLE_CACHE: dict[str, tuple[int, dict[str, Any]]] = {}
 
 
 def _expanded_bm25_search(database: Path, query: str, limit: int,
-                          source_type: str | None) -> list[dict[str, Any]]:
+                          source_type: str | None, principal_id: str = "local-dev") -> list[dict[str, Any]]:
     pool_size = max(limit * 4, 20)
-    exact = bm25_search(database, query, pool_size, source_type)
+    exact = bm25_search(database, query, pool_size, source_type, principal_id=principal_id)
     terms = list(dict.fromkeys(term for term in re.findall(r"[\w]+", query.casefold())
                                if term not in QUESTION_STOPWORDS and len(term) > 1))
-    expanded = bm25_or_search(database, " ".join(terms), pool_size, source_type) if terms else []
+    expanded = bm25_or_search(database, " ".join(terms), pool_size, source_type,
+                              principal_id=principal_id) if terms else []
     combined: dict[str, dict[str, Any]] = {}
     for rows, weight, signal in ((exact, 2.0, "bm25_and"), (expanded, 1.0, "bm25_or")):
         chunk_rows = []
@@ -134,7 +136,7 @@ def _load_index(database: Path, artifact: Path) -> dict[str, Any]:
 
 def vector_search(database: Path, query: str, limit: int = 5,
                   source_type: str | None = None,
-                  artifact: Path | None = None) -> list[dict[str, Any]]:
+                  artifact: Path | None = None, principal_id: str = "local-dev") -> list[dict[str, Any]]:
     if not query.strip():
         return []
     _, np, _, _, normalize = _vector_dependencies()
@@ -142,11 +144,17 @@ def vector_search(database: Path, query: str, limit: int = 5,
     bundle = _load_index(database, artifact)
     query_vector = bundle["reducer"].transform(bundle["vectorizer"].transform([query]))
     query_vector = normalize(query_vector).astype(np.float32)
-    scores = bundle["vectors"] @ query_vector.T
+    allowed = authorized_version_ids(database, principal_id)
+    eligible = [index for index, row in enumerate(bundle["rows"])
+                if row["version_id"] in allowed]
+    if not eligible:
+        return []
+    scores = bundle["vectors"][eligible] @ query_vector.T
     order = np.asarray(scores).reshape(-1).argsort()[::-1]
     result = []
-    for index in order:
-        row = bundle["rows"][int(index)]
+    for ranked_index in order:
+        index = eligible[int(ranked_index)]
+        row = bundle["rows"][index]
         if source_type and row["source_type"] != source_type:
             continue
         result.append({"paper_id": row["paper_id"], "version_id": row["version_id"],
@@ -154,7 +162,7 @@ def vector_search(database: Path, query: str, limit: int = 5,
                        "title": row["title"], "section": row["section_title"],
                        "pdf_page": row["page_number"], "path": row["absolute_path"],
                        "parse_status": row["parse_status"], "text_origin": row["text_origin"],
-                       "rank_score": float(scores[int(index), 0]),
+                       "rank_score": float(scores[int(ranked_index), 0]),
                        "text": row["body"], "chunk_id": row["chunk_id"]})
         if len(result) == limit:
             break
@@ -164,9 +172,9 @@ def vector_search(database: Path, query: str, limit: int = 5,
 def hybrid_search(database: Path, query: str, limit: int = 5,
                   source_type: str | None = None, rrf_k: int = 60,
                   bm25_weight: float = 2.0, vector_weight: float = 0.5,
-                  artifact: Path | None = None) -> list[dict[str, Any]]:
-    lexical = bm25_search(database, query, max(limit * 4, 20), source_type)
-    latent = vector_search(database, query, max(limit * 4, 20), source_type, artifact)
+                  artifact: Path | None = None, principal_id: str = "local-dev") -> list[dict[str, Any]]:
+    lexical = bm25_search(database, query, max(limit * 4, 20), source_type, principal_id=principal_id)
+    latent = vector_search(database, query, max(limit * 4, 20), source_type, artifact, principal_id)
     combined: dict[str, dict[str, Any]] = {}
     for ranked, weight in ((lexical, bm25_weight), (latent, vector_weight)):
         for rank, row in enumerate(ranked, 1):
@@ -180,15 +188,15 @@ def hybrid_search(database: Path, query: str, limit: int = 5,
 
 def retrieve(database: Path, query: str, limit: int = 5,
              source_type: str | None = None, mode: str = "bm25",
-             artifact: Path | None = None) -> list[dict[str, Any]]:
+             artifact: Path | None = None, principal_id: str = "local-dev") -> list[dict[str, Any]]:
     if mode == "bm25":
-        return bm25_search(database, query, limit, source_type)
+        return bm25_search(database, query, limit, source_type, principal_id=principal_id)
     if mode == "bm25_expanded":
-        return _expanded_bm25_search(database, query, limit, source_type)
+        return _expanded_bm25_search(database, query, limit, source_type, principal_id)
     if mode == "vector":
-        return vector_search(database, query, limit, source_type, artifact)
+        return vector_search(database, query, limit, source_type, artifact, principal_id)
     if mode == "hybrid":
-        return hybrid_search(database, query, limit, source_type, artifact=artifact)
+        return hybrid_search(database, query, limit, source_type, artifact=artifact, principal_id=principal_id)
     if mode in {"bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_dense_rerank", "hybrid_bge_rerank"}:
         from .semantic import (bge_search, hybrid_bge_search, hybrid_bge_wide_search,
                                hybrid_bge_dense_rerank_search, llm_rerank_search)
@@ -196,5 +204,5 @@ def retrieve(database: Path, query: str, limit: int = 5,
               "hybrid_bge_wide": hybrid_bge_wide_search,
               "hybrid_bge_dense_rerank": hybrid_bge_dense_rerank_search,
               "hybrid_bge_rerank": llm_rerank_search}[mode]
-        return fn(database, query, limit, source_type, artifact)
+        return fn(database, query, limit, source_type, artifact, principal_id)
     raise ValueError(f"未知检索模式：{mode}")

@@ -20,8 +20,12 @@ PT4 临时数据库用例覆盖同清单幂等、源哈希变化、删除失效�
 
 文献列表显示内容版本 ID 与哈希。已保存回答显示 claim、原文引句、物理 PDF 页、版本 ID；保存覆盖缺项，可区分有缺项与未记录缺项。
 
-应用与 MCP 服务均使用一个 `PAPERTRAIL_DB`，没有账户、集合或多租户授权模型。因此不存在可声称通过的跨用户 ACL 测试；MCP 只读访问所选本地数据库，并按 SHA、页码和源文件哈希验证直接证据。当前范围明确为单用户本地运行。
+应用与 MCP 服务均使用一个 `PAPERTRAIL_DB`。本地默认 Principal 固定为 `local-dev`。HTTP 认证中间件可通过服务端 WSGI environ 注入 `Principal`；MCP 嵌入调用可显式传入 `Principal`。请求参数和请求体不提供 `user_id` 入口。
+
+本轮加入 `collections(owner_id)`，论文版本关联集合。共享 `access.py` 的检索在 SQL 候选过滤前按 Principal 的 owner 限制；向量和 BGE 检索先筛出授权版本，再计算候选分数。页证据先校验集合所有权，再核验 PDF 当前 SHA 与页码。HTTP `/api/search`、`/api/evidence/<sha256>/<page>`、问答及 MCP `search_papers`、`get_evidence` 共用此授权边界；MCP 资源列表和读取也按 owner 隔离。
+
+测试覆盖 A/B 两个 Principal 的检索隔离、跨集合直接 SHA 读取拒绝、HTTP 与 MCP 共用授权、HTTP 不采信请求体伪造 `user_id`，以及默认 `local-dev` 对既有单用户库的访问。此为应用层授权测试，不代表生产身份认证或完整多租户安全验收。生产部署必须由可信认证中间件注入 Principal；当前不做登录界面。
 
 ## API 与隐私
 
-PT4 不调用模型。未读取或提交本机论文路径、私有 PDF、题目、摘录或忽略目录内容。
+PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排除的 `test_local_chat_client_uses_loopback_ollama_json_api`：1 passed。普通运行环境拒绝该测试的 loopback 连接，获准本机回环测试后通过。测试还覆盖旧数据库迁移和重建索引后保留集合 owner。PT4 不调用模型。未读取或提交本机论文路径、私有 PDF、题目、摘录或忽略目录内容。
