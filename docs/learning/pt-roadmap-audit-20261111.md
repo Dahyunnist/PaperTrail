@@ -56,7 +56,7 @@ PT-1 人工标注与基于该批论文的 PT-3 模型质量评估均待用户完
 
 `scripts/import_pt1_human_csv.py` 提供单命令 CSV→v2 JSONL→运行时旧 gold 导入。它要求人工填写、双人通过复核，并逐条核对来源 SHA、PDF页、精确 span/引文及上下文；空标注不会导出。底层 `scripts/import_pt1_gold_jsonl.py` 也能单独导入已复核的 v2 JSONL，随后调用 `papertrail.gold.load_gold` 和 `verify_quotes` 再验一次；拒绝不匹配的拒答/题型。跨论文题型、拒答和引文关系保留。导入不等于运行模型评测；真实 PT1/PT3 评估仍等用户完成人工标注、复核，并先核对评测账本预算。
 
-共享评测门禁：本次只读核对 `.local/pt-master-usage.json` 与 PT17 预登记账本起点；本机账本末尾有额外字面字符，标准 JSON 解析失败，且账本累计值与 PT17 预登记基线不一致。未改账本、未调用模型。真实模型评测前必须先由维护者修复/对账本机账本，再按当前冻结题集重新核对 cap、累计和可用余额；账本状态未清前只做离线准备。
+共享评测门禁：原 `.local/pt-master-usage.json` 末尾多出字面 `\\n`，严格 JSON 解析失败。已保留只读原件及其 SHA-256 相同的副本，并另建可追溯 v2 重建账本；不覆盖原账本。1715 条唯一请求中，历史账单与报告可对应 1688 条，另有 27 条无法归属运行，故 v2 标记 `model_calls_allowed=false`、`spendable_balance_usd=0`。保守已知累计上界为 `$0.44007762`，cap `$0.50`，算术余量 `$0.05992238`；算术余量不代表可花余额。报告链累计核对通过。PT17 预登记起点 `$0.43651278` 加本次 `$0.00356484` 得 `$0.44007762`，此前所谓基线不一致是把运行前基线与运行后累计额混比。恢复、逐条来源、门禁和限制见 `docs/learning/pt-budget-ledger-recovery-20261111.md`。未调用模型。PT1/PT3 新真实集模型评测仍须等人工标注、复核和未知请求归因解决。
 
 PT4 下一步依赖生产部署方提供可信身份服务及 user claim 映射，才能把 Principal 注入 Web/MCP；本轮静态复核未发现可安全替代身份约定的代码改动。`tests/test_access_control.py tests/test_s5_web.py`：9项通过，覆盖集合隔离及请求体伪造 user_id 拒绝。本轮再跑 PT2 `tests/test_page_ranking.py tests/test_semantic_rerank.py` 与 PT4 两组：18项通过；这些是回归，不是论文质量结果。部署身份契约未提供前，保留为外部集成项；不虚构认证来源。
 
