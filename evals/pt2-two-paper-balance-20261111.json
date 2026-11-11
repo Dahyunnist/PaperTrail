@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "status": "development_diagnostic_independent_copy_nonblind",
+  "purpose": "诊断并比较PT2两个遗留跨论文漏检；不改历史评测分数或冻结输入。",
+  "method": {
+    "name": "explicit-two-paper scoped parent-page fusion",
+    "retrieval_input": "question text and indexed paper titles only; gold evidence pointers are read after candidate lists are frozen",
+    "query_cleanup": "remove the two hyphenated paper aliases from the query to reduce title-page bias",
+    "candidate_depth_per_modality": 200,
+    "page_score": "within-paper child RRF (BM25=2.0, vector=0.5, k=60), then sum best scores from two distinct parents",
+    "selection": "up to 10 pages per explicitly named paper, round-robin interleave; fallback/default retrieval unchanged",
+    "independent_copy": "index schema migrated only in a disposable copy under ignored .tmp"
+  },
+  "frozen_inputs": {
+    "gold": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c",
+    "baseline": "cb84f619054a9709d2cb79e2fdb6127ba032a2d7b50ed275d5d287c6837ef6fd",
+    "database": "ef5f72491e4b7be9872d56a9621ffa57a1f8335506ba2394c039e7d999837a24",
+    "vector_index": "434acea553c4669aee6e06e252b1814b67a16e1215c43b9b142b2735e352441f",
+    "independent_copy_before_schema_migration_sha256": "ef5f72491e4b7be9872d56a9621ffa57a1f8335506ba2394c039e7d999837a24",
+    "independent_copy_after_schema_migration_sha256": "2f9a632337b41b878feeeb38c2a4fad36c0847b8b702625c5cc990c393b83dd3",
+    "source_unchanged_after_evaluation": {
+      "gold": true,
+      "baseline": true,
+      "database": true,
+      "vector_index": true
+    }
+  },
+  "scope": {
+    "gold_pages": 4,
+    "questions": 2,
+    "baseline_page_recall_at_10": 0.0,
+    "repaired_page_recall_at_10": 0.75,
+    "baseline_complete_questions_at_10": 0,
+    "repaired_complete_questions_at_10": 1,
+    "baseline_page_recall_at_20": 0.25,
+    "repaired_page_recall_at_20": 1.0,
+    "baseline_complete_questions_at_20": 0,
+    "repaired_complete_questions_at_20": 2,
+    "baseline_hybrid_candidate_coverage_at_50": 0.75,
+    "baseline_modality_candidate_coverage_at_200": 1.0,
+    "repaired_modality_candidate_coverage_at_200": 1.0,
+    "baseline_mrr_at_10": 0.0,
+    "repaired_mrr_at_10": 0.1875,
+    "baseline_mrr_at_20": 0.02631578947368421,
+    "repaired_mrr_at_20": 0.1875,
+    "default_retrieval_matches_frozen_top10": true
+  },
+  "results": [
+    {
+      "question_id": "PT12-05",
+      "paper_aliases": [
+        "computational-PhD",
+        "transdisciplinary-collaboration"
+      ],
+      "gold_page_count": 2,
+      "baseline": {
+        "gold_pages_found_at_10": 0,
+        "gold_pages_found_at_20": 1,
+        "hybrid_candidate_coverage_at_50": 1,
+        "mrr_at_10": 0.0,
+        "mrr_at_20": 0.05263157894736842,
+        "default_top10_matches_frozen_chunk_and_page_trace": true
+      },
+      "repaired": {
+        "gold_pages_found_at_10": 2,
+        "gold_pages_found_at_20": 2,
+        "modality_candidate_coverage_at_200": 2,
+        "mrr_at_10": 0.25,
+        "mrr_at_20": 0.25,
+        "paper_scoped_pages_returned": 10
+      },
+      "pages": [
+        {
+          "source_sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+          "pdf_page": 7,
+          "baseline": {
+            "bm25_candidate_rank_200": null,
+            "vector_candidate_rank_200": 167,
+            "rrf_chunk_rank_50": null,
+            "unique_page_rank_10": null,
+            "unique_page_rank_20": null,
+            "filter_reason": "全局RRF候选未进Top-50，之后无页可选"
+          },
+          "repaired": {
+            "bm25_candidate_rank_200_after_query_cleanup": null,
+            "vector_candidate_rank_200_after_query_cleanup": 96,
+            "candidate_union_hit_200": true,
+            "paper_scoped_fused_page_rank": 5,
+            "round_robin_output_rank": 9,
+            "included_at_k10": true,
+            "included_at_k20": true,
+            "filter_reason": "保留在指定论文页额内"
+          }
+        },
+        {
+          "source_sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "pdf_page": 8,
+          "baseline": {
+            "bm25_candidate_rank_200": 45,
+            "vector_candidate_rank_200": 10,
+            "rrf_chunk_rank_50": 21,
+            "unique_page_rank_10": null,
+            "unique_page_rank_20": 19,
+            "filter_reason": "进入Top-50，但重复页占位后唯一页名次超过10"
+          },
+          "repaired": {
+            "bm25_candidate_rank_200_after_query_cleanup": 186,
+            "vector_candidate_rank_200_after_query_cleanup": 45,
+            "candidate_union_hit_200": true,
+            "paper_scoped_fused_page_rank": 2,
+            "round_robin_output_rank": 4,
+            "included_at_k10": true,
+            "included_at_k20": true,
+            "filter_reason": "保留在指定论文页额内"
+          }
+        }
+      ],
+      "prior_parent_page_strategy_gold_pages_found_at_10": 0
+    },
+    {
+      "question_id": "PT9-03",
+      "paper_aliases": [
+        "statistical-practice",
+        "graduate-school"
+      ],
+      "gold_page_count": 2,
+      "baseline": {
+        "gold_pages_found_at_10": 0,
+        "gold_pages_found_at_20": 0,
+        "hybrid_candidate_coverage_at_50": 2,
+        "mrr_at_10": 0.0,
+        "mrr_at_20": 0.0,
+        "default_top10_matches_frozen_chunk_and_page_trace": true
+      },
+      "repaired": {
+        "gold_pages_found_at_10": 1,
+        "gold_pages_found_at_20": 2,
+        "modality_candidate_coverage_at_200": 2,
+        "mrr_at_10": 0.125,
+        "mrr_at_20": 0.125,
+        "paper_scoped_pages_returned": 17
+      },
+      "pages": [
+        {
+          "source_sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+          "pdf_page": 2,
+          "baseline": {
+            "bm25_candidate_rank_200": 59,
+            "vector_candidate_rank_200": 83,
+            "rrf_chunk_rank_50": 48,
+            "unique_page_rank_10": null,
+            "unique_page_rank_20": null,
+            "filter_reason": "进入Top-50，但重复页占位后唯一页名次超过10"
+          },
+          "repaired": {
+            "bm25_candidate_rank_200_after_query_cleanup": 27,
+            "vector_candidate_rank_200_after_query_cleanup": 23,
+            "candidate_union_hit_200": true,
+            "paper_scoped_fused_page_rank": 6,
+            "round_robin_output_rank": 11,
+            "included_at_k10": false,
+            "included_at_k20": true,
+            "filter_reason": "进入论文页额，但轮询后的全局K=10截断"
+          }
+        },
+        {
+          "source_sha256": "53e867793aa1f3a710004ee3c10346b4c1b8e2e5fdf9abfdf700ec3d3e09cbb1",
+          "pdf_page": 5,
+          "baseline": {
+            "bm25_candidate_rank_200": 79,
+            "vector_candidate_rank_200": 9,
+            "rrf_chunk_rank_50": 35,
+            "unique_page_rank_10": null,
+            "unique_page_rank_20": null,
+            "filter_reason": "进入Top-50，但重复页占位后唯一页名次超过10"
+          },
+          "repaired": {
+            "bm25_candidate_rank_200_after_query_cleanup": 137,
+            "vector_candidate_rank_200_after_query_cleanup": 61,
+            "candidate_union_hit_200": true,
+            "paper_scoped_fused_page_rank": 4,
+            "round_robin_output_rank": 8,
+            "included_at_k10": true,
+            "included_at_k20": true,
+            "filter_reason": "保留在指定论文页额内"
+          }
+        }
+      ],
+      "prior_parent_page_strategy_gold_pages_found_at_10": 0
+    }
+  ],
+  "limitations": [
+    "开发集/非盲固定回归；不是盲测、泛化评测或新基线。",
+    "只对问题明确含两篇连字符论文别名且能唯一映射到标题的查询启用；其他问题走原路径。",
+    "PT9-03仍需K=20才能同时保留两页；K=10页Recall未满，不能声称两题均完全修复。",
+    "未调用模型；输出无题干、gold引文、PDF正文或本机路径。"
+  ]
+}

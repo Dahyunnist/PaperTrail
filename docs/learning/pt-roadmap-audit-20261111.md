@@ -7,7 +7,7 @@
 | 阶段 | 状态 | 证据与缺口 |
 |---|---|---|
 | PT-1 真实论文基准 | 部分 | `evals/pt9-pt12-final-heldout-gold-20261023.jsonl` SHA-256 `e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c`，12 题/6 篇；按路线仍低于 40 题/30 篇。PT5 是 6 题小组。本文冻结 30 个已见来源，0 个 gold 标注；论文数达到路线最低数，人工题数仍未达 40。 |
-| PT-2 完整证据检索 | 部分 | `docs/learning/final-public-holdout-evaluation-20261023.md` SHA-256 `d6274ed33b77c35ec91589dca7cee01624cc30353f8623f7ccacd77793fbd590`；混合检索完整证据覆盖 7/10 可答题，跨论文完整覆盖未达标。已有 BM25/vector/RRF 与追踪，需新独立真实集复验。 |
+| PT-2 完整证据检索 | 部分 | 原混合完整证据覆盖仍为7/10。两个遗留题的非盲固定开发回归中，显式双论文 opt-in 策略 Recall@10 为3/4、Recall@20 为4/4；默认结果与冻结轨迹一致。详见 `docs/learning/pt2-two-paper-repair-20261111.md` 和 `evals/pt2-two-paper-balance-20261111.json`。仍需独立真实集复验。 |
 | PT-3 可信回答/错误拒答 | 部分 | `evals/pt17-model-e2e-analysis-20261023.json`：4 道可答题完整回答 0；候选证据槽 6/7、筛后 3/7、引用 1/7；不可答有效拒答 0/1。`tests/test_s3.py` 覆盖合成边界，不等于真实论文达标。 |
 | PT-4 权限、索引、Web 评测 | 部分 | 已补集合 owner ACL、HTTP/MCP 共用 Principal 授权、直接 SHA 跨 owner 拒绝及 A/B 合成测试；详见 `docs/learning/stage-PT4.md`。仍缺认证中间件生产集成、Web 评测审阅验收和完整多租户安全验证。 |
 
