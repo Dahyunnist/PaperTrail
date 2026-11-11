@@ -61,10 +61,11 @@ PT-1 gold 仍为空，当前 0 题。40 道题及逐页最小完整证据集留�
 
 ## 人工标注任务包与 PT-2 离线修复
 
-PT-1 人工任务包见 `docs/learning/pt1-human-annotation-guide-20261111.md` 与 `evals/pt1-human-annotation-task-40-20261111.csv`。40 个问题覆盖30个 DOI；30 个章节事实候选、10 个量化效果边界探测。答案、可答性、最小完整引文、页码、原文摘录、标注者和复核字段全部为空。任务生成不调用模型；需由人工标注和另一人复核。
+PT-1 人工任务包见 `docs/learning/pt1-human-annotation-guide-20261111.md` 与 `evals/pt1-human-annotation-task-40-20261111.csv`。40 个问题覆盖30个 DOI；30 个章节事实候选、10 个量化效果边界探测。答案、可答性、题型、最小完整引文、页码、原文摘录、标注者和复核字段全部为空。任务生成不调用模型；校验器、JSONL格式及证据校验、人工规则和虚构格式例已备妥。仍需人工逐题标注与第二人复核；当前 gold 为0题，不能称 PT-1 完成。
 
 PT-2 离线代码缺口：语义检索的 BGE 与去重页路径在 `limit=0` 时可能返回一条，LLM 重排路径也未保证在非正 limit 下不工作。`papertrail/semantic.py` 现统一让 BGE、混合、宽召回、稠密重排、LLM 重排和页去重在 `limit <= 0` 时直接返回空，不触发索引或模型。回归位于 `tests/test_semantic_rerank.py::test_semantic_retrieval_nonpositive_limit_returns_without_work`。PT15 冻结的 `qa.py`、`retrieval.py` 与预登记哈希未改。PT1 任务校验、PT1 来源校验及语义检索定向测试共10项通过；未调用模型。
 
 ## PT-2 原始 7/10 失败审计
 
 对 PT9-03、PT9-05、PT12-05 的原始追踪、单路候选与RRF页结果审计见 `docs/learning/pt2-parent-page-diagnostic-20261111.md`。全局子块RRF截断是共性瓶颈。可选父段/页聚合回归命中 PT9-05 一页；PT9-03 与 PT12-05 仍未完整覆盖。历史结果保持 7/10。
+
