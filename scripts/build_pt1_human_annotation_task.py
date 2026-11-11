@@ -13,7 +13,7 @@ OUTPUT = ROOT / "evals/pt1-human-annotation-task-40-20261111.csv"
 FIELDS = [
     "task_id", "paper_split", "doi", "title", "pdf_sha256",
     "candidate_type", "candidate_question", "candidate_basis", "candidate_basis_pdf_page",
-    "answerability", "expected_answer", "minimal_complete_evidence_quote",
+    "question_type", "answerability", "expected_answer", "minimal_complete_evidence_quote",
     "evidence_pdf_pages", "original_pdf_excerpt", "span_start_char", "span_end_char",
     "annotator", "reviewer", "review_status", "notes",
 ]

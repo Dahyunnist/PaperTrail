@@ -2,6 +2,7 @@
 from __future__ import annotations
 import csv
 import json
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,13 +10,13 @@ TASK = ROOT / "evals/pt1-human-annotation-task-40-20261111.csv"
 MANIFEST = ROOT / "evals/pt1-candidate-manifest-20261111.json"
 REQUIRED = {
     "task_id", "paper_split", "doi", "title", "pdf_sha256", "candidate_type",
-    "candidate_question", "candidate_basis", "candidate_basis_pdf_page", "answerability",
+    "candidate_question", "candidate_basis", "candidate_basis_pdf_page", "question_type", "answerability",
     "expected_answer", "minimal_complete_evidence_quote", "evidence_pdf_pages",
     "original_pdf_excerpt", "span_start_char", "span_end_char", "annotator", "reviewer",
     "review_status", "notes",
 }
 GOLD_FIELDS = {
-    "answerability", "expected_answer", "minimal_complete_evidence_quote", "evidence_pdf_pages",
+    "question_type", "answerability", "expected_answer", "minimal_complete_evidence_quote", "evidence_pdf_pages",
     "original_pdf_excerpt", "span_start_char", "span_end_char", "annotator", "reviewer",
     "review_status",
 }
@@ -38,6 +39,9 @@ def validate(task_path: Path = TASK, manifest_path: Path = MANIFEST) -> list[str
     dois = {row["doi"] for row in rows}
     if len(dois) != 30:
         errors.append(f"expected 30 isolated paper DOIs, got {len(dois)}")
+    questions = ["".join(ch for ch in unicodedata.normalize("NFKC", row["candidate_question"]).casefold() if ch.isalnum()) for row in rows]
+    if len(set(questions)) != len(questions):
+        errors.append("candidate questions must be unique after normalization")
     for row in rows:
         source = source_map.get(row["doi"])
         if not source:
