@@ -24,7 +24,7 @@
 - `minimal_complete_evidence_quote`：逐字抄录支撑答案所需的最小完整引文。若要多处证据，把引文写作 JSON 字符串数组。
 - `evidence_pdf_pages`：填一基 PDF 物理页码；多处引文用 JSON 整数数组，顺序与引文一致。不要用页面印刷编号替代 PDF 物理页码。
 - `original_pdf_excerpt`：逐字记录每处引文所在的原文上下文；多处用 JSON 字符串数组。保留符号、单位、否定词和小数点。
-- `span_start_char`、`span_end_char`：按 PyMuPDF `page.get_text("text")` 原始页文本的 Unicode 字符索引填写，0 起点、右端不包含。多个引文在 `notes` 中以 JSON 数组记录对应 span；如解析文本无法稳定定位，留空并在备注说明，不能伪造。
+- `span_start_char`、`span_end_char`：按 PyMuPDF `page.get_text("text")` 原始页文本的 Unicode 字符索引填写，0 起点、右端不包含。多个引文在 `notes` 填 JSON，例如 `[ {"start_char": 10, "end_char": 20}, {"start_char": 30, "end_char": 40} ]`；也可填 `{"spans": [...], "comment": "备注"}`。如解析文本无法稳定定位，不可伪造 span；该题先修复来源或替换题目。
 - `annotator`、`reviewer`：填写真实参与者身份。标注者与复核者不能相同。
 - `review_status`：复核前填 `未复核`；复核后填 `通过` 或 `退回`。退回时在 `notes` 写明具体问题。
 
@@ -71,17 +71,17 @@
 
 5题先使用上述独立 CSV 工作副本；其内容对应40题总表的 `PT1-H001` 至 `PT1-H005`，不要把答案写回空白总表。每题先核查候选问法，再填题型、可答性、答案/拒答理由、最小完整引文、PDF 物理页码、原文上下文、字符 span、标注者和复核者。复核者独立核对来源 PDF 后，才把状态记为 `通过`。保留 DOI 与原 PDF SHA，不要把格式示例当答案。
 
-转换为 PT1 v2 JSONL 后，可先校验5题：
+对5题工作副本完成双人复核后，一条命令生成 PT1 v2 JSONL、校验引文并导入运行时 gold：
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/validate_pt1_gold_jsonl.py <人工gold.jsonl路径> --min-questions 5 --min-papers 5
+.\.venv\Scripts\python.exe scripts/import_pt1_human_csv.py <已复核CSV副本路径> --manifest evals/pt1-candidate-manifest-20261111.json --output-v2 .local/pt1-human-v2-5.jsonl --output-gold .local/pt1-human-runtime-5.jsonl --output-sources .local/pt1-human-sources-5.yaml --min-questions 5 --min-papers 5
 ```
 
-校验器能核对重复题、双人复核、回答/拒答结构，以及清单中的 PDF SHA、物理页码和逐字符引文 span。它不读取 CSV；从 v2 JSONL 转为运行时格式的步骤见下节。当前 PT1 gold 0/40，PT1 与依赖它的真实论文 PT3 评测均未完成；不要用空集或合成示例报告质量指标。
+转换器核对 CSV 完整字段、来源 SHA、复核状态、拒答结构、PDF 页码、精确 span 和原文上下文；再调用 v2 校验器及运行时 gold 校验器。缺字段、空标注、未通过复核、标注/复核者相同或引用不符时不导出。多文献题须整理为人工编写的 v2 JSONL，不能塞入单篇 CSV 行。当前 PT1 gold 0/40，PT1 与依赖它的真实论文 PT3 评测均未完成；不要用空集或合成示例报告质量指标。
 
 ### 导入运行时 gold
 
-CSV 仍需人工整理为 v2 JSONL；导入器不替人推断或补标字段。导入会先执行 v2 校验，再转换为旧运行时结构，并调用 `papertrail.gold.load_gold` 与 `verify_quotes` 二次校验。未复核、字段不全、答案/拒答不匹配、PDF 哈希/页码/span/引文不符或题数不足时，不生成输出。跨文献题型、拒答标记和引文关系保留。
+CSV 转 v2 JSONL 由上一节的一条命令完成；导入器不替人推断或补标字段。导入会先执行 v2 校验，再转换为旧运行时结构，并调用 `papertrail.gold.load_gold` 与 `verify_quotes` 二次校验。未复核、字段不全、答案/拒答不匹配、PDF 哈希/页码/span/引文不符或题数不足时，不生成输出。跨文献题型、拒答标记和引文关系在 v2→运行时转换中保留。
 
 5题复核通过后运行：
 

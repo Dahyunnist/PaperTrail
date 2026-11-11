@@ -54,11 +54,11 @@ PT-1 gold 仍为空，当前 0 题。40 道题及逐页最小完整证据集留�
 
 PT-1 人工标注与基于该批论文的 PT-3 模型质量评估均待用户完成标注和复核；空集、格式示例、合成测试均不计入真实论文评测结果。先做5题起步批次：`evals/pt1-human-annotation-task-5-20261111.csv`（40题总表前5题，5个 DOI；只填工作副本）。逐题审核候选问题；填写 `question_type`、`answerability`、答案或拒答理由、最小完整原文引文、PDF物理页码、原文上下文及精确字符 span；标注者与复核者须为不同人。复核者独立核对 PDF SHA、页码、逐字引文和答案支持后，将 `review_status` 置为 `通过`。歧义题先改写，不能直接计入 gold。
 
-现有 `scripts/validate_pt1_gold_jsonl.py` 能按候选清单核对 PDF SHA、物理页码、精确引文 span、重复问题、跨论文证据和双人复核；可用 `--min-questions 5 --min-papers 5` 校验5题 JSONL。它不导入 CSV。新增 `scripts/import_pt1_gold_jsonl.py` 将已复核的 v2 JSONL 显式转换为运行时旧格式，并调用 `papertrail.gold.load_gold` 和 `verify_quotes` 再验一次；拒绝空集、未复核数据及不匹配的拒答/题型。跨论文题型、拒答和引文关系保留。导入不等于运行模型评测；真实 PT1/PT3 评估仍等用户完成人工标注、复核，并先核对评测账本预算。
+`scripts/import_pt1_human_csv.py` 提供单命令 CSV→v2 JSONL→运行时旧 gold 导入。它要求人工填写、双人通过复核，并逐条核对来源 SHA、PDF页、精确 span/引文及上下文；空标注不会导出。底层 `scripts/import_pt1_gold_jsonl.py` 也能单独导入已复核的 v2 JSONL，随后调用 `papertrail.gold.load_gold` 和 `verify_quotes` 再验一次；拒绝不匹配的拒答/题型。跨论文题型、拒答和引文关系保留。导入不等于运行模型评测；真实 PT1/PT3 评估仍等用户完成人工标注、复核，并先核对评测账本预算。
 
 共享评测门禁：本次只读核对 `.local/pt-master-usage.json` 与 PT17 预登记账本起点；本机账本末尾有额外字面字符，标准 JSON 解析失败，且账本累计值与 PT17 预登记基线不一致。未改账本、未调用模型。真实模型评测前必须先由维护者修复/对账本机账本，再按当前冻结题集重新核对 cap、累计和可用余额；账本状态未清前只做离线准备。
 
-PT4 下一步依赖生产部署方提供可信身份服务及 user claim 映射，才能把 Principal 注入 Web/MCP；本轮静态复核未发现可安全替代身份约定的代码改动。`tests/test_access_control.py tests/test_s5_web.py`：9项通过，覆盖集合隔离及请求体伪造 user_id 拒绝。部署身份契约未提供前，保留为外部集成项；不虚构认证来源。
+PT4 下一步依赖生产部署方提供可信身份服务及 user claim 映射，才能把 Principal 注入 Web/MCP；本轮静态复核未发现可安全替代身份约定的代码改动。`tests/test_access_control.py tests/test_s5_web.py`：9项通过，覆盖集合隔离及请求体伪造 user_id 拒绝。本轮再跑 PT2 `tests/test_page_ranking.py tests/test_semantic_rerank.py` 与 PT4 两组：18项通过；这些是回归，不是论文质量结果。部署身份契约未提供前，保留为外部集成项；不虚构认证来源。
 
 ## PT-2/PT-3 与测试边界
 
