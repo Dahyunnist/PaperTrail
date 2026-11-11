@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PaperTrail PT-1 manually annotated question",
+  "type": "object",
+  "required": [
+    "id",
+    "paper_ids",
+    "split",
+    "question_type",
+    "question",
+    "expected_answer",
+    "answerability",
+    "evidence",
+    "annotation_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "paper_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^10\\."
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "split": {
+      "enum": [
+        "development",
+        "validation",
+        "test"
+      ]
+    },
+    "question_type": {
+      "enum": [
+        "fact_location",
+        "cross_paper",
+        "multi_hop",
+        "conflict",
+        "unanswerable"
+      ]
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_answer": {
+      "type": "string"
+    },
+    "answerability": {
+      "enum": [
+        "answerable",
+        "unanswerable"
+      ]
+    },
+    "annotation_status": {
+      "enum": [
+        "pending",
+        "human_verified"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "doi",
+          "pdf_sha256",
+          "pdf_page",
+          "start_char",
+          "end_char",
+          "quote"
+        ],
+        "properties": {
+          "doi": {
+            "type": "string"
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "pdf_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "start_char": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_char": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "minimumCompleteEvidenceSet": {
+      "type": "boolean",
+      "const": true
+    }
+  },
+  "additionalProperties": false
+}
