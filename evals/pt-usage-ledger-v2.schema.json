@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://papertrail.local/schemas/pt-usage-ledger-v2.schema.json",
+  "title": "PaperTrail reconciled model usage ledger v2",
+  "type": "object",
+  "required": ["schema_version", "ledger_id", "status", "model_calls_allowed", "block_reasons", "cap_usd", "spent_upper_bound_usd", "known_spent_upper_bound_usd", "unknown_cost_count", "unknown_cost_usd", "remaining_upper_bound_usd", "spendable_balance_usd", "unattributed_request_count", "unattributed_upper_bound_usd", "pricing_basis", "reconciliation", "source_artifacts", "report_evidence", "requests"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "ledger_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["blocked", "reconciled"]},
+    "model_calls_allowed": {"type": "boolean"},
+    "block_reasons": {"type": "array", "items": {"type": "string"}},
+    "cap_usd": {"type": "number", "minimum": 0},
+    "spent_upper_bound_usd": {"type": ["number", "null"], "minimum": 0},
+    "known_spent_upper_bound_usd": {"type": "number", "minimum": 0},
+    "unknown_cost_count": {"type": "integer", "minimum": 0},
+    "unknown_cost_usd": {"type": ["number", "null"], "minimum": 0},
+    "remaining_upper_bound_usd": {"type": ["number", "null"]},
+    "spendable_balance_usd": {"type": "number", "minimum": 0},
+    "unattributed_request_count": {"type": "integer", "minimum": 0},
+    "unattributed_upper_bound_usd": {"type": "number", "minimum": 0},
+    "pricing_basis": {"type": "object"},
+    "reconciliation": {"type": "object"},
+    "source_artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifact"}},
+    "report_evidence": {"type": "array", "items": {"type": "object"}},
+    "requests": {"type": "array", "items": {"$ref": "#/$defs/request"}}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256", "role"],
+      "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "role": {"type": "string"}}
+    },
+    "request": {
+      "type": "object",
+      "required": ["request_key_sha256", "at", "model", "prompt_chars", "prompt_tokens", "completion_tokens", "cost_upper_bound_usd", "cost_certainty", "run_attribution", "source_observations", "historical_duplicate_count"],
+      "properties": {
+        "request_key_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "at": {"type": ["string", "null"]}, "model": {"type": ["string", "null"]},
+        "prompt_chars": {"type": ["integer", "null"], "minimum": 0},
+        "prompt_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "completion_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "cost_upper_bound_usd": {"type": ["number", "null"], "minimum": 0},
+        "cost_certainty": {"type": "string"}, "run_attribution": {"type": "string"},
+        "source_observations": {"type": "array", "items": {"type": "object"}},
+        "historical_duplicate_count": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

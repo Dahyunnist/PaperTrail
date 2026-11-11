@@ -102,6 +102,11 @@ def _budget_file() -> Path:
     return Path(os.environ.get("PAPERTRAIL_LLM_BUDGET_FILE", ".local/p6-api-usage.json"))
 
 
+def _assert_budget_ledger_allows_calls(data: dict[str, Any]) -> None:
+    if data.get("schema_version") == 2 and data.get("model_calls_allowed") is not True:
+        raise RuntimeError("Reconciled model budget ledger blocks model calls")
+
+
 def _max_request_cost(prompt_chars: int) -> float:
     prompt_token_ceiling = prompt_chars * _MAX_TOKENS_PER_CHAR
     return (prompt_token_ceiling * _FLASH_PEAK_INPUT_PER_M
@@ -113,6 +118,7 @@ def _record_usage(model: str, prompt_chars: int, usage: dict[str, Any], reserved
     cap = min(_MAX_BUDGET_USD, float(os.environ.get("PAPERTRAIL_LLM_BUDGET_USD", _MAX_BUDGET_USD)))
     with _BUDGET_LOCK:
         data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"cap_usd": cap, "spent_upper_bound_usd": 0.0, "requests": []}
+        _assert_budget_ledger_allows_calls(data)
         prompt_tokens = usage.get("prompt_tokens")
         completion_tokens = usage.get("completion_tokens")
         if isinstance(prompt_tokens, int) and isinstance(completion_tokens, int):
@@ -140,6 +146,7 @@ def _openai_compatible_json(model: str, system: str, prompt: str,
     path = _budget_file()
     with _BUDGET_LOCK:
         data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"spent_upper_bound_usd": 0.0}
+        _assert_budget_ledger_allows_calls(data)
         spent = float(data.get("spent_upper_bound_usd", 0.0))
     if spent + reserved > cap:
         raise RuntimeError("Hosted model budget cap reached; request blocked before sending")
