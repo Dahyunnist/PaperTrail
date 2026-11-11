@@ -8,6 +8,7 @@
 - 表结构校验器：`scripts/validate_pt1_human_annotation_task.py`
 - 人工 gold 格式：`evals/pt1-human-gold-schema-v2.json`
 - PDF 引文校验器：`scripts/validate_pt1_gold_jsonl.py`
+- 5题起步表：`evals/pt1-human-annotation-task-5-20261111.csv`
 
 任务表含40个候选问题，覆盖30个不同 DOI。每篇至少一个单篇问题；另有10个问题从10篇论文的第二个规则标题生成，用来探测文中是否报告对应的量化效果。候选问题由本地 PDF 标题/规则标题确定性生成，不含模型输出。`candidate_basis` 和 `candidate_basis_pdf_page` 只说明候选题从哪里提出；不是证据标注。
 
@@ -68,4 +69,12 @@
 .\.venv\Scripts\python.exe scripts/validate_pt1_gold_jsonl.py <人工gold.jsonl路径>
 ```
 
-JSONL 校验器核对不少于40题、30篇 DOI、重复问题、人工复核状态、答案/拒答结构、跨论文关系，以及清单中的 PDF SHA、物理页码和逐字符引文 span。校验错误必须先修正。只有全部通过且双方复核后，才进入冻结流程；当前 gold 仍为零题。
+5题先使用上述独立 CSV 工作副本；其内容对应40题总表的 `PT1-H001` 至 `PT1-H005`，不要把答案写回空白总表。每题先核查候选问法，再填题型、可答性、答案/拒答理由、最小完整引文、PDF 物理页码、原文上下文、字符 span、标注者和复核者。复核者独立核对来源 PDF 后，才把状态记为 `通过`。保留 DOI 与原 PDF SHA，不要把格式示例当答案。
+
+转换为 PT1 v2 JSONL 后，可先校验5题：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_pt1_gold_jsonl.py <人工gold.jsonl路径> --min-questions 5 --min-papers 5
+```
+
+校验器能核对重复题、双人复核、回答/拒答结构，以及清单中的 PDF SHA、物理页码和逐字符引文 span。它没有 CSV 导入功能。现有运行时 `papertrail.gold.load_gold` 不接受 PT1 v2 格式；其要求 `abstain` 和 `root_id/file_name/sha256/pdf_page/quote`。所以 v2 校验通过只证明人工记录的引用有效，不代表可以导入 PT1/PT3 评测。当前 PT1 gold 0/40，PT1 与依赖它的真实论文 PT3 评测均未完成；不要用空集或合成示例报告质量指标。

@@ -6,9 +6,9 @@
 
 | 阶段 | 状态 | 证据与缺口 |
 |---|---|---|
-| PT-1 真实论文基准 | 部分 | `evals/pt9-pt12-final-heldout-gold-20261023.jsonl` SHA-256 `e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c`，12 题/6 篇；按路线仍低于 40 题/30 篇。PT5 是 6 题小组。本文冻结 30 个已见来源，0 个 gold 标注；论文数达到路线最低数，人工题数仍未达 40。 |
+| PT-1 真实论文基准 | 未完成 | 候选来源30篇、人工任务40题；但用户尚未完成并复核标注，当前0/40 gold。来源均为 `development_seen`，不可当盲测。路线目标未达成。 |
 | PT-2 完整证据检索 | 部分 | 原混合完整证据覆盖仍为7/10。两个遗留题的非盲固定开发回归中，显式双论文 opt-in 策略 Recall@10 为3/4、Recall@20 为4/4；默认结果与冻结轨迹一致。详见 `docs/learning/pt2-two-paper-repair-20261111.md` 和 `evals/pt2-two-paper-balance-20261111.json`。仍需独立真实集复验。 |
-| PT-3 可信回答/错误拒答 | 部分 | `evals/pt17-model-e2e-analysis-20261023.json`：4 道可答题完整回答 0；候选证据槽 6/7、筛后 3/7、引用 1/7；不可答有效拒答 0/1。`tests/test_s3.py` 覆盖合成边界，不等于真实论文达标。 |
+| PT-3 可信回答/错误拒答 | 未完成 | 历史 PT17 结果仅是旧评测记录：4 道可答题完整回答0、引用1/7、不可答正确拒答0/1；不是当前 PT1 真实论文集结果。当前 PT1 人工 gold 为0/40，新的真实论文模型质量评估必须等用户标注、第二人复核及格式适配后进行。 |
 | PT-4 权限、索引、Web 评测 | 部分 | 已补集合 owner ACL、HTTP/MCP 共用 Principal 授权、直接 SHA 跨 owner 拒绝及 A/B 合成测试；详见 `docs/learning/stage-PT4.md`。仍缺认证中间件生产集成、Web 评测审阅验收和完整多租户安全验证。 |
 
 ## PT-1 候选来源目录（30 篇）
@@ -51,6 +51,10 @@
 许可依据：各 PLOS 文章页的版权声明及 [PLOS 官方版权政策](https://journals.plos.org/ploscompbiol/s/licenses-and-copyright)；政策说明 PLOS 文章适用 CC BY 4.0，除非文章另有说明。官方页面逐条链接已入清单。校验器要求 30 个不同 DOI、CC BY 4.0 元数据、有效 PDF 文件头、路径安全和哈希匹配。
 
 PT-1 gold 仍为空，当前 0 题。40 道题及逐页最小完整证据集留作用户人工标注任务；不由模型生成答案或标注。30 篇来源均标为 `development_seen`，不能作为盲测集。
+
+PT-1 人工标注与基于该批论文的 PT-3 模型质量评估均待用户完成标注和复核；空集、格式示例、合成测试均不计入真实论文评测结果。先做5题起步批次：`evals/pt1-human-annotation-task-5-20261111.csv`（40题总表前5题，5个 DOI；只填工作副本）。逐题审核候选问题；填写 `question_type`、`answerability`、答案或拒答理由、最小完整原文引文、PDF物理页码、原文上下文及精确字符 span；标注者与复核者须为不同人。复核者独立核对 PDF SHA、页码、逐字引文和答案支持后，将 `review_status` 置为 `通过`。歧义题先改写，不能直接计入 gold。
+
+现有 `scripts/validate_pt1_gold_jsonl.py` 能按候选清单核对 PDF SHA、物理页码、精确引文 span、重复问题、跨论文证据和双人复核；可用 `--min-questions 5 --min-papers 5` 校验5题 JSONL。它不导入 CSV。运行时 `papertrail.gold.load_gold` 仍要求旧格式 `abstain` 和 `root_id/file_name/sha256/pdf_page/quote`；PT1 v2 JSONL 使用 `answerability`、DOI 及字符 span，现无兼容导入器。因此，5题通过 v2 引文校验后仍不能直接送入现有 PT1/PT3 运行评测；适配工具和用户确认标注前不得启动模型评测。
 
 ## PT-2/PT-3 与测试边界
 

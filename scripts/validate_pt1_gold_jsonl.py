@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
 import json
 import re
 import sys
@@ -157,7 +158,12 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
 
 
 if __name__ == "__main__":
-    found = validate(Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_JSONL)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("jsonl", nargs="?", type=Path, default=DEFAULT_JSONL)
+    parser.add_argument("--min-questions", type=int, default=40)
+    parser.add_argument("--min-papers", type=int, default=30)
+    args = parser.parse_args()
+    found = validate(args.jsonl, min_questions=args.min_questions, min_papers=args.min_papers)
     if found:
         print("\n".join(found))
         raise SystemExit(1)
