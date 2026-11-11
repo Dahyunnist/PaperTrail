@@ -83,7 +83,7 @@ def _load(database: Path, artifact: Path) -> dict[str, Any]:
 
 def bge_search(database: Path, query: str, limit: int = 5,
                source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
-    if not query.strip():
+    if not query.strip() or limit <= 0:
         return []
     artifact = artifact or database.with_name(database.stem + ".bge.joblib")
     bundle = _load(database, artifact)
@@ -109,6 +109,8 @@ def bge_search(database: Path, query: str, limit: int = 5,
 
 def hybrid_bge_search(database: Path, query: str, limit: int = 5,
                       source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
     lexical = bm25_search(database, query, max(limit * 5, 30), source_type)
     semantic = bge_search(database, query, max(limit * 5, 30), source_type, artifact)
     fused: dict[str, dict[str, Any]] = {}
@@ -121,6 +123,8 @@ def hybrid_bge_search(database: Path, query: str, limit: int = 5,
 
 
 def _unique_page_rows(rows: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
     output: list[dict[str, Any]] = []
     seen: set[tuple[str, int]] = set()
     for row in rows:
@@ -138,6 +142,8 @@ def _unique_page_rows(rows: list[dict[str, Any]], limit: int) -> list[dict[str, 
 
 def hybrid_bge_wide_search(database: Path, query: str, limit: int = 5,
                            source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
     candidate_chunks = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
     return _unique_page_rows(candidate_chunks, limit)
 
@@ -146,6 +152,8 @@ def hybrid_bge_dense_rerank_search(database: Path, query: str, limit: int = 5,
                                    source_type: str | None = None,
                                    artifact: Path | None = None) -> list[dict[str, Any]]:
     """Rerank the hybrid candidate pool by cached BGE query-to-chunk similarity."""
+    if limit <= 0:
+        return []
     artifact = artifact or database.with_name(database.stem + ".bge.joblib")
     candidates = hybrid_bge_search(database, query, max(limit * 4, 100), source_type, artifact)
     bundle = _load(database, artifact)
@@ -168,6 +176,8 @@ def hybrid_bge_dense_rerank_search(database: Path, query: str, limit: int = 5,
 def llm_rerank_search(database: Path, query: str, limit: int = 5,
                       source_type: str | None = None, artifact: Path | None = None) -> list[dict[str, Any]]:
     """Rerank the same hybrid-BGE chunk pool by a hosted model, then return unique pages."""
+    if limit <= 0:
+        return []
     from .local_llm import chat_json, configured_model
 
     model = configured_model()

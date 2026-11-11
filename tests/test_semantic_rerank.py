@@ -65,3 +65,21 @@ def test_dense_reranker_sorts_hybrid_candidates_by_bge_similarity(monkeypatch):
     result = semantic.hybrid_bge_dense_rerank_search(Path("db.sqlite3"), "question", limit=2)
     assert [row["chunk_id"] for row in result] == ["high", "low"]
     assert result[0]["retrieval_signals"][-1] == "bge_dense_rerank"
+
+
+def test_semantic_retrieval_nonpositive_limit_returns_without_work(monkeypatch):
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("retrieval or model work must not run for a nonpositive limit")
+
+    for name in ("_encode", "_load", "bm25_search"):
+        monkeypatch.setattr(semantic, name, unexpected)
+    monkeypatch.setattr("papertrail.local_llm.configured_model", unexpected)
+    monkeypatch.setattr("papertrail.local_llm.chat_json", unexpected)
+    db = Path("unused.sqlite3")
+    searches = (semantic.bge_search, semantic.hybrid_bge_search, semantic.hybrid_bge_wide_search,
+                semantic.hybrid_bge_dense_rerank_search, semantic.llm_rerank_search)
+
+    for search in searches:
+        assert search(db, "query", limit=0) == []
+        assert search(db, "query", limit=-1) == []
+    assert semantic._unique_page_rows([{"sha256": "a", "pdf_page": 1, "text_origin": "native_text"}], 0) == []

@@ -57,3 +57,10 @@ PT-1 gold 仍为空，当前 0 题。40 道题及逐页最小完整证据集留�
 本轮未改冻结评测基线。PT-2 完整证据覆盖仍为 7/10；PT-3 真实集完整可答回答仍为 0/4、不可答正确拒答为 0/1。定向回归 `tests/test_s3.py` 与 `tests/test_p13_regressions.py`：41 项通过。
 
 全套测试在受限运行中为 75 项通过、1 项受本机回环权限拦截：`tests/test_local_llm.py::test_local_chat_client_uses_loopback_ollama_json_api`。本地假服务绑定 `127.0.0.1` 的临时端口；连接失败链为 `urllib.error.URLError`，底层 `WinError 10013`（套接字访问被拒），最终 `papertrail/local_llm.py:82` 抛出 `RuntimeError`。该用例获准单独运行后通过；不涉及外网或模型。PT-1 定向测试为 2 项通过。
+
+
+## 人工标注任务包与 PT-2 离线修复
+
+PT-1 人工任务包见 `docs/learning/pt1-human-annotation-guide-20261111.md` 与 `evals/pt1-human-annotation-task-40-20261111.csv`。40 个问题覆盖30个 DOI；30 个章节事实候选、10 个量化效果边界探测。答案、可答性、最小完整引文、页码、原文摘录、标注者和复核字段全部为空。任务生成不调用模型；需由人工标注和另一人复核。
+
+PT-2 离线代码缺口：语义检索的 BGE 与去重页路径在 `limit=0` 时可能返回一条，LLM 重排路径也未保证在非正 limit 下不工作。`papertrail/semantic.py` 现统一让 BGE、混合、宽召回、稠密重排、LLM 重排和页去重在 `limit <= 0` 时直接返回空，不触发索引或模型。回归位于 `tests/test_semantic_rerank.py::test_semantic_retrieval_nonpositive_limit_returns_without_work`。PT15 冻结的 `qa.py`、`retrieval.py` 与预登记哈希未改。PT1 任务校验、PT1 来源校验及语义检索定向测试共10项通过；未调用模型。
