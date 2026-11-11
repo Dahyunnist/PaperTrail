@@ -7,8 +7,8 @@
 | 阶段 | 状态 | 证据与缺口 |
 |---|---|---|
 | PT-1 真实论文基准 | 未完成 | 候选来源30篇、人工任务40题；但用户尚未完成并复核标注，当前0/40 gold。来源均为 `development_seen`，不可当盲测。路线目标未达成。 |
-| PT-2 完整证据检索 | 部分 | 原混合完整证据覆盖仍为7/10。两个遗留题的非盲固定开发回归中，显式双论文 opt-in 策略 Recall@10 为3/4、Recall@20 为4/4；默认结果与冻结轨迹一致。详见 `docs/learning/pt2-two-paper-repair-20261111.md` 和 `evals/pt2-two-paper-balance-20261111.json`。仍需独立真实集复验。 |
-| PT-3 可信回答/错误拒答 | 未完成 | 历史 PT17 结果仅是旧评测记录：4 道可答题完整回答0、引用1/7、不可答正确拒答0/1；不是当前 PT1 真实论文集结果。当前 PT1 人工 gold 为0/40，新的真实论文模型质量评估必须等用户标注、第二人复核及格式适配后进行。 |
+| PT-2 完整证据检索 | 部分 | 原混合完整证据覆盖仍为7/10。两个遗留题的非盲固定开发回归中，显式双论文 opt-in 策略 Recall@10 为3/4、Recall@20 为4/4；默认结果与冻结轨迹一致。详见 `docs/learning/pt2-two-paper-repair-20261111.md` 和 `evals/pt2-two-paper-balance-20261111.json`。仍需独立真实集复验，依赖 PT1 人工标注。 |
+| PT-3 可信回答/错误拒答 | 未完成 | 历史 PT17 结果仅是旧评测记录：4 道可答题完整回答0、引用1/7、不可答正确拒答0/1；不是当前 PT1 真实论文集结果。当前 PT1 人工 gold 为0/40，新的真实论文模型质量评估必须等用户标注与第二人复核，并通过导入校验及预算门禁后进行。 |
 | PT-4 权限、索引、Web 评测 | 部分 | 已补集合 owner ACL、HTTP/MCP 共用 Principal 授权、直接 SHA 跨 owner 拒绝及 A/B 合成测试；详见 `docs/learning/stage-PT4.md`。仍缺认证中间件生产集成、Web 评测审阅验收和完整多租户安全验证。 |
 
 ## PT-1 候选来源目录（30 篇）
@@ -54,7 +54,11 @@ PT-1 gold 仍为空，当前 0 题。40 道题及逐页最小完整证据集留�
 
 PT-1 人工标注与基于该批论文的 PT-3 模型质量评估均待用户完成标注和复核；空集、格式示例、合成测试均不计入真实论文评测结果。先做5题起步批次：`evals/pt1-human-annotation-task-5-20261111.csv`（40题总表前5题，5个 DOI；只填工作副本）。逐题审核候选问题；填写 `question_type`、`answerability`、答案或拒答理由、最小完整原文引文、PDF物理页码、原文上下文及精确字符 span；标注者与复核者须为不同人。复核者独立核对 PDF SHA、页码、逐字引文和答案支持后，将 `review_status` 置为 `通过`。歧义题先改写，不能直接计入 gold。
 
-现有 `scripts/validate_pt1_gold_jsonl.py` 能按候选清单核对 PDF SHA、物理页码、精确引文 span、重复问题、跨论文证据和双人复核；可用 `--min-questions 5 --min-papers 5` 校验5题 JSONL。它不导入 CSV。运行时 `papertrail.gold.load_gold` 仍要求旧格式 `abstain` 和 `root_id/file_name/sha256/pdf_page/quote`；PT1 v2 JSONL 使用 `answerability`、DOI 及字符 span，现无兼容导入器。因此，5题通过 v2 引文校验后仍不能直接送入现有 PT1/PT3 运行评测；适配工具和用户确认标注前不得启动模型评测。
+现有 `scripts/validate_pt1_gold_jsonl.py` 能按候选清单核对 PDF SHA、物理页码、精确引文 span、重复问题、跨论文证据和双人复核；可用 `--min-questions 5 --min-papers 5` 校验5题 JSONL。它不导入 CSV。新增 `scripts/import_pt1_gold_jsonl.py` 将已复核的 v2 JSONL 显式转换为运行时旧格式，并调用 `papertrail.gold.load_gold` 和 `verify_quotes` 再验一次；拒绝空集、未复核数据及不匹配的拒答/题型。跨论文题型、拒答和引文关系保留。导入不等于运行模型评测；真实 PT1/PT3 评估仍等用户完成人工标注、复核，并先核对评测账本预算。
+
+共享评测门禁：本次只读核对 `.local/pt-master-usage.json` 与 PT17 预登记账本起点；本机账本末尾有额外字面字符，标准 JSON 解析失败，且账本累计值与 PT17 预登记基线不一致。未改账本、未调用模型。真实模型评测前必须先由维护者修复/对账本机账本，再按当前冻结题集重新核对 cap、累计和可用余额；账本状态未清前只做离线准备。
+
+PT4 下一步依赖生产部署方提供可信身份服务及 user claim 映射，才能把 Principal 注入 Web/MCP；本轮静态复核未发现可安全替代身份约定的代码改动。`tests/test_access_control.py tests/test_s5_web.py`：9项通过，覆盖集合隔离及请求体伪造 user_id 拒绝。部署身份契约未提供前，保留为外部集成项；不虚构认证来源。
 
 ## PT-2/PT-3 与测试边界
 

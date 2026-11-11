@@ -77,4 +77,16 @@
 .\.venv\Scripts\python.exe scripts/validate_pt1_gold_jsonl.py <人工gold.jsonl路径> --min-questions 5 --min-papers 5
 ```
 
-校验器能核对重复题、双人复核、回答/拒答结构，以及清单中的 PDF SHA、物理页码和逐字符引文 span。它没有 CSV 导入功能。现有运行时 `papertrail.gold.load_gold` 不接受 PT1 v2 格式；其要求 `abstain` 和 `root_id/file_name/sha256/pdf_page/quote`。所以 v2 校验通过只证明人工记录的引用有效，不代表可以导入 PT1/PT3 评测。当前 PT1 gold 0/40，PT1 与依赖它的真实论文 PT3 评测均未完成；不要用空集或合成示例报告质量指标。
+校验器能核对重复题、双人复核、回答/拒答结构，以及清单中的 PDF SHA、物理页码和逐字符引文 span。它不读取 CSV；从 v2 JSONL 转为运行时格式的步骤见下节。当前 PT1 gold 0/40，PT1 与依赖它的真实论文 PT3 评测均未完成；不要用空集或合成示例报告质量指标。
+
+### 导入运行时 gold
+
+CSV 仍需人工整理为 v2 JSONL；导入器不替人推断或补标字段。导入会先执行 v2 校验，再转换为旧运行时结构，并调用 `papertrail.gold.load_gold` 与 `verify_quotes` 二次校验。未复核、字段不全、答案/拒答不匹配、PDF 哈希/页码/span/引文不符或题数不足时，不生成输出。跨文献题型、拒答标记和引文关系保留。
+
+5题复核通过后运行：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/import_pt1_gold_jsonl.py <人工gold-v2.jsonl路径> --output-gold .local/pt1-human-gold-runtime-5.jsonl --output-sources .local/pt1-human-sources-5.yaml --min-questions 5 --min-papers 5
+```
+
+40题完整批次使用默认门槛，不要传5题门槛。`.local` 输出含本机 PDF 根路径，只保存在本地。导入成功只表示人工记录通过结构和引文校验；不代表模型评测已运行或达到指标。

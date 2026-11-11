@@ -89,7 +89,10 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
                 questions.add(normalized)
             if row["split"] != "development" or not isinstance(row["question_type"], str) or row["question_type"] not in TYPES:
                 issues.append(f"line {line_no}: invalid split or question_type")
-            if row["annotation_status"] != "human_verified" or not row["annotator"] or not row["reviewer"] or row["annotator"] == row["reviewer"]:
+            if (row["annotation_status"] != "human_verified"
+                    or not isinstance(row["annotator"], str) or not row["annotator"].strip()
+                    or not isinstance(row["reviewer"], str) or not row["reviewer"].strip()
+                    or row["annotator"] == row["reviewer"]):
                 issues.append(f"line {line_no}: human review incomplete or reviewer matches annotator")
             if row["minimumCompleteEvidenceSet"] is not True:
                 issues.append(f"line {line_no}: minimumCompleteEvidenceSet must be true")
@@ -100,6 +103,9 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
                 issues.append(f"line {line_no}: paper_ids must be a nonempty unique list")
                 paper_list = []
             paper_ids.update(item for item in paper_list if isinstance(item, str))
+            for doi in paper_list:
+                if isinstance(doi, str):
+                    source_document(doi, line_no)
             evidence = row["evidence"]
             if not isinstance(evidence, list):
                 issues.append(f"line {line_no}: evidence must be a list")
@@ -107,6 +113,8 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
             answerability = row["answerability"]
             if not isinstance(answerability, str) or answerability not in {"answerable", "unanswerable"}:
                 issues.append(f"line {line_no}: invalid answerability")
+            if ((answerability == "unanswerable") != (row["question_type"] == "unanswerable")):
+                issues.append(f"line {line_no}: question_type must match answerability")
             if answerability == "answerable" and (not isinstance(row["expected_answer"], str) or not row["expected_answer"].strip() or not evidence):
                 issues.append(f"line {line_no}: answerable record needs answer and evidence")
             if answerability == "unanswerable" and (not isinstance(row["expected_answer"], str) or not row["expected_answer"].strip() or evidence):
@@ -122,6 +130,9 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
                     issues.append(f"line {line_no}: evidence reference missing fields")
                     continue
                 doi, rel = entry["doi"], entry["relation"]
+                if not isinstance(doi, str):
+                    issues.append(f"line {line_no}: evidence DOI must be a string")
+                    continue
                 if doi not in paper_list:
                     issues.append(f"line {line_no}: evidence DOI absent from paper_ids")
                 evidence_dois.add(doi)
@@ -136,11 +147,14 @@ def validate(path: Path = DEFAULT_JSONL, manifest_path: Path = DEFAULT_MANIFEST,
                     issues.append(f"line {line_no}: evidence PDF hash mismatch")
                 page_no = entry["pdf_page"]
                 start, end, quote = entry["start_char"], entry["end_char"], entry["quote"]
-                if not isinstance(page_no, int) or not 1 <= page_no <= doc.page_count:
+                if not isinstance(page_no, int) or isinstance(page_no, bool) or not 1 <= page_no <= doc.page_count:
                     issues.append(f"line {line_no}: evidence PDF page out of range")
                     continue
                 page_text = doc[page_no - 1].get_text("text")
-                if not isinstance(start, int) or not isinstance(end, int) or not isinstance(quote, str) or start < 0 or end <= start or end > len(page_text) or page_text[start:end] != quote:
+                if (not isinstance(start, int) or isinstance(start, bool)
+                        or not isinstance(end, int) or isinstance(end, bool)
+                        or not isinstance(quote, str) or start < 0 or end <= start
+                        or end > len(page_text) or page_text[start:end] != quote):
                     issues.append(f"line {line_no}: quote/span does not match PDF page text")
             qtype = row["question_type"]
             if qtype in {"cross_paper", "method_comparison", "multi_hop"} and len(evidence_dois) < 2:
