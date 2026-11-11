@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "status": "posthoc_seen_set_diagnostic_not_blind",
+  "purpose": "PT2诊断原始k=10混合检索漏掉的三个问题；不改历史评测结果或冻结输入",
+  "common_cause": "全语料按子块做RRF并全局截断；未按来源页聚合或为多论文问题分配来源预算，目标页在单路候选中出现但被全局融合/截断挤出。",
+  "minimal_repair": "独立可选检索器先扩展候选，再按不同父段聚合为唯一来源页；保留每个被选页的全部候选子块ID。",
+  "frozen_inputs_unchanged": {
+    "gold_sha256_matches_expected": true,
+    "prereg_file_sha256": "1c49a2f2ad47537852b2092d945fc01afeef083e19439f20d263ec96f53955f6",
+    "prereg_file_matches_head": true,
+    "source_files_unchanged_since_head": {
+      "papertrail/qa.py": {
+        "registered_sha256": "2db121ecfbbe1e8a73dab9c9e6f0b4a732a4c11dc5517a77e64e6f2645e8d977",
+        "head_blob_sha256": "23b56f66048f10eda2d6d2dc5c3cc1afc08c0d6fe041d521fa485b37441db26a",
+        "working_file_sha256": "5fd54c649737211f3535ce67aa45ff36de668b960dc482469e90c92a6be564b3",
+        "unchanged_in_git": true
+      },
+      "papertrail/retrieval.py": {
+        "registered_sha256": "7b5384200a92bc0c7405b53ee3034effa998c4af80559365a9c2749e39f577ff",
+        "head_blob_sha256": "249b4f0086e9e7851e9793bf4131e5290140fe04ee4285bd093e16c496cbd8e3",
+        "working_file_sha256": "249b4f0086e9e7851e9793bf4131e5290140fe04ee4285bd093e16c496cbd8e3",
+        "unchanged_in_git": true
+      },
+      "papertrail/s1_index.py": {
+        "registered_sha256": "dd85e778211001675905583c98a79ba888abaacb3ee57ab9b7b16de7b897fe83",
+        "head_blob_sha256": "dd85e778211001675905583c98a79ba888abaacb3ee57ab9b7b16de7b897fe83",
+        "working_file_sha256": "dd85e778211001675905583c98a79ba888abaacb3ee57ab9b7b16de7b897fe83",
+        "unchanged_in_git": true
+      },
+      "papertrail/gold.py": {
+        "registered_sha256": "0279ae12a260e0f5bf5879a32ae44034c420e827a4000315cb0453c380b301d7",
+        "head_blob_sha256": "14062c214dc65b45c7f57d86cba325eae55f00a1171afa3041f57228eb225252",
+        "working_file_sha256": "0279ae12a260e0f5bf5879a32ae44034c420e827a4000315cb0453c380b301d7",
+        "unchanged_in_git": true
+      },
+      "papertrail/audit.py": {
+        "registered_sha256": "7ea7b78212f69b53f25765a494cdade28dbba51c4b75eb18a9f421b3f9b4a289",
+        "head_blob_sha256": "7ea7b78212f69b53f25765a494cdade28dbba51c4b75eb18a9f421b3f9b4a289",
+        "working_file_sha256": "7ea7b78212f69b53f25765a494cdade28dbba51c4b75eb18a9f421b3f9b4a289",
+        "unchanged_in_git": true
+      }
+    }
+  },
+  "baseline_report": ".local\\pt9-pt12-final-retrieval-k10.json",
+  "baseline_report_sha256": "cb84f619054a9709d2cb79e2fdb6127ba032a2d7b50ed275d5d287c6837ef6fd",
+  "gold_file": "evals\\pt9-pt12-final-heldout-gold-20261023.jsonl",
+  "gold_sha256": "e03aaec49d953664841ab9cf3e17f079829597dc2200e8c071e1d80f9c1b510c",
+  "database_sha256": "ef5f72491e4b7be9872d56a9621ffa57a1f8335506ba2394c039e7d999837a24",
+  "method": {
+    "name": "distinct-parent page aggregation",
+    "candidate_multiplier": 20,
+    "baseline_return_limit_before_page_dedup": 50,
+    "baseline_candidate_pool_per_modality": 200,
+    "baseline_rrf_weights": {
+      "bm25": 2.0,
+      "vector": 0.5
+    },
+    "final_page_limit": 10,
+    "score": "每页取分数最高的两个不同父段RRF分数之和；父段内保留全部候选子块引用"
+  },
+  "scope": {
+    "questions": 3,
+    "gold_pages": 5,
+    "baseline_complete_evidence_rate": 0.7,
+    "baseline_complete_evidence_questions": 7,
+    "parent_page_gold_pages_found": 1,
+    "parent_page_complete_questions": 1
+  },
+  "results": [
+    {
+      "question_id": "PT9-03",
+      "gold_pages": 2,
+      "baseline_complete_evidence": false,
+      "parent_page_complete_evidence_at_10": false,
+      "gold_pages_found": 0,
+      "page_ranks": [
+        {
+          "sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+          "pdf_page": 2,
+          "baseline_chunk_top10_hit": false,
+          "baseline_page_top10_rank": null,
+          "bm25_candidate_rank_at_200": 59,
+          "vector_candidate_rank_at_200": 83,
+          "hybrid_candidate_rank_at_50": 48,
+          "parent_page_rank_at_10": null
+        },
+        {
+          "sha256": "53e867793aa1f3a710004ee3c10346b4c1b8e2e5fdf9abfdf700ec3d3e09cbb1",
+          "pdf_page": 5,
+          "baseline_chunk_top10_hit": false,
+          "baseline_page_top10_rank": null,
+          "bm25_candidate_rank_at_200": 79,
+          "vector_candidate_rank_at_200": 9,
+          "hybrid_candidate_rank_at_50": 35,
+          "parent_page_rank_at_10": null
+        }
+      ]
+    },
+    {
+      "question_id": "PT9-05",
+      "gold_pages": 1,
+      "baseline_complete_evidence": false,
+      "parent_page_complete_evidence_at_10": true,
+      "gold_pages_found": 1,
+      "page_ranks": [
+        {
+          "sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+          "pdf_page": 5,
+          "baseline_chunk_top10_hit": false,
+          "baseline_page_top10_rank": null,
+          "bm25_candidate_rank_at_200": 5,
+          "vector_candidate_rank_at_200": null,
+          "hybrid_candidate_rank_at_50": 14,
+          "parent_page_rank_at_10": 5
+        }
+      ]
+    },
+    {
+      "question_id": "PT12-05",
+      "gold_pages": 2,
+      "baseline_complete_evidence": false,
+      "parent_page_complete_evidence_at_10": false,
+      "gold_pages_found": 0,
+      "page_ranks": [
+        {
+          "sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+          "pdf_page": 7,
+          "baseline_chunk_top10_hit": false,
+          "baseline_page_top10_rank": null,
+          "bm25_candidate_rank_at_200": null,
+          "vector_candidate_rank_at_200": 167,
+          "hybrid_candidate_rank_at_50": null,
+          "parent_page_rank_at_10": null
+        },
+        {
+          "sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+          "pdf_page": 8,
+          "baseline_chunk_top10_hit": false,
+          "baseline_page_top10_rank": null,
+          "bm25_candidate_rank_at_200": 45,
+          "vector_candidate_rank_at_200": 10,
+          "hybrid_candidate_rank_at_50": 21,
+          "parent_page_rank_at_10": null
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "题目和来源已暴露；本报告是诊断，不是独立评测或新基线。",
+    "历史k=10结果仍为7/10；页聚合仅修复PT9-05，PT9-03与PT12-05仍漏页。",
+    "候选策略不接入默认路径；未调用模型，未写入索引、gold或原报告。"
+  ]
+}
