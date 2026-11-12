@@ -41,7 +41,7 @@ def test_manifest_rejects_missing_provenance_and_non_synthetic_values():
 def test_manifest_and_trace_reject_secrets_paths_prompts_and_text():
     manifest = _manifest() | {"private_path": "C:\\Users\\person\\paper.pdf", "api_key": "secret"}
     assert any(issue.startswith("forbidden_field") for issue in validate_manifest(manifest))
-    event = {"run_id": "r", "trace_id": "t", "span_id": "s", "event_name": "eval.case_completed",
+    event = {"run_id": "r", "trace_id": "t", "span_id": "s", "event_name": "citation.validated",
              "timestamp": "2026-11-12T00:00:00Z", "attributes": {"raw_prompt": "question", "full_text": "paper"}}
     assert len([issue for issue in validate_trace_event(event) if issue.startswith("forbidden_field")]) == 2
 

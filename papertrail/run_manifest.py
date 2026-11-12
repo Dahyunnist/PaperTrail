@@ -4,7 +4,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-EVENT_NAMES = {"run.started", "dataset.loaded", "eval.case_completed", "run.completed", "run.failed"}
+EVENT_NAMES = {"retrieval.completed", "rerank.completed", "generation.completed",
+               "citation.validated", "access.checked", "human.reviewed"}
 FORBIDDEN_KEYS = {"prompt", "raw_prompt", "full_text", "document_text", "api_key", "secret", "token", "path", "absolute_path"}
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
