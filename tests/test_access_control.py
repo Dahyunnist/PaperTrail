@@ -136,3 +136,50 @@ def test_reindex_keeps_existing_collection_owner(tmp_path, monkeypatch):
         database, "beta-only-needle", Principal("user-b"))] == [rows[1]["sha256"]]
     assert rows[1]["sha256"] not in {row["sha256"] for row in search_papers(
         database, "beta-only-needle", Principal("local-dev"))}
+
+
+def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    root = tmp_path / "papers"
+    selection = tmp_path / "selection.jsonl"
+    config = tmp_path / "sources.yaml"
+    alpha = root / "alpha.pdf"
+    beta = root / "beta.pdf"
+    old_alpha_sha, beta_sha = rows[0]["sha256"], rows[1]["sha256"]
+
+    replacement = fitz.open()
+    page = replacement.new_page()
+    page.insert_text((40, 60), "alpha.pdf revised")
+    page.insert_text((40, 100), "alpha revised-only evidence appears in this updated synthetic source.")
+    replacement.save(alpha)
+    replacement.close()
+    stale = index_selection(database, config, selection, reconcile=True)
+    assert any(issue["issue"] == "source_missing_or_changed" for issue in stale["issues"])
+    assert old_alpha_sha not in {row["sha256"] for row in search_papers(
+        database, "alpha-only-needle", Principal("local-dev"))}
+    try:
+        read_evidence(database, old_alpha_sha, 1, Principal("local-dev"))
+    except ValueError as exc:
+        assert str(exc) == "original paper not found"
+    else:
+        raise AssertionError("updated source left old citation readable")
+
+    new_alpha_sha = hashlib.sha256(alpha.read_bytes()).hexdigest()
+    selected_rows = [dict(rows[1]), dict(rows[0], sha256=new_alpha_sha)]
+    selection.write_text("".join(json.dumps(row) + "\n" for row in selected_rows), encoding="utf-8")
+    assert index_selection(database, config, selection, reconcile=True)["added"] == 1
+    assert "alpha revised-only evidence" in read_evidence(
+        database, new_alpha_sha, 1, Principal("local-dev"))["text"]
+
+    beta.unlink()
+    deleted = index_selection(database, config, selection, reconcile=True)
+    assert any(issue["issue"] == "source_missing_or_changed" for issue in deleted["issues"])
+    assert beta_sha not in {row["sha256"] for row in search_papers(
+        database, "beta-only-needle", Principal("user-b"))}
+    mcp_read = handle(database, {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                                 "params": {"name": "get_evidence", "arguments": {
+                                     "sha256": beta_sha, "page": 1}}}, Principal("user-b"))
+    assert mcp_read["result"]["isError"] is True
+    client = create_app(database).test_client()
+    assert client.get(f"/api/evidence/{beta_sha}/1",
+                      environ_overrides={"papertrail.principal": Principal("user-b")}).status_code == 404
