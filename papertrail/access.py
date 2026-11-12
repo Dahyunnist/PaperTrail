@@ -50,8 +50,12 @@ def assign_version_to_collection(database: Path, version_id: str, collection_id:
 def search_papers(database: Path, query: str, principal: Principal,
                   limit: int = 5) -> list[dict[str, Any]]:
     """Filter by collection owner inside SQL before ranked results are returned."""
-    return bm25_search(database, query, limit=limit, source_type="original_pdf",
+    rows = bm25_search(database, query, limit=limit, source_type="original_pdf",
                        readonly=True, principal_id=principal.user_id)
+    from .trace import emit
+    emit("access.checked", operation="search_papers", allowed=True,
+         principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
+    return rows
 
 
 def authorized_version_ids(database: Path, principal_id: str) -> set[str]:
@@ -97,7 +101,13 @@ def read_evidence(database: Path, sha256: str, page_number: int,
         raise ValueError("invalid SHA-256 or page")
     match = _authorized_document(database, sha256.lower(), principal)
     if not match:
+        from .trace import emit
+        emit("access.checked", operation="read_evidence", allowed=False,
+             principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
         raise ValueError("original paper not found")
+    from .trace import emit
+    emit("access.checked", operation="read_evidence", allowed=True,
+         principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
     metadata, path = match
     if not path.is_file():
         raise ValueError("source file changed or is unavailable")

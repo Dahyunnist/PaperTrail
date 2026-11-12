@@ -189,20 +189,28 @@ def hybrid_search(database: Path, query: str, limit: int = 5,
 def retrieve(database: Path, query: str, limit: int = 5,
              source_type: str | None = None, mode: str = "bm25",
              artifact: Path | None = None, principal_id: str = "local-dev") -> list[dict[str, Any]]:
-    if mode == "bm25":
-        return bm25_search(database, query, limit, source_type, principal_id=principal_id)
-    if mode == "bm25_expanded":
-        return _expanded_bm25_search(database, query, limit, source_type, principal_id)
-    if mode == "vector":
-        return vector_search(database, query, limit, source_type, artifact, principal_id)
-    if mode == "hybrid":
-        return hybrid_search(database, query, limit, source_type, artifact=artifact, principal_id=principal_id)
-    if mode in {"bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_dense_rerank", "hybrid_bge_rerank"}:
+    if mode in {"bm25", "bm25_expanded", "vector", "hybrid"}:
+        if mode == "bm25":
+            rows = bm25_search(database, query, limit, source_type, principal_id=principal_id)
+        elif mode == "bm25_expanded":
+            rows = _expanded_bm25_search(database, query, limit, source_type, principal_id)
+        elif mode == "vector":
+            rows = vector_search(database, query, limit, source_type, artifact, principal_id)
+        else:
+            rows = hybrid_search(database, query, limit, source_type, artifact=artifact, principal_id=principal_id)
+    elif mode in {"bge", "hybrid_bge", "hybrid_bge_wide", "hybrid_bge_dense_rerank", "hybrid_bge_rerank"}:
         from .semantic import (bge_search, hybrid_bge_search, hybrid_bge_wide_search,
                                hybrid_bge_dense_rerank_search, llm_rerank_search)
         fn = {"bge": bge_search, "hybrid_bge": hybrid_bge_search,
               "hybrid_bge_wide": hybrid_bge_wide_search,
               "hybrid_bge_dense_rerank": hybrid_bge_dense_rerank_search,
               "hybrid_bge_rerank": llm_rerank_search}[mode]
-        return fn(database, query, limit, source_type, artifact, principal_id)
-    raise ValueError(f"未知检索模式：{mode}")
+        rows = fn(database, query, limit, source_type, artifact, principal_id)
+    else:
+        raise ValueError(f"未知检索模式：{mode}")
+    from .trace import emit
+    emit("retrieval.completed", mode=mode, result_count=len(rows), status="passed")
+    if mode in {"hybrid_bge_dense_rerank", "hybrid_bge_rerank"}:
+        emit("rerank.completed", method=mode, candidate_count=len(rows),
+             result_count=len(rows), status="passed")
+    return rows

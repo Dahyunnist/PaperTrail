@@ -664,7 +664,10 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         paper_key = (row["paper_id"], row["sha256"])
         if key in seen or paper_counts.get(paper_key, 0) >= max_quotes_per_paper:
             continue
-        if not _validate_quote(row["path"], row["sha256"], row["pdf_page"], quote, page_cache):
+        quote_valid = _validate_quote(row["path"], row["sha256"], row["pdf_page"], quote, page_cache)
+        from .trace import emit
+        emit("citation.validated", source_sha256=row["sha256"], page=row["pdf_page"], valid=quote_valid)
+        if not quote_valid:
             continue
         seen.add(key)
         paper_counts[paper_key] = paper_counts.get(paper_key, 0) + 1
@@ -859,10 +862,22 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
 def ask(database: Path, question: str, conversation_id: str | None = None,
         limit: int = 5, mode: str = "bm25", generate: bool = True,
         artifact: Path | None = None, principal_id: str = "local-dev") -> dict[str, Any]:
-    with model_turn_budget() as budget:
-        result = _ask(database, question, conversation_id, limit, mode, generate, artifact, principal_id)
-        result["model_budget"] = {**budget, "reserved_usd": round(budget["reserved_usd"], 8)}
-        return result
+    from .trace import bind_trace, emit, reset_trace
+    token = bind_trace()
+    try:
+        with model_turn_budget() as budget:
+            try:
+                result = _ask(database, question, conversation_id, limit, mode, generate, artifact, principal_id)
+            except Exception:
+                if generate:
+                    emit("generation.completed", status="failed")
+                raise
+            result["model_budget"] = {**budget, "reserved_usd": round(budget["reserved_usd"], 8)}
+            if result.get("model_name"):
+                emit("generation.completed", model_id=result["model_name"], status="passed")
+            return result
+    finally:
+        reset_trace(token)
 
 
 def _add_usage(left: dict[str, Any] | None, right: dict[str, Any] | None) -> dict[str, Any]:

@@ -138,8 +138,13 @@ def label_evidence(database: Path, evidence_id: str, label: str,
         if cursor.rowcount != 1:
             raise ValueError("找不到该比较证据")
         conn.commit()
-        return dict(conn.execute("SELECT * FROM comparison_evidence WHERE evidence_id=?",
-                                 (evidence_id,)).fetchone())
+        result = dict(conn.execute("SELECT * FROM comparison_evidence WHERE evidence_id=?",
+                                   (evidence_id,)).fetchone())
+        import hashlib
+        from .trace import emit
+        emit("human.reviewed", label=label,
+             evidence_id_hash=hashlib.sha256(evidence_id.encode()).hexdigest())
+        return result
     finally:
         conn.close()
 

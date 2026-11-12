@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from typing import Any
 
 EVENT_NAMES = {"retrieval.completed", "rerank.completed", "generation.completed",
@@ -34,7 +35,7 @@ def validate_manifest(row: dict[str, Any]) -> list[str]:
             issues.append(f"invalid:{key}")
     if row.get("prompt_sha256") is not None and (not isinstance(row["prompt_sha256"], str) or not SHA256.fullmatch(row["prompt_sha256"])):
         issues.append("invalid:prompt_sha256")
-    if row.get("cost_usd") is not None and (not isinstance(row["cost_usd"], (int, float)) or row["cost_usd"] < 0):
+    if row.get("cost_usd") is not None and (not isinstance(row["cost_usd"], (int, float)) or isinstance(row["cost_usd"], bool) or row["cost_usd"] < 0):
         issues.append("invalid:cost_usd")
     if row.get("gold_source") != "synthetic_fixture":
         issues.append("synthetic run must declare gold_source=synthetic_fixture")
@@ -50,6 +51,27 @@ def validate_manifest(row: dict[str, Any]) -> list[str]:
         issues.append("runtime provenance missing or invalid")
     if not isinstance(row.get("budget"), dict) or not {"cap_usd", "spent_usd", "status"} <= row["budget"].keys():
         issues.append("budget fields missing")
+    git_sha = row.get("git_sha")
+    if not isinstance(git_sha, str) or not re.fullmatch(r"[0-9a-f]{7,40}", git_sha):
+        issues.append("invalid:git_sha")
+    if not isinstance(row.get("split"), str) or not row["split"].strip():
+        issues.append("invalid:split")
+    if row.get("status") not in {"passed", "failed", "blocked"}:
+        issues.append("invalid:status")
+    for key in ("started_at", "completed_at"):
+        value = row.get(key)
+        try:
+            if not isinstance(value, str):
+                raise ValueError
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            issues.append(f"invalid:{key}")
+    budget = row.get("budget")
+    if isinstance(budget, dict):
+        for key in ("cap_usd", "spent_usd"):
+            value = budget.get(key)
+            if value is not None and (not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0):
+                issues.append(f"invalid:budget.{key}")
     issues.extend(_privacy_issues(row))
     return issues
 

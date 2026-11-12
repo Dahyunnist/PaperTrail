@@ -23,6 +23,9 @@ def test_shared_synthetic_manifests_and_traces_validate():
     assert len(manifests) == 2
     assert all(validate_manifest(row) == [] for row in manifests)
     assert all(validate_trace_event(row) == [] for row in traces)
+    assert {row["event_name"] for row in traces} == {
+        "retrieval.completed", "rerank.completed", "generation.completed",
+        "citation.validated", "access.checked", "human.reviewed"}
 
 
 def test_manifest_rejects_missing_provenance_and_non_synthetic_values():
@@ -36,6 +39,16 @@ def test_manifest_rejects_missing_provenance_and_non_synthetic_values():
     assert "synthetic run must declare gold_source=synthetic_fixture" in issues
     assert "offline run must declare model_id=null" in issues
     assert "offline run cost_usd must be null" in issues
+
+
+def test_manifest_rejects_invalid_git_split_status_and_budget():
+    row = _manifest() | {"git_sha": "bad", "split": " ", "status": "unknown"}
+    row["budget"] = {"cap_usd": -1, "spent_usd": 0, "status": "ok"}
+    issues = validate_manifest(row)
+    assert "invalid:git_sha" in issues
+    assert "invalid:split" in issues
+    assert "invalid:status" in issues
+    assert "invalid:budget.cap_usd" in issues
 
 
 def test_manifest_and_trace_reject_secrets_paths_prompts_and_text():
