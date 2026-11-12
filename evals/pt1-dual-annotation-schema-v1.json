@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PT-1 independent offline annotation record v1",
+  "type": "object",
+  "required": ["task_id", "annotator_id", "independent", "doi", "pdf_sha256", "question", "answerability", "expected_answer", "minimum_complete_evidence_set", "evidence"],
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "annotator_id": {"type": "string", "minLength": 1},
+    "independent": {"const": true},
+    "doi": {"type": "string", "pattern": "^10\\."},
+    "pdf_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "question": {"type": "string", "minLength": 1},
+    "answerability": {"enum": ["answerable", "unanswerable", "ambiguous"]},
+    "expected_answer": {"type": "string", "minLength": 1, "description": "For unanswerable questions, state a refusal rationale."},
+    "minimum_complete_evidence_set": {"const": true, "description": "Human attestation that listed evidence is sufficient and minimal."},
+    "evidence": {"type": "array", "items": {
+      "type": "object",
+      "required": ["doi", "pdf_sha256", "pdf_page", "start_char", "end_char", "quote", "relation"],
+      "properties": {
+        "doi": {"type": "string", "pattern": "^10\\."},
+        "pdf_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "pdf_page": {"type": "integer", "minimum": 1},
+        "start_char": {"type": "integer", "minimum": 0},
+        "end_char": {"type": "integer", "minimum": 1},
+        "quote": {"type": "string", "minLength": 1},
+        "relation": {"enum": ["supports", "contradicts", "context"]}
+      },
+      "additionalProperties": false
+    }}
+  },
+  "additionalProperties": false
+}
