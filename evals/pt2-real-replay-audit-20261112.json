@@ -1,0 +1,20 @@
+{
+  "scope": "historical report audit only; no local index, PDF, model, or .env read",
+  "dataset": "P9 historical real-paper set; not PT2 synthetic fixture",
+  "full_qa_replayable_from_committed_artifacts": false,
+  "retrieval_replay": "code path is offline, but exact historical database/vector artifacts are not included in tracked inputs; not replayed",
+  "model_qa_replay": "not replayed; historical run used model generation and current shared ledger gate is closed",
+  "historical_answered": 5,
+  "historical_answerable_questions": 27,
+  "historical_correct_abstentions": 3,
+  "historical_unanswered_answerable": 22,
+  "human_review_of_five_answers": {"correct": 4, "partial": 1, "incorrect": 0},
+  "incorrect_refusal_attribution": {
+    "total": 22,
+    "evidence_organization": 1,
+    "generation_or_review": 21,
+    "generation_empty_claims": 16,
+    "output_length_limit": 5
+  },
+  "interpretation": "historical development result only; not reproduced and not evidence of improvement"
+}
