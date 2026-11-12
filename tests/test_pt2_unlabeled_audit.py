@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import fitz
+from papertrail.qa import _validate_quote
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("audit_pt2_unlabeled_retrieval", ROOT / "scripts/audit_pt2_unlabeled_retrieval.py")
@@ -16,11 +17,18 @@ def test_unlabeled_audit_rebuilds_synthetic_bm25_and_omits_text(tmp_path):
     source_dir.mkdir()
     source = source_dir / "only-synthetic.pdf"
     doc = fitz.open()
-    page = doc.new_page()
-    page.insert_text((40, 60), "Synthetic Audit Study")
-    page.insert_text((40, 100), "amber-only-synthetic-marker supports local BM25 retrieval audit.")
+    first_page = doc.new_page()
+    first_page.insert_text((40, 60), "Synthetic Audit Study")
+    first_page.insert_text((40, 100), "This distractor page has no target retrieval marker.")
+    target_page = doc.new_page()
+    target_page.insert_text((40, 60), "Evidence Location Replay")
+    target_page.insert_text((40, 100), "amber-only-synthetic-marker supports local BM25 retrieval audit.")
     doc.save(source)
     doc.close()
+    with fitz.open(source) as indexed_pdf:
+        target_text = indexed_pdf[1].get_text("text")
+    quote = "amber-only-synthetic-marker supports local BM25 retrieval audit."
+    span_start = target_text.index(quote)
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     config = tmp_path / "sources.yaml"
     config.write_text(f"roots:\n  - id: fixture\n    path: {source_dir.as_posix()}\n    kinds: [pdf]\n", encoding="utf-8")
@@ -34,10 +42,16 @@ def test_unlabeled_audit_rebuilds_synthetic_bm25_and_omits_text(tmp_path):
     output = tmp_path / "audit.json"
 
     report = audit.run(tmp_path / "audit.sqlite3", config, selection, queries, output)
+    replay = audit.run(tmp_path / "replay.sqlite3", config, selection, queries, tmp_path / "replay.json")
     serialized = output.read_text(encoding="utf-8")
     assert report["run_type"] == "unlabeled_retrieval_audit"
     assert report["gold_metrics"] is None and report["model_id"] is None and report["cost_usd"] is None
     assert report["results"][0]["candidate_count"] > 0
+    assert report["results"] == replay["results"]
+    hit = report["results"][0]["hits"][0]
+    assert hit["document_sha256"] == digest and hit["pdf_page"] == 2
+    assert _validate_quote(str(source), digest, hit["pdf_page"], quote, {})
+    assert target_text[span_start:span_start + len(quote)] == quote
     assert "amber-only-synthetic-marker" not in serialized
     assert str(source_dir) not in serialized
     assert "Synthetic Audit Study" not in serialized

@@ -10,6 +10,8 @@
 .\.venv\Scripts\python.exe scripts/audit_pt2_unlabeled_retrieval.py --database .local/pt2-authorized.sqlite3 --sources <本地授权来源配置.yaml> --selection <冻结选择清单.jsonl> --queries <不含答案的查询集.jsonl> --output .local/pt2-unlabeled-audit.json --limit 10
 ```
 
+本轮另加可重复的 synthetic-only 定位回放：测试临时造一份两页 PDF，目标词只在第 2 页出现；在两个新 SQLite 索引上分别跑固定 BM25 查询，比较命中列表，并用来源 SHA、物理页和精确 span 验证目标引文。报告仍不含 query 正文、原文或路径；不计算 gold 指标，也不代表真实文献质量。
+
 真实 PT2 旧脚本 `scripts/evaluate_pt1_local.py` 需要 `.local/pt1-real-dev-gold.jsonl`、`.local/pt1-real-dev-manifest.json`、`.local/papertrail-expanded-s1.sqlite3`、向量文件和来源配置；还会逐题验证 gold 引文并打开 PDF。因此本轮没有运行。此前文档记录的 8 题完整证据覆盖为 BM25 4/8、向量 1/8、RRF 4/8；失败为 PT1-02 至 PT1-05 的至少一个必要证据缺失。该数值是历史结果，没有本轮复现。
 
 要计算可答题 Recall 或完整证据集合率，用户还需提供逐题冻结 gold：问题、question ID、每条必需引文的来源 SHA、物理页和精确短引文；gold 必须由人工核对。没有它时保留 unlabeled 状态。
