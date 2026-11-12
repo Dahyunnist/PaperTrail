@@ -89,7 +89,7 @@ def _parser() -> argparse.ArgumentParser:
     web_parser.add_argument("--selection", type=Path, help="明确选择的 PDF/笔记清单")
     web_parser.add_argument("--port", type=int, default=5000)
 
-    mcp_parser = commands.add_parser("mcp", help="以只读 MCP stdio 服务暴露论文证据")
+    mcp_parser = commands.add_parser("mcp", help="以本机单用户只读 MCP stdio 服务暴露论文证据")
     mcp_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
 
     rate_parser = commands.add_parser("trajectory-rate", help="为 QA 轨迹记录人工结果评分")

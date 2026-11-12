@@ -94,6 +94,13 @@ def _authorized_document(database: Path, sha256: str, principal: Principal
         conn.close()
 
 
+def _source_matches_sha(path: Path, sha256: str) -> bool:
+    if not path.is_file():
+        return False
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest() == sha256
+
+
 def read_evidence(database: Path, sha256: str, page_number: int,
                   principal: Principal) -> dict[str, Any]:
     if (not isinstance(sha256, str) or not re.fullmatch(r"[a-fA-F0-9]{64}", sha256)
@@ -109,11 +116,7 @@ def read_evidence(database: Path, sha256: str, page_number: int,
     emit("access.checked", operation="read_evidence", allowed=True,
          principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
     metadata, path = match
-    if not path.is_file():
-        raise ValueError("source file changed or is unavailable")
-    with path.open("rb") as stream:
-        actual_hash = hashlib.file_digest(stream, "sha256").hexdigest()
-    if actual_hash != sha256.lower():
+    if not _source_matches_sha(path, sha256.lower()):
         raise ValueError("source file changed or is unavailable")
     import pymupdf
     with pymupdf.open(path) as doc:
@@ -128,6 +131,8 @@ def document_metadata(database: Path, sha256: str, principal: Principal) -> dict
     match = _authorized_document(database, sha256, principal)
     if not match:
         raise ValueError("original paper not found")
-    metadata, _ = match
+    metadata, path = match
+    if not _source_matches_sha(path, sha256.lower()):
+        raise ValueError("source file changed or is unavailable")
     return {"sha256": metadata["sha256"], "title": metadata["title_candidate"],
             "page_count": metadata["page_count"], "parse_status": metadata["parse_status"]}

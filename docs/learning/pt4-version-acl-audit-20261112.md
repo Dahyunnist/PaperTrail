@@ -4,15 +4,15 @@
 
 ## 结果
 
-- 原 PDF 内容更新后，旧 SHA 从索引移除；旧页 citation 经 `read_evidence` 返回 `original paper not found`。重新登记新 SHA 后，新版本可读。
-- PDF 删除后，reconcile 移除来源位置、版本和检索块；旧 SHA 不再出现在该 owner 的检索结果中，MCP 直接读取报错，HTTP 返回 404。
+- 原 PDF 内容更新后，即使索引尚未 reconcile，文档元数据和页资源都因当前文件 SHA 不匹配而拒绝；reconcile 后旧 SHA 从索引移除。重新登记新 SHA 后，新版本可读。
+- PDF 删除后，reconcile 移除来源位置、版本和检索块；旧 SHA 不再出现在该 owner 的检索结果中，MCP 工具直读、`papertrail://documents/{sha}` 元数据资源和 `papertrail://evidence/{sha}/{page}` 页资源均拒绝，HTTP 返回 404。
 - 跨集合搜索由 `search_papers` 在查询时按 collection owner 过滤；直读由 `read_evidence` 使用同一 Principal 和 owner 联接校验。既有回归覆盖 HTTP、MCP 搜索、MCP 工具/资源直读和伪造请求体 user_id。
-- 代码审计与合成测试未发现缺陷；新增测试把更新/删除后的失效行为固定下来。
+- 新增资源 URI 负例：跨 owner 的元数据和页资源读取均拒绝；来源更新或删除后、索引同步前，旧 SHA 的两类资源也失效；reconcile 后旧记录继续不可读。
 
-定向验证：`tests/test_access_control.py`，**6 passed**。
+定向验证：`tests/test_access_control.py`、`tests/test_mcp_server.py`、`tests/test_s5_web.py`，**12 passed**。
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .tmp/pytest-pt4-acl tests/test_access_control.py
+.\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .tmp/pytest-pt4-acl-regression tests/test_access_control.py tests/test_mcp_server.py tests/test_s5_web.py
 ```
 
-不代表生产身份认证、多租户部署或真实文献质量已验证。跨集合安全依赖部署层正确注入 Principal；本地测试直接构造 Principal。
+本机 MCP stdio 固定使用 `local-dev`，没有调用方身份认证；当前明确按单用户本机服务运行，不宣称多租户支持。嵌入式调用的集合隔离测试直接构造不同 Principal；生产身份认证及可信 Principal 注入仍待部署集成。真实文献质量未在此验证。

@@ -1,4 +1,4 @@
-"""Read-only MCP stdio server for PaperTrail evidence."""
+"""Single-user local read-only MCP stdio server; no caller authentication is provided."""
 
 from __future__ import annotations
 

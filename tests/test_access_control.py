@@ -7,7 +7,7 @@ import yaml
 
 from papertrail.access import (Principal, assign_version_to_collection, create_collection,
                                authorized_version_ids, read_evidence, search_papers)
-from papertrail.mcp_server import _call, handle
+from papertrail.mcp_server import _call, _resource_list, handle
 from papertrail.s1_index import index_selection, open_database
 from papertrail.web import create_app
 
@@ -87,6 +87,24 @@ def test_http_and_mcp_share_acl_and_http_ignores_body_user_id(tmp_path):
     assert mcp_resource["error"]["code"] == -32602
 
 
+def test_mcp_direct_resources_enforce_collection_acl(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    foreign_sha = rows[0]["sha256"]
+    own_sha = rows[1]["sha256"]
+    principal = Principal("user-b")
+    assert {item["uri"] for item in _resource_list(database, principal)} == {
+        f"papertrail://documents/{own_sha}"}
+
+    for uri in (f"papertrail://documents/{foreign_sha}",
+                f"papertrail://evidence/{foreign_sha}/1"):
+        response = handle(database, {"jsonrpc": "2.0", "id": 11,
+                                     "method": "resources/read", "params": {"uri": uri}}, principal)
+        assert response["error"]["code"] == -32602
+    own = handle(database, {"jsonrpc": "2.0", "id": 12, "method": "resources/read",
+                            "params": {"uri": f"papertrail://evidence/{own_sha}/1"}}, principal)
+    assert "beta-only-needle" in own["result"]["contents"][0]["text"]
+
+
 def test_default_single_user_principal_keeps_existing_local_library_access(tmp_path):
     database, rows = _indexed_library(tmp_path)
     app = create_app(database)
@@ -153,6 +171,10 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
     page.insert_text((40, 100), "alpha revised-only evidence appears in this updated synthetic source.")
     replacement.save(alpha)
     replacement.close()
+    stale_before_reconcile = handle(database, {"jsonrpc": "2.0", "id": 20,
+                                               "method": "resources/read",
+                                               "params": {"uri": f"papertrail://documents/{old_alpha_sha}"}})
+    assert stale_before_reconcile["error"]["code"] == -32602
     stale = index_selection(database, config, selection, reconcile=True)
     assert any(issue["issue"] == "source_missing_or_changed" for issue in stale["issues"])
     assert old_alpha_sha not in {row["sha256"] for row in search_papers(
@@ -163,6 +185,11 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
         assert str(exc) == "original paper not found"
     else:
         raise AssertionError("updated source left old citation readable")
+    for uri in (f"papertrail://documents/{old_alpha_sha}",
+                f"papertrail://evidence/{old_alpha_sha}/1"):
+        stale_resource = handle(database, {"jsonrpc": "2.0", "id": 21,
+                                           "method": "resources/read", "params": {"uri": uri}})
+        assert stale_resource["error"]["code"] == -32602
 
     new_alpha_sha = hashlib.sha256(alpha.read_bytes()).hexdigest()
     selected_rows = [dict(rows[1]), dict(rows[0], sha256=new_alpha_sha)]
@@ -172,6 +199,12 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
         database, new_alpha_sha, 1, Principal("local-dev"))["text"]
 
     beta.unlink()
+    for uri in (f"papertrail://documents/{beta_sha}",
+                f"papertrail://evidence/{beta_sha}/1"):
+        stale_deleted_source = handle(database, {"jsonrpc": "2.0", "id": 30,
+                                                 "method": "resources/read", "params": {"uri": uri}},
+                                      Principal("user-b"))
+        assert stale_deleted_source["error"]["code"] == -32602
     deleted = index_selection(database, config, selection, reconcile=True)
     assert any(issue["issue"] == "source_missing_or_changed" for issue in deleted["issues"])
     assert beta_sha not in {row["sha256"] for row in search_papers(
@@ -180,6 +213,12 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
                                  "params": {"name": "get_evidence", "arguments": {
                                      "sha256": beta_sha, "page": 1}}}, Principal("user-b"))
     assert mcp_read["result"]["isError"] is True
+    for uri in (f"papertrail://documents/{beta_sha}",
+                f"papertrail://evidence/{beta_sha}/1"):
+        deleted_resource = handle(database, {"jsonrpc": "2.0", "id": 31,
+                                             "method": "resources/read", "params": {"uri": uri}},
+                                  Principal("user-b"))
+        assert deleted_resource["error"]["code"] == -32602
     client = create_app(database).test_client()
     assert client.get(f"/api/evidence/{beta_sha}/1",
                       environ_overrides={"papertrail.principal": Principal("user-b")}).status_code == 404
