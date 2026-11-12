@@ -37,6 +37,7 @@ def _fixture(tmp_path, monkeypatch):
         "local_pdf": "synthetic.pdf", "pdf_sha256": digest}]}), encoding="utf-8")
     base = {"task_id": "PT1-H001", "independent": True, "doi": "10.9999/synthetic",
             "pdf_sha256": digest, "question": "How many people were enrolled?",
+            "question_type": "fact_location",
             "answerability": "answerable", "expected_answer": "12 people.",
             "minimum_complete_evidence_set": True,
             "evidence": [{"doi": "10.9999/synthetic", "pdf_sha256": digest, "pdf_page": 1,
@@ -59,16 +60,37 @@ def test_two_independent_annotations_validate_but_are_not_gold(tmp_path, monkeyp
     assert "expected_answer" not in report[0]
 
 
+def test_validator_accepts_the_two_fillable_csv_exports(tmp_path, monkeypatch):
+    _, tasks, manifest, rows, _ = _fixture(tmp_path, monkeypatch)
+    csv_paths = []
+    fields = sorted(validator.REQUIRED | {"question_type"})
+    for row in rows:
+        path = tmp_path / f"{row['annotator_id']}.csv"
+        csv_row = dict(row)
+        csv_row["independent"] = "true"
+        csv_row["minimum_complete_evidence_set"] = "true"
+        csv_row["evidence"] = json.dumps(csv_row["evidence"])
+        with path.open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=fields)
+            writer.writeheader()
+            writer.writerow(csv_row)
+        csv_paths.append(path)
+    issues, report = validator.validate(csv_paths, tasks, manifest)
+    assert issues == []
+    assert report[0]["status"] == "agreement_pending_final_review"
+
+
 def test_disagreement_is_pending_adjudication_without_merging_answers(tmp_path, monkeypatch):
     annotations, tasks, manifest, rows, _ = _fixture(tmp_path, monkeypatch)
     rows[1]["answerability"] = "unanswerable"
+    rows[1]["question_type"] = "unanswerable"
     rows[1]["expected_answer"] = "The report is not stated."
     rows[1]["evidence"] = []
     annotations.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
     issues, report = validator.validate(annotations, tasks, manifest)
     assert issues == []
     assert report[0]["status"] == "pending_adjudication"
-    assert {"answerability", "expected_answer", "minimum_evidence_set"} <= set(report[0]["conflicts"])
+    assert {"answerability", "expected_answer", "question_type", "minimum_evidence_set"} <= set(report[0]["conflicts"])
     assert "answer" not in report[0] and "expected_answer" not in report[0]
 
 

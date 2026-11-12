@@ -10,6 +10,7 @@
     "doi": {"type": "string", "pattern": "^10\\."},
     "pdf_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "question": {"type": "string", "minLength": 1},
+    "question_type": {"enum": ["fact_location", "method_comparison", "cross_paper", "multi_hop", "conflict", "unanswerable"]},
     "answerability": {"enum": ["answerable", "unanswerable", "ambiguous"]},
     "expected_answer": {"type": "string", "minLength": 1, "description": "For unanswerable questions, state a refusal rationale."},
     "minimum_complete_evidence_set": {"const": true, "description": "Human attestation that listed evidence is sufficient and minimal."},

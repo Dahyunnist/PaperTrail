@@ -18,6 +18,7 @@ DEFAULT_TASKS = ROOT / "evals/pt1-human-annotation-task-40-20261111.csv"
 DEFAULT_MANIFEST = ROOT / "evals/pt1-candidate-manifest-20261111.json"
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 ANSWERABILITY = {"answerable", "unanswerable", "ambiguous"}
+QUESTION_TYPES = {"fact_location", "method_comparison", "cross_paper", "multi_hop", "conflict", "unanswerable"}
 RELATIONS = {"supports", "contradicts", "context"}
 REQUIRED = {"task_id", "annotator_id", "independent", "doi", "pdf_sha256", "question", "answerability",
             "expected_answer", "minimum_complete_evidence_set", "evidence"}
@@ -28,7 +29,44 @@ def _normal(value: str) -> str:
     return " ".join(unicodedata.normalize("NFKC", value).casefold().split())
 
 
-def validate(annotations_path: Path, tasks_path: Path = DEFAULT_TASKS,
+def _read_annotations(paths: list[Path]) -> tuple[list[dict[str, Any]], list[str]]:
+    rows: list[dict[str, Any]] = []
+    issues: list[str] = []
+    for path in paths:
+        if path.suffix.casefold() == ".csv":
+            with path.open(encoding="utf-8-sig", newline="") as stream:
+                reader = csv.DictReader(stream)
+                if not (REQUIRED | {"question_type"}) <= set(reader.fieldnames or []):
+                    issues.append(f"{path.name}: annotation CSV schema mismatch")
+                    continue
+                for line_no, row in enumerate(reader, 2):
+                    row["independent"] = row.get("independent", "").strip().casefold() == "true"
+                    row["minimum_complete_evidence_set"] = (
+                        row.get("minimum_complete_evidence_set", "").strip().casefold() == "true")
+                    raw_evidence = row.get("evidence", "").strip()
+                    try:
+                        row["evidence"] = json.loads(raw_evidence) if raw_evidence else []
+                    except json.JSONDecodeError:
+                        issues.append(f"{path.name} line {line_no}: invalid evidence JSON")
+                        row["evidence"] = None
+                    rows.append(row)
+        else:
+            for line_no, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
+                if not raw.strip():
+                    continue
+                try:
+                    row = json.loads(raw)
+                except json.JSONDecodeError:
+                    issues.append(f"{path.name} line {line_no}: invalid JSON")
+                    continue
+                if isinstance(row, dict):
+                    rows.append(row)
+                else:
+                    issues.append(f"{path.name} line {line_no}: record must be an object")
+    return rows, issues
+
+
+def validate(annotations_path: Path | list[Path], tasks_path: Path = DEFAULT_TASKS,
              manifest_path: Path = DEFAULT_MANIFEST) -> tuple[list[str], list[dict[str, Any]]]:
     issues: list[str] = []
     tasks: dict[str, dict[str, str]] = {}
@@ -72,17 +110,13 @@ def validate(annotations_path: Path, tasks_path: Path = DEFAULT_TASKS,
             source_cache[doi] = None
         return source_cache[doi]
 
+    annotation_paths = annotations_path if isinstance(annotations_path, list) else [annotations_path]
+    annotation_rows, input_issues = _read_annotations(annotation_paths)
+    issues.extend(input_issues)
     try:
-        for line_no, raw in enumerate(annotations_path.read_text(encoding="utf-8-sig").splitlines(), 1):
-            if not raw.strip():
-                continue
-            try:
-                row = json.loads(raw)
-            except json.JSONDecodeError:
-                issues.append(f"line {line_no}: invalid JSON")
-                continue
-            if not isinstance(row, dict) or REQUIRED - row.keys():
-                issues.append(f"line {line_no}: missing required annotation fields")
+        for line_no, row in enumerate(annotation_rows, 1):
+            if REQUIRED - row.keys():
+                issues.append(f"annotation {line_no}: missing required annotation fields")
                 continue
             task_id, annotator_id = row["task_id"], row["annotator_id"]
             if not isinstance(task_id, str) or task_id not in tasks:
@@ -115,6 +149,13 @@ def validate(annotations_path: Path, tasks_path: Path = DEFAULT_TASKS,
             answerability = row["answerability"]
             if not isinstance(answerability, str) or answerability not in ANSWERABILITY:
                 issues.append(f"{prefix}: invalid answerability")
+            question_type = row.get("question_type")
+            if question_type is not None:
+                if not isinstance(question_type, str) or question_type not in QUESTION_TYPES:
+                    issues.append(f"{prefix}: invalid question_type")
+                elif ((answerability == "unanswerable") != (question_type == "unanswerable")
+                      and answerability in {"answerable", "unanswerable"}):
+                    issues.append(f"{prefix}: question_type must match answerability")
             expected = row["expected_answer"]
             if not isinstance(expected, str) or not expected.strip():
                 issues.append(f"{prefix}: expected_answer or refusal rationale required")
@@ -189,6 +230,10 @@ def validate(annotations_path: Path, tasks_path: Path = DEFAULT_TASKS,
                 values = {_normal(row[field]) if isinstance(row.get(field), str) else "" for row in annotations}
                 if len(values) > 1:
                     conflicts.add(field)
+            if all("question_type" in row for row in annotations):
+                question_types = {row.get("question_type") for row in annotations}
+                if len(question_types) > 1:
+                    conflicts.add("question_type")
             evidence_sets = {tuple(sorted(json.dumps(item, ensure_ascii=False, sort_keys=True, default=str)
                                           for item in row.get("evidence", []) if isinstance(item, dict)))
                              for row in annotations}
@@ -203,7 +248,7 @@ def validate(annotations_path: Path, tasks_path: Path = DEFAULT_TASKS,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("annotations", type=Path, help="双人独立标注 JSONL")
+    parser.add_argument("annotations", nargs="+", type=Path, help="两份独立填写 CSV，或已有 JSONL")
     parser.add_argument("--tasks", type=Path, default=DEFAULT_TASKS)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--report", type=Path, help="可选：写出不含答案和引文的仲裁状态 JSONL")
