@@ -76,3 +76,7 @@ PT-2 离线代码缺口：语义检索的 BGE 与去重页路径在 `limit=0` �
 ## PT-2 原始 7/10 失败审计
 
 对 PT9-03、PT9-05、PT12-05 的原始追踪、单路候选与RRF页结果审计见 `docs/learning/pt2-parent-page-diagnostic-20261111.md`。全局子块RRF截断是共性瓶颈。可选父段/页聚合回归命中 PT9-05 一页；PT9-03 与 PT12-05 仍未完整覆盖。历史结果保持 7/10。
+
+## PT2/PT4 共享合成运行规范
+
+PT2 与 PT4 合成评测现统一使用 run manifest v1 和脱敏 trace。字段、SHA、预算、运行时、隐私约束与回归见 `docs/learning/synthetic-run-manifest-v1-20261112.md`。
