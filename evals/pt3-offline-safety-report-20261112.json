@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-12",
+  "scope": "synthetic fixtures only; no private PDFs, source manifests, .env, or external model calls",
+  "fixture_source": "tests/test_s3.py runtime-generated PyMuPDF PDFs",
+  "model_calls": 0,
+  "test_command": ".\\.venv\\Scripts\\python.exe -m pytest -q -p no:cacheprovider --basetemp .tmp/pytest-pt3 tests/test_s3.py tests/test_p13_regressions.py",
+  "test_result": {"passed": 41, "failed": 0},
+  "checks": {
+    "partial_answer_retains_supported_claims_and_logs_gaps": "passed",
+    "claim_citation_maps_source_version_page_and_exact_span": "passed",
+    "unsupported_claim_is_rejected": "passed",
+    "bad_source_hash_is_rejected": "passed",
+    "bad_page_number_is_rejected": "passed",
+    "ocr_derived_citation_is_rejected": "passed",
+    "subquestion_evidence_slot_mismatch_is_rejected": "passed"
+  },
+  "conclusion": "mocked offline safety-path verification only; no claim about real-world answer quality"
+}
