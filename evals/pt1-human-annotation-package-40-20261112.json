@@ -1,0 +1,807 @@
+{
+  "schema_version": 1,
+  "package_id": "PT1-human-minimal-40-v1",
+  "gold_status": "pending_human_annotation",
+  "tasks": [
+    {
+      "task_id": "PT1-H001",
+      "source_id": "pt1pdf-527fc8f7054f80b2",
+      "pdf_sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+      "question": "What practice does the paper recommend under ‘Statistical Methods Should Enable Data to Answer’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H002",
+      "source_id": "pt1pdf-002081be65fbd42c",
+      "pdf_sha256": "002081be65fbd42c0356d3e49ac7f49fa6202f566f50341481ead22d3cce78b2",
+      "question": "What practice does the paper recommend under ‘Use version control’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H003",
+      "source_id": "pt1pdf-ed60d4b71c36d650",
+      "pdf_sha256": "ed60d4b71c36d650757c7adfe1d52afb5b6b125b7b747f74f79d5ad80e94c017",
+      "question": "What are the paper’s main recommendations about ‘Good enough practices in scientific computing’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H004",
+      "source_id": "pt1pdf-7a9dca63168f3069",
+      "pdf_sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+      "question": "What practice does the paper recommend under ‘Provide an overview, then quote the full set of reviews’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H005",
+      "source_id": "pt1pdf-030137d7ea8d31c1",
+      "pdf_sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+      "question": "What practice does the paper recommend under ‘Check your data for plausibility’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H006",
+      "source_id": "pt1pdf-c2b50ad022577a95",
+      "pdf_sha256": "c2b50ad022577a957672622dec9ae0ad7ab746ef38a04ab051f007814fb76e7d",
+      "question": "What practice does the paper recommend under ‘Write comments as you code’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H007",
+      "source_id": "pt1pdf-30af1629e0fe31b5",
+      "pdf_sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+      "question": "What practice does the paper recommend under ‘Tell a story for an audience’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H008",
+      "source_id": "pt1pdf-f608cdf588ac44ef",
+      "pdf_sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+      "question": "What practice does the paper recommend under ‘Get the basics right’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H009",
+      "source_id": "pt1pdf-67cdeb70bbb0697d",
+      "pdf_sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+      "question": "What practice does the paper recommend under ‘Integrate ethical principles’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H010",
+      "source_id": "pt1pdf-af8b3122f5f85e87",
+      "pdf_sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+      "question": "What practice does the paper recommend under ‘Get your ship together: Structure the fundamentals of your’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H011",
+      "source_id": "pt1pdf-fb6cf1880a44b5c6",
+      "pdf_sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+      "question": "What practice does the paper recommend under ‘Develop reflexive habits’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H012",
+      "source_id": "pt1pdf-0be11b02dd8e7631",
+      "pdf_sha256": "0be11b02dd8e7631d0c1ee7ca41c9ab36c44d8e98289080bb1a9fa45aa4a3344",
+      "question": "What practice does the paper recommend under ‘Identify your topic’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H013",
+      "source_id": "pt1pdf-2f0758d577a8d09d",
+      "pdf_sha256": "2f0758d577a8d09dbf45dc0c370ab303a2978858e0e2c0a0b979755c39f308bc",
+      "question": "What practice does the paper recommend under ‘Don’t reinvent the wheel’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H014",
+      "source_id": "pt1pdf-7bc4ddf60ed24be4",
+      "pdf_sha256": "7bc4ddf60ed24be41d5b3337de2a4c1294a8295e1f2ecc798806326c36e3cde8",
+      "question": "What practice does the paper recommend under ‘Decide what level of access you can provide’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H015",
+      "source_id": "pt1pdf-53e867793aa1f3a7",
+      "pdf_sha256": "53e867793aa1f3a710004ee3c10346b4c1b8e2e5fdf9abfdf700ec3d3e09cbb1",
+      "question": "What practice does the paper recommend under ‘Start with a research question before data collection’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H016",
+      "source_id": "pt1pdf-98d6d1458eac6b88",
+      "pdf_sha256": "98d6d1458eac6b88fc8f8fd8e376ad1707e053f205db2b71e4a35ecdc2f09f4e",
+      "question": "What practice does the paper recommend under ‘Set a vision for diversity and inclusion’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H017",
+      "source_id": "pt1pdf-ad4f59ea9b8fa694",
+      "pdf_sha256": "ad4f59ea9b8fa6941db4184ea8b648c099ce55c3db57943206b613a90962d30a",
+      "question": "What practice does the paper recommend under ‘Structure, structure, and structure some more!’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H018",
+      "source_id": "pt1pdf-3e88c105c0292a07",
+      "pdf_sha256": "3e88c105c0292a07c3dcc32872c6f2acfe865173aebd757dded9874b0ae2dc2a",
+      "question": "What are the paper’s main recommendations about ‘A simple kit to use computational notebooks for more openness, reproducibility, and productivity in research’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H019",
+      "source_id": "pt1pdf-629c33befe0160b0",
+      "pdf_sha256": "629c33befe0160b0cb463799af659a35fdf49203720f55bd0371bef4d55fe073",
+      "question": "What practice does the paper recommend under ‘Everything is connected’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H020",
+      "source_id": "pt1pdf-22a5065918ae639b",
+      "pdf_sha256": "22a5065918ae639b88a4bfb58e3b634c98f406340fc199448feacea6c992f1ed",
+      "question": "What practice does the paper recommend under ‘Identify a community in need of connection’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H021",
+      "source_id": "pt1pdf-91f24205d1559622",
+      "pdf_sha256": "91f24205d15596227407fc5ade92c71d37c86dd1fc589b8dc1d64d7c7dd38ed0",
+      "question": "What practice does the paper recommend under ‘Use public biological data purposefully in your research’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H022",
+      "source_id": "pt1pdf-950c43a35649934f",
+      "pdf_sha256": "950c43a35649934f2375e745c792a599225e0838e9fc1527c3df5829c9b3877f",
+      "question": "What practice does the paper recommend under ‘Abide by local legal and regulatory data protection requirements’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H023",
+      "source_id": "pt1pdf-34466c3a60a65117",
+      "pdf_sha256": "34466c3a60a651172a015a948148b063e627ab288438d0b4897241d3515dd303",
+      "question": "What practice does the paper recommend under ‘AU : Pleaseconfirmthatallheadinglevelsarerepresentedcorrectly’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H024",
+      "source_id": "pt1pdf-e887af39e1982b7e",
+      "pdf_sha256": "e887af39e1982b7e164100bf591409340fdbed78153fc11f8a04696518123122",
+      "question": "What practice does the paper recommend under ‘Determine if your computable knowledge is appropriate for’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H025",
+      "source_id": "pt1pdf-f8e2af70e3999231",
+      "pdf_sha256": "f8e2af70e399923198b253109e255d3a818f732ce97dbd5092cf7c6accead567",
+      "question": "What practice does the paper recommend under ‘Explicitly consider ways in which your research findings’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H026",
+      "source_id": "pt1pdf-176e2321b47a2cf1",
+      "pdf_sha256": "176e2321b47a2cf1c726372eafeb24f47b73e9b3d75c91c98545af4dcc5835b5",
+      "question": "What practice does the paper recommend under ‘Design your validation data to include sufficient problems of’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H027",
+      "source_id": "pt1pdf-fd90106cc19e5a58",
+      "pdf_sha256": "fd90106cc19e5a587bf0355822563d1681cf556eaaa92373823d0e84c6a9230e",
+      "question": "What practice does the paper recommend under ‘Measure resource accessibility’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H028",
+      "source_id": "pt1pdf-0b21626f7223a66c",
+      "pdf_sha256": "0b21626f7223a66c7edc4628cd883a568e411067745afc3f055683f4b9643445",
+      "question": "What practice does the paper recommend under ‘Establish programming learning objectives’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H029",
+      "source_id": "pt1pdf-6992aafd1be44a31",
+      "pdf_sha256": "6992aafd1be44a31c70d1dc080691d75eb9cfe50470ad686b65df6143f6b6871",
+      "question": "What are the paper’s main recommendations about ‘Ten simple rules for responsible use of AI and LLMs in computational biology’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H030",
+      "source_id": "pt1pdf-2aa23da30ca26e61",
+      "pdf_sha256": "2aa23da30ca26e61ecff0389045f2f04110f093343b60312144211037b20baa4",
+      "question": "What are the paper’s main recommendations about ‘Workflow for detecting biomedical articles with underlying open and restricted-access datasets’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H031",
+      "source_id": "pt1pdf-527fc8f7054f80b2",
+      "pdf_sha256": "527fc8f7054f80b2a2fd277afb9a1ea7ada2f96659140764729adf12a78d00ad",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Signals Always Come with Noise’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H032",
+      "source_id": "pt1pdf-002081be65fbd42c",
+      "pdf_sha256": "002081be65fbd42c0356d3e49ac7f49fa6202f566f50341481ead22d3cce78b2",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Document your code and usage’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H033",
+      "source_id": "pt1pdf-7a9dca63168f3069",
+      "pdf_sha256": "7a9dca63168f30698b05742a99f61d5b3b87cf33a01e374b702c8fc22dbfbfbf",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Be polite and respectful of all reviewers’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H034",
+      "source_id": "pt1pdf-030137d7ea8d31c1",
+      "pdf_sha256": "030137d7ea8d31c1004976b005d9817f4cefcf686f8ae8acc8472964ec98a816",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Track your sources’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H035",
+      "source_id": "pt1pdf-c2b50ad022577a95",
+      "pdf_sha256": "c2b50ad022577a957672622dec9ae0ad7ab746ef38a04ab051f007814fb76e7d",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Include examples (and lots of them)’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H036",
+      "source_id": "pt1pdf-30af1629e0fe31b5",
+      "pdf_sha256": "30af1629e0fe31b51a82c8f01c901a0ecc6d13bb61bc601861aeb3d260397910",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Document the process, not just the results’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H037",
+      "source_id": "pt1pdf-f608cdf588ac44ef",
+      "pdf_sha256": "f608cdf588ac44ef34797a4dac35fa2b4da1800ab038b4ccc3453742d709a452",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Keep the right profile’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H038",
+      "source_id": "pt1pdf-67cdeb70bbb0697d",
+      "pdf_sha256": "67cdeb70bbb0697da49ef359b2cce9ac2edd78e5e7b3d294d563e552df61631e",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Involve nonscientists’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H039",
+      "source_id": "pt1pdf-af8b3122f5f85e87",
+      "pdf_sha256": "af8b3122f5f85e877f423e7cff5fbeb4019593945c9c6ad21de56d03cc6f228e",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Set the course of your research’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    },
+    {
+      "task_id": "PT1-H040",
+      "source_id": "pt1pdf-fb6cf1880a44b5c6",
+      "pdf_sha256": "fb6cf1880a44b5c65c9925fc753f36a8032986e01f6ac4a22dd285cf39e1f292",
+      "question": "What quantified outcome did the paper report after applying or evaluating ‘Communicate the project management plan early and often’?",
+      "human_fields": {
+        "question_type": null,
+        "answerability": null,
+        "expected_answer": null,
+        "quote": null,
+        "evidence_pdf_pages": null,
+        "original_pdf_excerpt": null,
+        "span_start_char": null,
+        "span_end_char": null,
+        "annotator": null,
+        "reviewer": null,
+        "review_status": null,
+        "notes": null
+      }
+    }
+  ]
+}

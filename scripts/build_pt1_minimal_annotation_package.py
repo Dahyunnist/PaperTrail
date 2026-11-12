@@ -14,7 +14,7 @@ ANNOTATION_FIELDS = ["question_type", "answerability", "expected_answer", "quote
                      "span_end_char", "annotator", "reviewer", "review_status", "notes"]
 
 
-def build(csv_path: Path, source_manifest_path: Path) -> dict[str, Any]:
+def build(csv_path: Path, source_manifest_path: Path, limit: int | None = None) -> dict[str, Any]:
     manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
     by_sha = {row["pdf_sha256"]: row for row in manifest["sources"]}
     records = []
@@ -31,11 +31,15 @@ def build(csv_path: Path, source_manifest_path: Path) -> dict[str, Any]:
                 "question": row["candidate_question"].strip(),
                 "human_fields": {field: None for field in ANNOTATION_FIELDS},
             })
-    if len(records) != 5:
-        raise ValueError(f"expected exactly five annotation tasks; got {len(records)}")
-    if len({row["task_id"] for row in records}) != 5 or len({row["pdf_sha256"] for row in records}) != 5:
-        raise ValueError("task IDs and source hashes must be unique")
-    return {"schema_version": 1, "package_id": "PT1-human-minimal-5-v1",
+    if limit is not None:
+        if limit not in {5, 40} or len(records) < limit:
+            raise ValueError("limit must be 5 or 40 and not exceed task count")
+        records = records[:limit]
+    if len(records) not in {5, 40}:
+        raise ValueError(f"expected five or forty annotation tasks; got {len(records)}")
+    if len({row["task_id"] for row in records}) != len(records):
+        raise ValueError("task IDs must be unique")
+    return {"schema_version": 1, "package_id": f"PT1-human-minimal-{len(records)}-v1",
             "gold_status": "pending_human_annotation", "tasks": records}
 
 
@@ -44,8 +48,9 @@ def main() -> None:
     parser.add_argument("--csv", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--limit", type=int, choices=(5, 40), help="emit five pilot tasks or full forty-task package")
     args = parser.parse_args()
-    package = build(args.csv, args.manifest)
+    package = build(args.csv, args.manifest, args.limit)
     args.output.write_text(json.dumps(package, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"tasks": len(package["tasks"]), "gold_status": package["gold_status"],
                       "output_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest()}))

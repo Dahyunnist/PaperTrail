@@ -90,3 +90,18 @@ CSV 转 v2 JSONL 由上一节的一条命令完成；导入器不替人推断或
 ```
 
 40题完整批次使用默认门槛，不要传5题门槛。`.local` 输出含本机 PDF 根路径，只保存在本地。导入成功只表示人工记录通过结构和引文校验；不代表模型评测已运行或达到指标。
+
+### 复核与分歧状态
+
+工作副本的 `review_status` 只用 `待复核`、`退回修改`、`分歧待仲裁`、`通过`。标注者先填写问题、题型、可答性、答案或不可答理由。可答题必须填 PDF 物理页码、逐字最短完整引文、含引文的原文上下文和 0-based `[start,end)` span；不可答题必须留空证据字段，并写清已检查的范围。多条引文用 JSON 数组填写页码与引文，`notes` 增加同序 `spans` 数组。
+
+复核者独立打开同一 SHA 的 PDF，核对页码、引文、span 和答案覆盖。不同意时将状态设为 `分歧待仲裁`，保留标注者原值和复核意见；不得改成 `通过`。仲裁者记录最终决定和理由，之后由复核者再次确认才可设为 `通过`。导入器只接受状态 `通过` 且两人姓名不同的行；任何其他状态均不能进入 gold。
+
+40题工作流可先生成不含 PDF 路径与 gold 的相对 ID 包：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/build_pt1_minimal_annotation_package.py --csv evals/pt1-human-annotation-task-40-20261111.csv --manifest evals/pt1-candidate-manifest-20261111.json --limit 40 --output evals/pt1-human-annotation-package-40-20261112.json
+.\.venv\Scripts\python.exe scripts/validate_pt1_minimal_annotation_package.py evals/pt1-human-annotation-package-40-20261112.json
+```
+
+原 CSV 是后续导入的唯一权威填写表。40条模板结构校验不读取 PDF；它只核对 40 行、30 个 DOI、候选问题、SHA 元数据和 gold 空字段。

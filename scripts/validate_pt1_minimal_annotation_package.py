@@ -20,8 +20,8 @@ def validate(path: Path) -> list[str]:
     if package.get("schema_version") != 1 or package.get("gold_status") != "pending_human_annotation":
         issues.append("package version/status invalid")
     tasks = package.get("tasks")
-    if not isinstance(tasks, list) or len(tasks) != 5:
-        return [*issues, "package must contain exactly five tasks"]
+    if not isinstance(tasks, list) or len(tasks) not in {5, 40}:
+        return [*issues, "package must contain exactly five or forty tasks"]
     allowed = {"task_id", "source_id", "pdf_sha256", "question", "human_fields"}
     for index, task in enumerate(tasks, 1):
         if set(task) != allowed:
@@ -37,10 +37,11 @@ def validate(path: Path) -> list[str]:
             issues.append(f"task {index}: human field set invalid")
         elif any(value not in (None, "") for value in fields.values()):
             issues.append(f"task {index}: gold field must remain blank")
-    if len({row.get("task_id") for row in tasks}) != 5:
+    if len({row.get("task_id") for row in tasks}) != len(tasks):
         issues.append("task IDs must be unique")
-    if len({row.get("pdf_sha256") for row in tasks}) != 5:
-        issues.append("PDF hashes must be unique")
+    expected_id = f"PT1-human-minimal-{len(tasks)}-v1"
+    if package.get("package_id") != expected_id:
+        issues.append("package_id does not match task count")
     return issues
 
 
@@ -52,7 +53,8 @@ def main() -> None:
     if issues:
         print("\n".join(issues))
         raise SystemExit(1)
-    print("PT1 minimal package valid: 5 tasks; gold fields blank; PDFs not opened.")
+    package = json.loads(args.package.read_text(encoding="utf-8"))
+    print(f"PT1 minimal package valid: {len(package['tasks'])} tasks; gold fields blank; PDFs not opened.")
 
 
 if __name__ == "__main__":
