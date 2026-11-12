@@ -1,0 +1,4 @@
+{"run_id":"pt2-synthetic-20261112","trace_id":"01JCP2SYNTHETIC000000000001","span_id":"pt2-root","event_name":"run.started","timestamp":"2026-11-12T20:56:35.4917182+08:00","attributes":{"split":"synthetic-frozen-v1"}}
+{"run_id":"pt2-synthetic-20261112","trace_id":"01JCP2SYNTHETIC000000000001","span_id":"pt2-root","event_name":"run.completed","timestamp":"2026-11-12T20:56:38.0662064+08:00","attributes":{"status":"passed","case_count":3,"method_count":3,"cost_usd":null}}
+{"run_id":"pt4-evaluator-synthetic-20261112","trace_id":"01JCP4SYNTHETIC000000000001","span_id":"pt4-root","event_name":"run.started","timestamp":"2026-11-12T20:56:38.1044004+08:00","attributes":{"split":"synthetic-fixture-tests"}}
+{"run_id":"pt4-evaluator-synthetic-20261112","trace_id":"01JCP4SYNTHETIC000000000001","span_id":"pt4-root","event_name":"run.completed","timestamp":"2026-11-12T20:56:39.1420503+08:00","attributes":{"status":"passed","tests_passed":7,"cost_usd":null}}

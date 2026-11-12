@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offline evaluation run manifest v1",
+  "type": "object",
+  "required": ["schema_version", "run_id", "trace_id", "git_sha", "dataset_sha256", "prompt_sha256", "scorer_sha256", "split", "runtime", "model_id", "gold_source", "budget", "cost_usd", "status", "started_at", "completed_at"],
+  "properties": {
+    "schema_version": {"const": 1}, "run_id": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "dataset_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "prompt_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "scorer_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "split": {"type": "string", "minLength": 1}, "runtime": {"type": "object", "required": ["python", "platform", "lock_sha256"], "properties": {"python": {"type": "string"}, "platform": {"type": "string"}, "lock_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
+    "model_id": {"type": ["string", "null"]}, "gold_source": {"type": "string"},
+    "budget": {"type": "object", "required": ["cap_usd", "spent_usd", "status"], "properties": {"cap_usd": {"type": ["number", "null"]}, "spent_usd": {"type": ["number", "null"]}, "status": {"type": "string"}}},
+    "cost_usd": {"type": ["number", "null"]}, "status": {"enum": ["passed", "failed", "blocked"]},
+    "started_at": {"type": "string", "format": "date-time"}, "completed_at": {"type": "string", "format": "date-time"}
+  }
+}
