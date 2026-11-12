@@ -47,9 +47,29 @@ def _gold_page_coverage(expected_pages: set[tuple[str, int]], citations: list[di
             "all_expected_pages_cited": bool(expected_pages) and expected_pages.issubset(cited_pages)}
 
 
+def _gold_quote_coverage(expected: list[dict[str, Any]], citations: list[dict[str, Any]]) -> dict[str, Any]:
+    expected_quotes = [row for row in expected if isinstance(row.get("quote"), str) and row["quote"].strip()]
+    def normalize(value: str) -> str:
+        return " ".join(value.casefold().split())
+    covered = 0
+    for row in expected_quotes:
+        target = normalize(row["quote"])
+        if any(ref.get("sha256") == row.get("sha256") and ref.get("page") == row.get("pdf_page")
+               and isinstance(ref.get("quote"), str) and target in normalize(ref["quote"])
+               for ref in citations):
+            covered += 1
+    return {"covered_quotes": covered, "expected_quotes": len(expected_quotes),
+            "coverage": covered / len(expected_quotes) if expected_quotes else None,
+            "all_expected_quotes_cited": bool(expected_quotes) and covered == len(expected_quotes)}
+
+
 def _correct_abstention(row: dict[str, Any]) -> bool:
     return (not row["answered"] and
             row.get("completion_state") in {"refused", "no_evidence"})
+
+
+def _complete_answer_rate(rows: list[dict[str, Any]]) -> float | None:
+    return sum(row.get("coverage_complete") is True for row in rows) / len(rows) if rows else None
 
 
 def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
@@ -77,6 +97,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
         expected_pages = {(row["sha256"], row["pdf_page"]) for row in item["evidence"]}
         cited_pages = {(ref["sha256"], ref["page"]) for ref in citations}
         page_coverage = _gold_page_coverage(expected_pages, citations)
+        quote_coverage = _gold_quote_coverage(item["evidence"], citations)
         trace = open_database(database)
         try:
             rejected = trace.execute("SELECT rejected_claims FROM qa_trajectories WHERE turn_id=?",
@@ -94,6 +115,10 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                       "expected_page_count": page_coverage["expected_pages"],
                       "expected_page_coverage": page_coverage["coverage"],
                       "all_expected_pages_cited": page_coverage["all_expected_pages_cited"],
+                      "expected_quotes_cited": quote_coverage["covered_quotes"],
+                      "expected_quote_count": quote_coverage["expected_quotes"],
+                      "expected_quote_coverage": quote_coverage["coverage"],
+                      "all_expected_quotes_cited": quote_coverage["all_expected_quotes_cited"],
                       "citations": citations, "claims": [row["text"] for row in result["claims"]],
                       "rejected_claims": rejected, "latency_ms": result["latency_ms"],
                       "usage": result["usage"], "answer": result["answer"]})
@@ -110,6 +135,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
         by_type[kind] = {"total": len(group),
                          "answerable_coverage": (sum(row["answered"] for row in group_answerable) / len(group_answerable)
                                                  if group_answerable else None),
+                         "complete_answer_rate": _complete_answer_rate(group_answerable),
                          "gold_page_citation_rate": (sum(row["expected_page_cited"] for row in group_answerable) / len(group_answerable)
                                                      if group_answerable else None),
                          "all_expected_pages_cited_rate": (sum(row["all_expected_pages_cited"] for row in group_answerable) / len(group_answerable)

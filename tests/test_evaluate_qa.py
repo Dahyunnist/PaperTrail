@@ -67,3 +67,43 @@ def test_budget_block_is_not_scored_as_correct_abstention():
     assert _correct_abstention({"answered": False, "completion_state": "no_evidence"})
     assert not _correct_abstention({"answered": False, "completion_state": "budget_blocked"})
     assert not _correct_abstention({"answered": True, "completion_state": "refused"})
+
+
+def test_same_page_with_wrong_quote_does_not_count_as_exact_evidence():
+    from papertrail.evaluate_qa import _gold_page_coverage, _gold_quote_coverage
+
+    gold = [{"sha256": "a" * 64, "pdf_page": 1, "quote": "The synthetic endpoint was 42 units."}]
+    wrong_span = [{"sha256": "a" * 64, "page": 1, "quote": "The synthetic endpoint was 24 units."}]
+    assert _gold_page_coverage({("a" * 64, 1)}, wrong_span)["all_expected_pages_cited"] is True
+    exact = _gold_quote_coverage(gold, wrong_span)
+    assert exact["covered_quotes"] == 0
+    assert exact["all_expected_quotes_cited"] is False
+
+
+def test_empty_retrieval_is_abstention_but_budget_block_is_not():
+    from papertrail.evaluate_qa import _correct_abstention
+
+    assert _correct_abstention({"answered": False, "completion_state": "no_evidence"})
+    assert not _correct_abstention({"answered": False, "completion_state": "budget_blocked"})
+
+
+def test_partial_answer_does_not_count_as_complete_answer():
+    from papertrail.evaluate_qa import _complete_answer_rate
+
+    rows = [{"answered": True, "coverage_complete": False},
+            {"answered": True, "coverage_complete": True}]
+    assert _complete_answer_rate(rows) == 0.5
+
+
+def test_evaluator_does_not_pass_gold_answer_to_qa_call():
+    import ast
+    from pathlib import Path
+    source = Path(__file__).resolve().parents[1] / "papertrail/evaluate_qa.py"
+    tree = ast.parse(source.read_text(encoding="utf-8"))
+    run_mode = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "_run_mode")
+    calls = [node for node in ast.walk(run_mode) if isinstance(node, ast.Call)
+             and isinstance(node.func, ast.Name) and node.func.id == "ask"]
+    assert len(calls) == 1
+    assert not any(isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant)
+                   and node.slice.value in {"expected_answer", "evidence", "abstain"}
+                   for node in ast.walk(calls[0]))
