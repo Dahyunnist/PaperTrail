@@ -77,7 +77,7 @@ compare_modes(SQLite index, fixed k, named modes)
 
 ## 共享运行清单兼容视图
 
-papertrail.shared_manifest.to_shared_manifest 将现有 PT run manifest 投影到共享字段名，不改写历史报告，也不构成新的评测证据。缺失或不适用字段保留 null；runtime_digest 仅在有合法 lock SHA 时由实际 runtime 对象计算。转换拒绝路径、prompt、全文、token/API key 等敏感字段。测试：	ests/test_shared_manifest.py。
+`papertrail.shared_manifest.to_shared_manifest` 将现有 PT run manifest 投影到共享字段名，不改写历史报告，也不构成新的评测证据。缺失或不适用字段保留 `null`；`runtime_digest` 仅在有合法 lock SHA 时由实际 runtime 对象计算。转换拒绝路径、prompt、全文、token/API key 等敏感字段。测试：`tests/test_shared_manifest.py`。
 
 
 ## Trace coverage 盘点
