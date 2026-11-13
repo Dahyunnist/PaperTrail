@@ -6,7 +6,7 @@
     "question_count": 5
   },
   "provenance": {
-    "git_sha": "14c1a16a2e4987c1d59403d37fe9c13e789f749f",
+    "git_sha": "17989e64d751c52f3c082712fe0f0b235007ecbd",
     "gold_sha256": "ac5817348de4d6f797e533be12c81d922bb161420f53f7ef5d392782e7b4933f",
     "source_manifest_sha256": "1d842e3724242d73a1fe9fb624f2fa5b427d5f36b8092f9ccac418ee39ec8f7e"
   },
@@ -566,13 +566,13 @@
     }
   },
   "runtime": {
-    "generated_at_utc": "2026-11-13T11:29:17.673050+00:00",
+    "generated_at_utc": "2026-11-13T11:30:11.902084+00:00",
     "python": "3.12.14",
     "platform": "Windows-11-10.0.26200-SP0",
-    "elapsed_ms": 22.23719999892637,
+    "elapsed_ms": 20.37440000276547,
     "query_latency_by_mode": {
       "bm25": {
-        "mean_query_ms": 4.3811750001623295
+        "mean_query_ms": 3.9170000000012806
       }
     }
   },
@@ -580,7 +580,7 @@
   "run_manifest": {
     "schema_version": 1,
     "project": "papertrail",
-    "git_sha": "14c1a16a2e4987c1d59403d37fe9c13e789f749f",
+    "git_sha": "17989e64d751c52f3c082712fe0f0b235007ecbd",
     "dataset_id": "pt17-public-heldout-20261023",
     "dataset_sha256": "806acd2f35c5261d6b4da8adbdeb0911ee795116e865ceb87669b1f7ba380541",
     "split": "final_paper_disjoint_holdout",
@@ -593,10 +593,10 @@
     "scorer_sha": "00332578e24250adedba5ef4ace681bc0010458eac7bffd747e2145f429525a8",
     "gold_source": "unspecified",
     "cost_usd_estimate": 0,
-    "run_id": "659273a9299e3057a8baad8f298cf788",
-    "trace_id": "8a87e690886175d08d09ef0a8e7381d2",
-    "started_at": "2026-11-13T11:29:17.607449+00:00",
-    "ended_at": "2026-11-13T11:29:18.320742+00:00",
+    "run_id": "da99431c80dff02d15c849d06ea19396",
+    "trace_id": "b61543e2949bfee20d69d6e54d112222",
+    "started_at": "2026-11-13T11:30:11.852099+00:00",
+    "ended_at": "2026-11-13T11:30:12.573598+00:00",
     "status": "completed",
     "source_type": "final_paper_disjoint_holdout",
     "source_manifest_sha256": "1d842e3724242d73a1fe9fb624f2fa5b427d5f36b8092f9ccac418ee39ec8f7e",
@@ -606,6 +606,6 @@
     ],
     "k": 5,
     "question_count": 5,
-    "report_fingerprint": "e1063fdd13a1bad45e24bcff22fd795e5b20d1721fe0cb47682355f545ad51b7"
+    "report_fingerprint": "ef7d26d9d26c897f0207513bbb2abaa13597a0bf5aa417c944c21d06698157a7"
   }
 }
