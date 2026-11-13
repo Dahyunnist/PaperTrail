@@ -79,3 +79,17 @@ compare_modes(SQLite index, fixed k, named modes)
 
 papertrail.shared_manifest.to_shared_manifest 将现有 PT run manifest 投影到共享字段名，不改写历史报告，也不构成新的评测证据。缺失或不适用字段保留 null；runtime_digest 仅在有合法 lock SHA 时由实际 runtime 对象计算。转换拒绝路径、prompt、全文、token/API key 等敏感字段。测试：	ests/test_shared_manifest.py。
 
+
+## Trace coverage 盘点
+
+| 事件 | 实现 | 回归覆盖 | 本阶段实跑 |
+|---|---|---|---|
+| timeout | not_covered（只有请求 timeout 参数） | not_covered | not_covered |
+| retry | 有 QA 重试逻辑，未发统一 trace event | test_p13_regressions.py 覆盖结构修复重试 | not_covered |
+| budget_exceeded | 预算守卫存在；统一事件未见 | test_local_llm.py 覆盖预算拒绝 | not_covered |
+| unsafe_action_blocked | not_covered | not_covered | not_covered |
+| cancel | not_covered | not_covered | not_covered |
+| checkpoint_resume | 个别一次性脚本有恢复机制，未见通用事件 | 局部恢复测试，统一事件 not_covered | not_covered |
+
+表中实现/测试只表示静态代码与回归证据，不代表本阶段运行时曾触发这些事件。
+
