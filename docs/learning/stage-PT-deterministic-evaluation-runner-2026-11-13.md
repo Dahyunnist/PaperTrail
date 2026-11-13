@@ -26,7 +26,7 @@ compare_modes(SQLite index, fixed k, named modes)
 - 检索模式和 `k` 固定为命令参数。gold 指标与逐题 trace 放在 `evaluation`；壁钟耗时、执行时间、Python 和平台放在 `runtime`，避免把机器噪声混入检索质量指标。
 - 报告只写数据集标签、哈希和聚合/逐题检索结果，不复制 source manifest 路径或文献全文。现阶段 source manifest 必须是公开、安全可提交的冻结清单。
 - 入口不调用生成模型。它测检索，不测回答忠实度或端到端问答质量。
-- 新报告附带 `run_manifest`，对齐四项目运行规范：绑定 Git、数据集/gold、split、评分器、运行/trace ID、预算、时间与状态。无模型评测使用 `model_id=none`、来源清单明确声明的 gold 来源、零成本；不适用的 prompt/tool/runtime 哈希与 token 预算写 `null`，不能伪造模型元数据。
+- 新报告附带 `run_manifest`，对齐四项目运行规范：绑定 Git、数据集/gold、split、评分器、运行/trace ID、预算、时间与状态。无模型评测使用 `model_id=none` 和零成本；不适用的 prompt/tool/runtime 哈希与 token 预算写 `null`。来源清单未声明 gold 来源时写 `unspecified`，不推断为人工或独立标注。
 - 额外记录 source manifest/gold SHA、来源类型、检索模式、`k`、总题数和报告指纹。manifest 在报告写盘前校验；无效身份、哈希、时间或模型边界都会拒绝输出。
 - 人工 CSV 先由 PT1 importer 校验并转换成带来源指针的 JSONL，确定性 runner 再消费 JSONL。合成端到端测试验证了 CSV 转换、PDF 引文检查、索引检索与报告生成；它不代表真实人工标注集已经完成。
 

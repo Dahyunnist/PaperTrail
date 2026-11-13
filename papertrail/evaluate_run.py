@@ -123,7 +123,7 @@ def run_evaluation(
     if not isinstance(split, str) or not split.strip():
         raise ValueError("source manifest must declare split or dataset_role")
     if not isinstance(gold_source, str) or not gold_source.strip():
-        raise ValueError("source manifest must declare gold_source")
+        gold_source = "unspecified"
     declared_gold = manifest.get("gold_file")
     if declared_gold is not None:
         declared_path = Path(declared_gold)

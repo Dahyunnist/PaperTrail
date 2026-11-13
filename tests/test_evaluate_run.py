@@ -137,16 +137,14 @@ def test_manifest_requires_dataset_identity_before_writing_report(tmp_path):
     assert not output.exists()
 
 
-def test_manifest_requires_gold_source_before_evaluation(tmp_path):
+def test_missing_gold_source_is_reported_as_unspecified(tmp_path):
     database, gold, source_manifest = _fixture(tmp_path)
     source = json.loads(source_manifest.read_text(encoding="utf-8"))
     source.pop("gold_source")
     source_manifest.write_text(json.dumps(source), encoding="utf-8")
-    output = tmp_path / "out.json"
-    with pytest.raises(ValueError, match="gold_source"):
-        run_evaluation(database, gold, source_manifest, output,
-                       k=1, modes=("bm25",), minimum_questions=1)
-    assert not output.exists()
+    report = run_evaluation(database, gold, source_manifest, tmp_path / "out.json",
+                            k=1, modes=("bm25",), minimum_questions=1)
+    assert report["run_manifest"]["gold_source"] == "unspecified"
 
 
 def test_manifest_bound_evaluation_rejects_changed_gold_hash(tmp_path):
