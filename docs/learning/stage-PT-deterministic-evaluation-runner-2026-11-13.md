@@ -21,7 +21,7 @@ compare_modes(SQLite index, fixed k, named modes)
 
 ## 关键设计与取舍
 
-- `--manifest` 的 `gold_sha256` 必须与实际 gold 字节一致；若清单含 `question_count`，必须与已通过 `load_gold` 校验的题数相等。
+- `--manifest` 必须声明数据来源类型、gold 路径和 SHA-256；gold 路径、字节哈希和可选 `question_count` 都与输入文件校验。题数始终来自通过 `load_gold` 的实际总题数，包含拒答题。
 - `--minimum-questions` 默认 1，便于小型冻结诊断集；正式集应传项目要求的门槛。低门槛不代表样本足以支持泛化结论。
 - 检索模式和 `k` 固定为命令参数。gold 指标与逐题 trace 放在 `evaluation`；壁钟耗时、执行时间、Python 和平台放在 `runtime`，避免把机器噪声混入检索质量指标。
 - 报告只写数据集标签、哈希和聚合/逐题检索结果，不复制 source manifest 路径或文献全文。现阶段 source manifest 必须是公开、安全可提交的冻结清单。

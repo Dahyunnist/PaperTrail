@@ -39,6 +39,16 @@ def run_evaluation(
     manifest = json.loads(source_manifest.read_text(encoding="utf-8"))
     if not isinstance(manifest, dict):
         raise ValueError("source manifest must be a JSON object")
+    source_type = next((manifest.get(key) for key in ("source_type", "data_policy", "dataset_role")
+                        if isinstance(manifest.get(key), str) and manifest[key].strip()), None)
+    if source_type is None:
+        raise ValueError("source manifest must declare source_type, data_policy, or dataset_role")
+    declared_gold = manifest.get("gold_file")
+    if declared_gold is not None:
+        declared_path = Path(declared_gold)
+        candidates = [declared_path, source_manifest.parent / declared_path]
+        if not any(candidate.resolve() == gold_path.resolve() for candidate in candidates):
+            raise ValueError("gold path does not match source manifest gold_file")
     expected_gold_hash = manifest.get("gold_sha256")
     actual_gold_hash = sha256(gold_path)
     if (not isinstance(expected_gold_hash, str) or len(expected_gold_hash) != 64
@@ -46,7 +56,9 @@ def run_evaluation(
         raise ValueError("gold SHA-256 does not match source manifest")
     expected_count = manifest.get("question_count")
     items = load_gold(gold_path, minimum_questions=minimum_questions)
-    if isinstance(expected_count, int) and expected_count != len(items):
+    if expected_count is not None and (
+            not isinstance(expected_count, int) or isinstance(expected_count, bool)
+            or expected_count != len(items)):
         raise ValueError("manifest question_count does not match validated gold")
     if not modes or k < 1:
         raise ValueError("at least one retrieval mode and k >= 1 are required")
@@ -67,8 +79,8 @@ def run_evaluation(
         "schema_version": 1,
         "dataset": {
             "dataset_id": manifest.get("dataset_id", manifest.get("benchmark", "unspecified")),
-            "source_type": manifest.get("source_type", manifest.get("data_policy", "unspecified")),
-            "question_count": manifest.get("question_count", raw["answerable_questions"]),
+            "source_type": source_type,
+            "question_count": len(items),
         },
         "provenance": {
             "git_sha": _git_sha(),
@@ -79,9 +91,7 @@ def run_evaluation(
             "k": k,
             "minimum_questions": minimum_questions,
             "answerable_questions": raw["answerable_questions"],
-            "unanswerable_questions": sum(
-                1 for row in raw["modes"][modes[0]]["unanswerable_retrieval"]
-            ) if modes else 0,
+            "unanswerable_questions": len(items) - raw["answerable_questions"],
             "modes": clean_modes,
         },
         "runtime": {

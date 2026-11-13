@@ -84,6 +84,31 @@ def test_manifest_bound_evaluation_rejects_question_count_mismatch(tmp_path):
     assert not (tmp_path / "out.json").exists()
 
 
+@pytest.mark.parametrize("change, message", [
+    ({"gold_file": "other.jsonl"}, "gold_file"),
+    ({"source_type": ""}, "source_type"),
+])
+def test_manifest_rejects_wrong_gold_path_or_missing_source_type(tmp_path, change, message):
+    database, gold, manifest = _fixture(tmp_path)
+    row = json.loads(manifest.read_text(encoding="utf-8"))
+    row.update(change)
+    manifest.write_text(json.dumps(row), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        run_evaluation(database, gold, manifest, tmp_path / "out.json",
+                       k=1, modes=("bm25",), minimum_questions=1)
+
+
+def test_manifest_without_question_count_reports_validated_total(tmp_path):
+    database, gold, manifest = _fixture(tmp_path)
+    row = json.loads(manifest.read_text(encoding="utf-8"))
+    del row["question_count"]
+    manifest.write_text(json.dumps(row), encoding="utf-8")
+    report = run_evaluation(database, gold, manifest, tmp_path / "out.json",
+                            k=1, modes=("bm25",), minimum_questions=1)
+    assert report["dataset"]["question_count"] == 2
+    assert report["evaluation"]["unanswerable_questions"] == 1
+
+
 def test_cli_emits_report_for_synthetic_fixture(tmp_path, monkeypatch, capsys):
     import sys
 
