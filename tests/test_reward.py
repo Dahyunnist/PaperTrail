@@ -37,7 +37,7 @@ def test_trajectory_records_evidence_latency_and_human_reward(tmp_path):
     assert before["latency_ms"] > 0
     assert before["retrieval"] and before["evidence_refs"]
     assert all("path" not in item for item in before["evidence_refs"])
-    rated = rate_trajectory(db, result["turn_id"], "correct", "逐条对照原文")
+    rated = rate_trajectory(db, result["turn_id"], "correct", "逐条对照原文", reviewer_id="reviewer-a")
     assert rated["reward"] <= 1.0
     assert rated["components"]["human_rating_base"] == 1.0
     out = tmp_path / "trajectories.jsonl"
@@ -45,4 +45,5 @@ def test_trajectory_records_evidence_latency_and_human_reward(tmp_path):
     row = json.loads(out.read_text(encoding="utf-8"))
     assert row["user_rating"] == "correct"
     assert row["reward"] == rated["reward"]
+    assert row["reviewer_id"] == "reviewer-a" and row["rated_at"]
 

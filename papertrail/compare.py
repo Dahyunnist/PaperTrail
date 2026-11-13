@@ -32,7 +32,7 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         relevance_score REAL NOT NULL, path TEXT NOT NULL,
         label TEXT NOT NULL DEFAULT 'unclassified'
             CHECK(label IN ('unclassified','supports','contradicts','conditions','context','unclear')),
-        rationale TEXT NOT NULL DEFAULT '', labeled_at TEXT,
+        rationale TEXT NOT NULL DEFAULT '', labeled_at TEXT, reviewer_id TEXT,
         UNIQUE(comparison_id,ordinal)
     );
     CREATE TABLE IF NOT EXISTS comparison_gaps (
@@ -42,6 +42,9 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         status TEXT NOT NULL DEFAULT 'user_proposed', created_at TEXT NOT NULL
     );
     """)
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(comparison_evidence)")}
+    if "reviewer_id" not in columns:
+        conn.execute("ALTER TABLE comparison_evidence ADD COLUMN reviewer_id TEXT")
 
 
 def compare_papers(database: Path, topic: str, claim: str, limit_papers: int = 8,
@@ -126,15 +129,17 @@ def compare_papers(database: Path, topic: str, claim: str, limit_papers: int = 8
 
 
 def label_evidence(database: Path, evidence_id: str, label: str,
-                   rationale: str = "") -> dict[str, Any]:
+                   rationale: str = "", reviewer_id: str = "local-dev") -> dict[str, Any]:
     if label not in LABELS - {"unclassified"}:
         raise ValueError(f"label 必须是：{', '.join(sorted(LABELS - {'unclassified'}))}")
+    if not isinstance(reviewer_id, str) or not reviewer_id.strip():
+        raise ValueError("reviewer_id must be nonempty")
     conn = open_database(database)
     try:
         _ensure_schema(conn)
         cursor = conn.execute(
-            "UPDATE comparison_evidence SET label=?,rationale=?,labeled_at=? WHERE evidence_id=?",
-            (label, rationale.strip(), datetime.now(timezone.utc).isoformat(), evidence_id))
+            "UPDATE comparison_evidence SET label=?,rationale=?,labeled_at=?,reviewer_id=? WHERE evidence_id=?",
+            (label, rationale.strip(), datetime.now(timezone.utc).isoformat(), reviewer_id, evidence_id))
         if cursor.rowcount != 1:
             raise ValueError("找不到该比较证据")
         conn.commit()

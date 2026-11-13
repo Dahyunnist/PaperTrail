@@ -47,6 +47,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     app.config.update(SECRET_KEY=secrets.token_hex(32), MAX_CONTENT_LENGTH=100 * 1024 * 1024,
                       DATABASE=database, UPLOAD_ROOT=upload_root, CSRF_ENABLED=True,
                       PRINCIPAL_PROVIDER=None,
+                      REQUIRE_PRINCIPAL=False,
                       QA_MODE=os.environ.get("PAPERTRAIL_RETRIEVAL_MODE", "bm25"),
                       QA_LIMIT=qa_limit)
     if app.config["QA_MODE"] not in WEB_RETRIEVAL_MODES:
@@ -55,7 +56,11 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     @app.before_request
     def csrf_guard() -> None:
         provider = app.config["PRINCIPAL_PROVIDER"]
-        principal = provider() if provider else request.environ.get("papertrail.principal", LOCAL_PRINCIPAL)
+        principal = provider() if provider else request.environ.get("papertrail.principal")
+        if principal is None:
+            if app.config["REQUIRE_PRINCIPAL"]:
+                abort(401, "请求未认证。")
+            principal = LOCAL_PRINCIPAL
         if not isinstance(principal, Principal):
             abort(401, "服务端未提供有效身份。")
         g.principal = principal
@@ -222,7 +227,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
         comparison_id = request.form.get("comparison_id", "")
         try:
             label_evidence(app.config["DATABASE"], evidence_id,
-                           request.form.get("label", "unclear"), request.form.get("rationale", ""))
+                           request.form.get("label", "unclear"), request.form.get("rationale", ""),
+                           reviewer_id=g.principal.user_id)
             flash("证据标签和理由已保存为人工判断。", "success")
         except ValueError as exc:
             flash(str(exc), "warning")

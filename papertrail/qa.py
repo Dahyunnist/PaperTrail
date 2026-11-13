@@ -77,7 +77,7 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
         model_name TEXT, usage_json TEXT, prompt_chars INTEGER NOT NULL,
         latency_ms REAL NOT NULL, answer_status TEXT NOT NULL,
         total_claims INTEGER NOT NULL, rejected_claims INTEGER NOT NULL,
-        user_rating TEXT, user_note TEXT, reward REAL, reward_json TEXT,
+        user_rating TEXT, user_note TEXT, reviewer_id TEXT, reward REAL, reward_json TEXT,
         created_at TEXT NOT NULL, rated_at TEXT
     );
     """)
@@ -86,6 +86,9 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_json TEXT NOT NULL DEFAULT '[]'")
     if "coverage_complete" not in columns:
         conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_complete INTEGER")
+    trajectory_columns = {row[1] for row in conn.execute("PRAGMA table_info(qa_trajectories)")}
+    if "reviewer_id" not in trajectory_columns:
+        conn.execute("ALTER TABLE qa_trajectories ADD COLUMN reviewer_id TEXT")
 
 
 def _validate_quote(path: str, sha256: str, page_number: int, quote: str,

@@ -41,7 +41,9 @@ def test_cross_paper_evidence_stays_unclassified_until_user_labels(tmp_path):
     assert all(item["label"] == "unclassified" for item in result["evidence"])
     assert {item["sha256"] for item in result["evidence"]} == {_hash(a), _hash(b)}
     evidence = result["evidence"]
-    label_evidence(db, evidence[0]["evidence_id"], "supports", "Matches the claim's described method.")
+    reviewed = label_evidence(db, evidence[0]["evidence_id"], "supports",
+                              "Matches the claim's described method.", reviewer_id="reviewer-a")
+    assert reviewed["reviewer_id"] == "reviewer-a" and reviewed["labeled_at"]
     label_evidence(db, evidence[1]["evidence_id"], "contradicts", "The paper describes a different treatment.")
     add_gap_candidate(db, result["comparison_id"],
                       "The pilot contains no direct comparison of the two noise processes.",

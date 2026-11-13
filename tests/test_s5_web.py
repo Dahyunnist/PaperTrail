@@ -127,6 +127,8 @@ def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tm
     assert report["question_turns"] and report["comparisons"]
     assert "personal-private-marker" in json.dumps(report["personal_notes"], ensure_ascii=False)
     assert "E:\\" not in report_response.get_data(as_text=True)
+    assert all("path" not in evidence for comparison in report["comparisons"]
+               for evidence in comparison["evidence"])
 
     upload = list_uploads(db)[0]
     path = upload["stored_path"]
@@ -189,3 +191,36 @@ def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeyp
     assert seen["mode"] == "hybrid_bge_wide"
     assert seen["limit"] == 8
     assert seen["principal_id"] == "local-dev"
+
+
+def test_web_requires_trusted_principal_when_authentication_is_required(tmp_path):
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True)
+    client = app.test_client()
+    assert client.get("/").status_code == 401
+
+
+def test_web_rejects_invalid_identity_provider_result(tmp_path):
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True, PRINCIPAL_PROVIDER=lambda: None)
+    assert app.test_client().get("/reports/study.json").status_code == 401
+
+
+def test_web_review_passes_trusted_principal_to_audit_record(tmp_path, monkeypatch):
+    import papertrail.web as web
+    from papertrail.access import Principal
+
+    seen = {}
+    def fake_label(_database, evidence_id, label, rationale, *, reviewer_id):
+        seen.update(evidence_id=evidence_id, label=label, rationale=rationale, reviewer_id=reviewer_id)
+    monkeypatch.setattr(web, "label_evidence", fake_label)
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True)
+    client = app.test_client()
+    page = client.get("/")
+    response = client.post("/compare/evidence/evidence-1/label", data={
+        "_csrf": _csrf(page), "comparison_id": "comparison-1", "label": "supports",
+        "rationale": "Synthetic review."},
+        environ_overrides={"papertrail.principal": Principal("reviewer-a")})
+    assert response.status_code == 302
+    assert seen["reviewer_id"] == "reviewer-a"

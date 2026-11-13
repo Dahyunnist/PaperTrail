@@ -15,9 +15,12 @@ RATING_BASE = {"correct": 1.0, "partially_correct": 0.5, "incorrect": -1.0,
                "abstention_correct": 0.5, "abstention_wrong": -0.5}
 
 
-def rate_trajectory(database: Path, turn_id: str, rating: str, note: str = "") -> dict[str, Any]:
+def rate_trajectory(database: Path, turn_id: str, rating: str, note: str = "",
+                    reviewer_id: str = "local-dev") -> dict[str, Any]:
     if rating not in RATING_BASE:
         raise ValueError(f"rating must be one of {', '.join(RATING_BASE)}")
+    if not isinstance(reviewer_id, str) or not reviewer_id.strip():
+        raise ValueError("reviewer_id must be nonempty")
     conn = open_database(database)
     try:
         _ensure_qa_schema(conn)
@@ -32,9 +35,13 @@ def rate_trajectory(database: Path, turn_id: str, rating: str, note: str = "") -
         components = {"human_rating_base": RATING_BASE[rating], "claim_grounding_ratio": grounding,
                       "latency_penalty": latency_penalty, "formula": "base * grounding_ratio - latency_penalty"}
         rated_at = datetime.now(timezone.utc).isoformat()
-        conn.execute("UPDATE qa_trajectories SET user_rating=?,user_note=?,reward=?,reward_json=?,rated_at=? WHERE turn_id=?",
-                     (rating, note[:1000], reward, json.dumps(components), rated_at, turn_id))
+        conn.execute("UPDATE qa_trajectories SET user_rating=?,user_note=?,reviewer_id=?,reward=?,reward_json=?,rated_at=? WHERE turn_id=?",
+                     (rating, note[:1000], reviewer_id, reward, json.dumps(components), rated_at, turn_id))
         conn.commit()
+        import hashlib
+        from .trace import emit
+        emit("human.reviewed", label=rating,
+             evidence_id_hash=hashlib.sha256(turn_id.encode()).hexdigest())
         return {"turn_id": turn_id, "rating": rating, "reward": reward, "components": components}
     finally:
         conn.close()
