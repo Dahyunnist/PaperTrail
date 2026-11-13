@@ -16,12 +16,27 @@
 
 评测结果和逐题失败样本见 JSON 报告。PT17 gold 的人工来源标注仍为 `unspecified`；文件 hash 校验可证明输入一致，不能替代人工标注复核。5 题样本不能支持显著性或泛化结论。任何后续检索参数调整都必须另建开发集，并重新冻结评估集。
 
+## 本次结果
+
+| 模式 | k | Page Recall@k | 完整证据覆盖 | 平均查询时间（ms） |
+|---|---:|---:|---:|---:|
+| BM25 | 5 | 0.750 | 0.500 | 3.9 |
+| Vector | 5 | 0.750 | 0.750 | 1,753.2 |
+| Hybrid | 5 | 0.750 | 0.250 | 83.8 |
+| BM25 | 10 | 0.750 | 0.500 | 28.7 |
+| Vector | 10 | 0.750 | 0.750 | 53.2 |
+| Hybrid | 10 | 0.750 | 0.500 | 82.5 |
+
+该运行中 Vector 的完整证据覆盖最高，但只有 5 题，首轮均值受冷启动影响；不能据此替换默认模式。报告 SHA-256：`a2cd90ae508adcd60eaf61699da1afc77252e942b7399b96c197e29fa6a04b58`。k=5、k=10 两个嵌套 run manifest 均通过 schema-v1 校验，并分别保留各自报告指纹。
+
 ## 测试命令
 
 ```powershell
 .venv\Scripts\python.exe -m pytest -q -p no:cacheprovider tests/test_pt17_retrieval_comparison.py
 .venv\Scripts\python.exe scripts/evaluate_pt17_retrieval_comparison.py
 ```
+
+本次运行：4 项结构/边界测试通过；6 组检索运行完成，模型调用为 0。
 
 ## 设计取舍
 
