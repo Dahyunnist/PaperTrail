@@ -38,6 +38,41 @@ def test_local_chat_client_uses_loopback_ollama_json_api(monkeypatch):
     assert seen["payload"]["format"] == "json"
 
 
+def test_ollama_json_contract_with_injected_transport(monkeypatch):
+    import papertrail.local_llm as llm
+    seen = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def read(self):
+            return json.dumps({"message": {"content": "{\"ok\":true}"},
+                               "prompt_eval_count": 7, "eval_count": 3}).encode()
+
+    def mock_open(request, timeout):
+        seen["url"] = request.full_url
+        seen["timeout"] = timeout
+        seen["payload"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.delenv("PAPERTRAIL_LLM_PROVIDER", raising=False)
+    monkeypatch.setenv("PAPERTRAIL_OLLAMA_URL", "http://127.0.0.1:11434")
+    monkeypatch.setenv("PAPERTRAIL_LLM_TIMEOUT", "9")
+    monkeypatch.setattr(llm, "urlopen", mock_open)
+    result = chat_json("fixture-model", "system", "prompt")
+    assert result["ok"] is True
+    assert result["_usage"]["prompt_eval_count"] == 7
+    assert seen["url"] == "http://127.0.0.1:11434/api/chat"
+    assert seen["timeout"] == 9
+    assert seen["payload"]["model"] == "fixture-model"
+    assert seen["payload"]["format"] == "json"
+    assert seen["payload"]["stream"] is False
+
+
 def test_openai_compatible_client_enforces_model_budget_and_redacts_key(tmp_path, monkeypatch):
     seen = {}
     class Response:

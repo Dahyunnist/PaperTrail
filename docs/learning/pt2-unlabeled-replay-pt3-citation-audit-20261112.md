@@ -36,3 +36,9 @@
 
 tests/test_s3.py::test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer 验证保留已支持结论并报告 missing 子问题；	ests/test_s3.py::test_qa_preserves_supported_partial_answer_and_logs_reason 验证 API/历史状态为 generated_partial，而非完整或整体拒答。两项通过。行为由 fake generator 驱动，不调用模型；未改 gold。真实 PT-3 人工 gold 仍待标注。
 
+
+## Ollama 客户端契约测试与宿主限制
+
+全量测试曾有唯一失败 `test_local_chat_client_uses_loopback_ollama_json_api`：宿主 `WinError 10013` 拒绝测试 HTTP server 绑定 `127.0.0.1` 临时端口，属环境 socket 权限限制。保留此集成测试，不改断言；新增 `test_ollama_json_contract_with_injected_transport`，注入 `urlopen` 替身验证 `/api/chat`、JSON/非流式请求体、timeout 与 usage 解析，不开 socket、不调用模型。
+
+聚焦命令：`python -m pytest tests/test_local_llm.py::test_ollama_json_contract_with_injected_transport -q`。若需宿主验收，PowerShell 执行 ` .\.venv\Scripts\python.exe -m pytest -q tests/test_local_llm.py::test_local_chat_client_uses_loopback_ollama_json_api`。
