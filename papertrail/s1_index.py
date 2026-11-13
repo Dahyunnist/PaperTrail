@@ -516,6 +516,7 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
     issues: list[dict[str, str]] = list(stale_issues)
     seen_sha: set[str] = set()
     locations_changed = False
+    deferred_progress: list[tuple[int, int, str]] = []
     try:
         parsed_batch: dict[str, ParsedDocument] = {}
         if reconcile:
@@ -548,7 +549,10 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                                  (existing["version_id"], item["root_id"], str(item["path"])))
                 totals["duplicates"] += 1
                 if progress_callback:
-                    progress_callback(item_number, len(selected), item["file_name"])
+                    if reconcile:
+                        deferred_progress.append((item_number, len(selected), item["file_name"]))
+                    else:
+                        progress_callback(item_number, len(selected), item["file_name"])
                 continue
             seen_sha.add(item["sha256"])
             try:
@@ -578,7 +582,10 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                     raise
                 issues.append({"file_name": item["file_name"], "issue": f"{type(exc).__name__}: {exc}"})
             if progress_callback:
-                progress_callback(item_number, len(selected), item["file_name"])
+                if reconcile:
+                    deferred_progress.append((item_number, len(selected), item["file_name"]))
+                else:
+                    progress_callback(item_number, len(selected), item["file_name"])
         if reconcile:
             if totals["added"] or locations_changed:
                 conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
@@ -588,6 +595,11 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
             if totals["added"] or locations_changed:
                 conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
                 conn.commit()
+        # The job callback writes progress through a second SQLite connection.
+        # Defer it until the corpus transaction releases its write lock.
+        if reconcile and progress_callback:
+            for progress in deferred_progress:
+                progress_callback(*progress)
     finally:
         conn.close()
     totals["issues"] = issues
