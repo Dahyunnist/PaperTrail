@@ -1,0 +1,611 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "dataset_id": "pt17-public-heldout-20261023",
+    "source_type": "final_paper_disjoint_holdout",
+    "question_count": 5
+  },
+  "provenance": {
+    "git_sha": "14c1a16a2e4987c1d59403d37fe9c13e789f749f",
+    "gold_sha256": "ac5817348de4d6f797e533be12c81d922bb161420f53f7ef5d392782e7b4933f",
+    "source_manifest_sha256": "1d842e3724242d73a1fe9fb624f2fa5b427d5f36b8092f9ccac418ee39ec8f7e"
+  },
+  "evaluation": {
+    "k": 5,
+    "minimum_questions": 5,
+    "answerable_questions": 4,
+    "unanswerable_questions": 1,
+    "modes": {
+      "bm25": {
+        "page_recall_at_k": 0.75,
+        "gold_page_recall_at_k": 0.5714285714285714,
+        "chunk_page_recall_at_k": 0.75,
+        "document_recall_at_k": 1.0,
+        "unique_document_recall_at_k": 1.0,
+        "all_evidence_pages_at_k": 0.5,
+        "complete_evidence_at_k": 0.5,
+        "evidence_item_recall_at_k": 0.5714285714285714,
+        "rerank_candidate_page_recall": null,
+        "mrr_at_k": 0.75,
+        "ndcg_at_k": 0.6158730245750532,
+        "page_hits": 3,
+        "document_hits": 4,
+        "by_question_type": {
+          "multi_hop": {
+            "total": 2,
+            "page_hits": 2
+          },
+          "cross_paper": {
+            "total": 1,
+            "page_hits": 0
+          },
+          "fact_location": {
+            "total": 1,
+            "page_hits": 1
+          }
+        },
+        "by_paper": {
+          "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b": {
+            "title": "Ten simple rules for navigating AI in science",
+            "total": 2,
+            "page_hits": 1,
+            "complete_evidence_hits": 1,
+            "target_document_not_retrieved": 0,
+            "target_document_retrieved_wrong_page": 1,
+            "incomplete_evidence": 0
+          },
+          "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f": {
+            "title": "Ten simple rules for effective research data management",
+            "total": 2,
+            "page_hits": 1,
+            "complete_evidence_hits": 1,
+            "target_document_not_retrieved": 0,
+            "target_document_retrieved_wrong_page": 1,
+            "incomplete_evidence": 0
+          },
+          "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f": {
+            "title": "Ten simple rules for training by researchers for researchers in a rapidly evolving workforce",
+            "total": 1,
+            "page_hits": 1,
+            "complete_evidence_hits": 0,
+            "target_document_not_retrieved": 0,
+            "target_document_retrieved_wrong_page": 0,
+            "incomplete_evidence": 1
+          }
+        },
+        "trace": [
+          {
+            "id": "PT17-01",
+            "question": "What do AI-in-science authors recommend for both external package version tracking and code documentation?",
+            "type": "multi_hop",
+            "expected_pages": [
+              [
+                "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                5
+              ],
+              [
+                "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                6
+              ]
+            ],
+            "page_hit": true,
+            "chunk_page_hit": true,
+            "document_hit": true,
+            "unique_document_hit": true,
+            "failure_class": "hit",
+            "all_evidence_pages": true,
+            "complete_evidence": true,
+            "evidence_items_found": 2,
+            "evidence_items_total": 2,
+            "rerank_candidate_hit": null,
+            "chunk_results": [
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 5,
+                "rank_score": 16.15004467373879,
+                "source_type": "original_pdf",
+                "chunk_id": "64d21e106e58d553300cd8717b61c22696ab70b166f57c4a57f808d61b29274b",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 10,
+                "rank_score": 13.729048266514683,
+                "source_type": "original_pdf",
+                "chunk_id": "33205954143fa27c8f9f5253b437004c8911ac770159af732dce2a4ccb7a17f2",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 9,
+                "rank_score": 12.261509098321465,
+                "source_type": "original_pdf",
+                "chunk_id": "5017b9ef63f2120fd3ccaf6f0eb69176e15157c1b39572b917b93c9b86336e48",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 1,
+                "rank_score": 10.778676168120567,
+                "source_type": "original_pdf",
+                "chunk_id": "6ee4e25dac0dfb46377b20196449489f357b8956586776b2bf7f760717a6a8e4",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 6,
+                "rank_score": 9.881400931808336,
+                "source_type": "original_pdf",
+                "chunk_id": "c7a24f8583cef0f1a7ebc96625f48e34459f759f586f431a3ea27f88aa7415c5",
+                "text_origin": "native_text"
+              }
+            ],
+            "page_results": [
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 5,
+                "rank_score": 16.15004467373879,
+                "source_type": "original_pdf",
+                "chunk_id": "64d21e106e58d553300cd8717b61c22696ab70b166f57c4a57f808d61b29274b",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 10,
+                "rank_score": 13.729048266514683,
+                "source_type": "original_pdf",
+                "chunk_id": "33205954143fa27c8f9f5253b437004c8911ac770159af732dce2a4ccb7a17f2",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 9,
+                "rank_score": 12.261509098321465,
+                "source_type": "original_pdf",
+                "chunk_id": "5017b9ef63f2120fd3ccaf6f0eb69176e15157c1b39572b917b93c9b86336e48",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 1,
+                "rank_score": 10.778676168120567,
+                "source_type": "original_pdf",
+                "chunk_id": "6ee4e25dac0dfb46377b20196449489f357b8956586776b2bf7f760717a6a8e4",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 6,
+                "rank_score": 9.881400931808336,
+                "source_type": "original_pdf",
+                "chunk_id": "c7a24f8583cef0f1a7ebc96625f48e34459f759f586f431a3ea27f88aa7415c5",
+                "text_origin": "native_text"
+              }
+            ],
+            "rerank_succeeded": null,
+            "rerank_error": null
+          },
+          {
+            "id": "PT17-02",
+            "question": "How do the AI navigation paper and research data management paper recommend making models and datasets easier to reuse?",
+            "type": "cross_paper",
+            "expected_pages": [
+              [
+                "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                9
+              ],
+              [
+                "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                6
+              ]
+            ],
+            "page_hit": false,
+            "chunk_page_hit": false,
+            "document_hit": true,
+            "unique_document_hit": true,
+            "failure_class": "target_document_retrieved_wrong_page",
+            "all_evidence_pages": false,
+            "complete_evidence": false,
+            "evidence_items_found": 0,
+            "evidence_items_total": 2,
+            "rerank_candidate_hit": null,
+            "chunk_results": [
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 8,
+                "rank_score": 12.285279678501348,
+                "source_type": "original_pdf",
+                "chunk_id": "8a5cbb63012ffe17d90b4ba66ef36ae10f09f3c077230c8bc467b95e16b78f69",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 9,
+                "rank_score": 10.442414641668202,
+                "source_type": "original_pdf",
+                "chunk_id": "59e0ea9a3f04f5755f4eba5ec0033d81397b9511db0fe0d16d414099d45d2804",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 3,
+                "rank_score": 10.096787276174283,
+                "source_type": "original_pdf",
+                "chunk_id": "24702ea91a603d30772a97283218114b5062db16dc1026d380c26440a5dabc38",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 9,
+                "rank_score": 9.624049611446178,
+                "source_type": "original_pdf",
+                "chunk_id": "1ffab6e60dd2365f88ef16b6f7c0a3de34b3f559766b377188097e91cbc69217",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 3,
+                "rank_score": 9.48940439481596,
+                "source_type": "original_pdf",
+                "chunk_id": "d445d004b553e756c5db36c1eee5d3db4333678178b9ea1bce92fe02b6ba2a6c",
+                "text_origin": "native_text"
+              }
+            ],
+            "page_results": [
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 8,
+                "rank_score": 12.285279678501348,
+                "source_type": "original_pdf",
+                "chunk_id": "8a5cbb63012ffe17d90b4ba66ef36ae10f09f3c077230c8bc467b95e16b78f69",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 9,
+                "rank_score": 10.442414641668202,
+                "source_type": "original_pdf",
+                "chunk_id": "59e0ea9a3f04f5755f4eba5ec0033d81397b9511db0fe0d16d414099d45d2804",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 3,
+                "rank_score": 10.096787276174283,
+                "source_type": "original_pdf",
+                "chunk_id": "24702ea91a603d30772a97283218114b5062db16dc1026d380c26440a5dabc38",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 5,
+                "rank_score": 9.21144019149825,
+                "source_type": "original_pdf",
+                "chunk_id": "ef1719d76477cc88438ec3165c6756ec7f25323a6f89b8bdb554f7ab9eadd2f3",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "818f12afab0e6a5049675d11d661fe593fc7619565c88b6fd32d563fbd347a7b",
+                "paper_id": "p_9d0c42f0ebe6e3c9b08bc9e8",
+                "pdf_page": 2,
+                "rank_score": 8.89429694640398,
+                "source_type": "original_pdf",
+                "chunk_id": "352990e75769eae664cd0e6d1b59f63997c1b3d4335427c321aa6aa0c4b60e43",
+                "text_origin": "native_text"
+              }
+            ],
+            "rerank_succeeded": null,
+            "rerank_error": null
+          },
+          {
+            "id": "PT17-03",
+            "question": "What file forms can serve as metadata in the research data management article?",
+            "type": "fact_location",
+            "expected_pages": [
+              [
+                "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                6
+              ]
+            ],
+            "page_hit": true,
+            "chunk_page_hit": true,
+            "document_hit": true,
+            "unique_document_hit": true,
+            "failure_class": "hit",
+            "all_evidence_pages": true,
+            "complete_evidence": true,
+            "evidence_items_found": 1,
+            "evidence_items_total": 1,
+            "rerank_candidate_hit": null,
+            "chunk_results": [
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 6,
+                "rank_score": 18.60344743374288,
+                "source_type": "original_pdf",
+                "chunk_id": "450d20b8dc14a04712de08ef6d2a3059d967af872d33630079275e0dc9608e70",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 2,
+                "rank_score": 11.607635683762087,
+                "source_type": "original_pdf",
+                "chunk_id": "a17156273b011d9f273c06927ef63479239f8389d8b9080f580099c4d0039bbc",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 4,
+                "rank_score": 10.49633276456602,
+                "source_type": "original_pdf",
+                "chunk_id": "03f5b90d2c87dc72d19a456642627216c0d759ee28d7abd79d851fff6d0756f4",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 6,
+                "rank_score": 10.278213805482435,
+                "source_type": "original_pdf",
+                "chunk_id": "5a74f1f2081a6c6a8b814434f13c059fd8df24d1c91496423a0d961f7d002ed3",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 2,
+                "rank_score": 10.195047977419696,
+                "source_type": "original_pdf",
+                "chunk_id": "c081f559b545ef8fa08e5c191b78a3ef66d6a2000f5caaad603754d5e2693511",
+                "text_origin": "native_text"
+              }
+            ],
+            "page_results": [
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 6,
+                "rank_score": 18.60344743374288,
+                "source_type": "original_pdf",
+                "chunk_id": "450d20b8dc14a04712de08ef6d2a3059d967af872d33630079275e0dc9608e70",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 2,
+                "rank_score": 11.607635683762087,
+                "source_type": "original_pdf",
+                "chunk_id": "a17156273b011d9f273c06927ef63479239f8389d8b9080f580099c4d0039bbc",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 4,
+                "rank_score": 10.49633276456602,
+                "source_type": "original_pdf",
+                "chunk_id": "03f5b90d2c87dc72d19a456642627216c0d759ee28d7abd79d851fff6d0756f4",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 10,
+                "rank_score": 10.03602968455408,
+                "source_type": "original_pdf",
+                "chunk_id": "79bd77770e8888ca5df09745f70f22dc51d7a822b27100ea2ed61c252b522af6",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 11,
+                "rank_score": 9.22558812908779,
+                "source_type": "original_pdf",
+                "chunk_id": "e5d4eb45c8cedf79d78d0d178e5c81ed490083d7e1901da479ba69dd72e4798e",
+                "text_origin": "native_text"
+              }
+            ],
+            "rerank_succeeded": null,
+            "rerank_error": null
+          },
+          {
+            "id": "PT17-05",
+            "question": "How should organizers both monitor learner progress during short-format training and use evaluation to improve later training?",
+            "type": "multi_hop",
+            "expected_pages": [
+              [
+                "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                8
+              ],
+              [
+                "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                9
+              ]
+            ],
+            "page_hit": true,
+            "chunk_page_hit": true,
+            "document_hit": true,
+            "unique_document_hit": true,
+            "failure_class": "hit",
+            "all_evidence_pages": false,
+            "complete_evidence": false,
+            "evidence_items_found": 1,
+            "evidence_items_total": 2,
+            "rerank_candidate_hit": null,
+            "chunk_results": [
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 8,
+                "rank_score": 15.626273720461121,
+                "source_type": "original_pdf",
+                "chunk_id": "a97c48fccfb467d0961055be35433540f1ba7ba49a4234a15f53bc6d69f0fee1",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 7,
+                "rank_score": 14.707872368697245,
+                "source_type": "original_pdf",
+                "chunk_id": "12b561faf57c438e95c976986dccf59d267bd8a15f59a3f80efa4a648ac8f47a",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 8,
+                "rank_score": 12.67558732081211,
+                "source_type": "original_pdf",
+                "chunk_id": "30d8da11a6662aaaf22f2245da08c20161cdc506a2d8323a89c4e9bf014ac206",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 7,
+                "rank_score": 12.37885537126891,
+                "source_type": "original_pdf",
+                "chunk_id": "a28942eceab07d52b7be23b2c06f7abbc5d5315105e5116e3ea2f276e7a9b03a",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 8,
+                "rank_score": 12.119905181085223,
+                "source_type": "original_pdf",
+                "chunk_id": "f29ce25851153ba4e66e838faecaf3f78a946bd39a6ea934e66a4a59f670bf3a",
+                "text_origin": "native_text"
+              }
+            ],
+            "page_results": [
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 8,
+                "rank_score": 15.626273720461121,
+                "source_type": "original_pdf",
+                "chunk_id": "a97c48fccfb467d0961055be35433540f1ba7ba49a4234a15f53bc6d69f0fee1",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 7,
+                "rank_score": 14.707872368697245,
+                "source_type": "original_pdf",
+                "chunk_id": "12b561faf57c438e95c976986dccf59d267bd8a15f59a3f80efa4a648ac8f47a",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "557babf6594dbd3680982f78e9435d34a6fd74152ca8ea0fe690e339c3fddc4f",
+                "paper_id": "p_31999efe9d30e93cc1c4ee56",
+                "pdf_page": 7,
+                "rank_score": 12.37885537126891,
+                "source_type": "original_pdf",
+                "chunk_id": "a28942eceab07d52b7be23b2c06f7abbc5d5315105e5116e3ea2f276e7a9b03a",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 3,
+                "rank_score": 11.875252027697746,
+                "source_type": "original_pdf",
+                "chunk_id": "f2b51665a962b5312384995ca17cf20c847ed7177350d6d85681501ffae9e3df",
+                "text_origin": "native_text"
+              },
+              {
+                "sha256": "5bb594a64ba9585758163578f4cc93103ae304f22a20ee4a57f5ded180db362f",
+                "paper_id": "p_905c35201c05c85964d0d513",
+                "pdf_page": 4,
+                "rank_score": 11.09211686877415,
+                "source_type": "original_pdf",
+                "chunk_id": "b456b914e2e98e7fbde8a58c60eadac2604170d4c606eb6c885df350f54c16cd",
+                "text_origin": "native_text"
+              }
+            ],
+            "rerank_succeeded": null,
+            "rerank_error": null
+          }
+        ],
+        "unanswerable_retrieval": [
+          {
+            "id": "PT17-04",
+            "retrieval_nonempty": true,
+            "top_score": 15.723850795309845
+          }
+        ]
+      }
+    }
+  },
+  "runtime": {
+    "generated_at_utc": "2026-11-13T11:29:17.673050+00:00",
+    "python": "3.12.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "elapsed_ms": 22.23719999892637,
+    "query_latency_by_mode": {
+      "bm25": {
+        "mean_query_ms": 4.3811750001623295
+      }
+    }
+  },
+  "limits": [],
+  "run_manifest": {
+    "schema_version": 1,
+    "project": "papertrail",
+    "git_sha": "14c1a16a2e4987c1d59403d37fe9c13e789f749f",
+    "dataset_id": "pt17-public-heldout-20261023",
+    "dataset_sha256": "806acd2f35c5261d6b4da8adbdeb0911ee795116e865ceb87669b1f7ba380541",
+    "split": "final_paper_disjoint_holdout",
+    "model_id": "none",
+    "prompt_sha": null,
+    "tool_schema_sha": null,
+    "runtime_digest": null,
+    "max_steps": 1,
+    "max_tokens": null,
+    "scorer_sha": "00332578e24250adedba5ef4ace681bc0010458eac7bffd747e2145f429525a8",
+    "gold_source": "unspecified",
+    "cost_usd_estimate": 0,
+    "run_id": "659273a9299e3057a8baad8f298cf788",
+    "trace_id": "8a87e690886175d08d09ef0a8e7381d2",
+    "started_at": "2026-11-13T11:29:17.607449+00:00",
+    "ended_at": "2026-11-13T11:29:18.320742+00:00",
+    "status": "completed",
+    "source_type": "final_paper_disjoint_holdout",
+    "source_manifest_sha256": "1d842e3724242d73a1fe9fb624f2fa5b427d5f36b8092f9ccac418ee39ec8f7e",
+    "gold_sha256": "ac5817348de4d6f797e533be12c81d922bb161420f53f7ef5d392782e7b4933f",
+    "retrieval_modes": [
+      "bm25"
+    ],
+    "k": 5,
+    "question_count": 5,
+    "report_fingerprint": "e1063fdd13a1bad45e24bcff22fd795e5b20d1721fe0cb47682355f545ad51b7"
+  }
+}

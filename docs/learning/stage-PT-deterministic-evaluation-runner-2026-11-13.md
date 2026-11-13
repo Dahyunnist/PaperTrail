@@ -47,7 +47,15 @@ compare_modes(SQLite index, fixed k, named modes)
   --k 5 --minimum-questions 5 --modes bm25 hybrid
 ```
 
-本轮定向 pytest 为 **25 passed**（CSV importer、运行入口、检索 evaluator 与 manifest 校验）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。本轮全量 pytest 为 173 passed、1 failed；失败项需要在 `127.0.0.1` 绑定 HTTP mock，测试宿主以 Windows `WinError 10013` 拒绝该 socket，属于宿主限制，未通过项不计入通过；该环境限制不是应用断言通过。
+公开 PT17 仅 BM25 复现：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evaluate_pt17_public_bm25.py
+```
+
+该脚本只读校验已登记的 3 篇 CC BY 4.0 fixture PDF 与冻结 gold 哈希，在 `.tmp` 建索引，将聚合报告写入 `reports/pt17-public-bm25-20261113.json`；不读取私人目录、不调用模型。5 题中 4 题可答、1 题不可答。BM25 `page_recall@5=0.75`（3/4）、`gold_page_recall@5=0.571`（4/7）、`document_recall@5=1.00`（4/4）、`complete_evidence@5=0.50`（2/4）、`nDCG@5=0.616`。不可回答题仍有非空召回。来源清单没有声明 gold 产出者，因此 manifest 标为 `unspecified`；该 5 题只能作为小样本检索诊断，不能作为生成问答或私人文献语料成绩。
+
+本轮定向 pytest 为 **25 passed**（CSV importer、运行入口、检索 evaluator 与 manifest 校验）；`git diff --check` 通过。pytest 使用临时合成 PDF fixture；单独的 PT17 评测使用仓库中已登记的 3 篇公开 CC BY 4.0 PDF。两者都没有读取 E 盘毕设论文或调用模型。PT17 的小样本只描述这 5 道冻结题，不外推为私人语料或生成问答成绩。本轮全量 pytest 为 173 passed、1 failed；失败项需要在 `127.0.0.1` 绑定 HTTP mock，测试宿主以 Windows `WinError 10013` 拒绝该 socket，属于宿主限制，未通过项不计入通过；该环境限制不是应用断言通过。
 
 ## 用户亲手实验（10–20 分钟）
 
