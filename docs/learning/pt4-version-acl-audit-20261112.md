@@ -16,3 +16,8 @@
 ```
 
 本机 MCP stdio 固定使用 `local-dev`，没有调用方身份认证；当前明确按单用户本机服务运行，不宣称多租户支持。嵌入式调用的集合隔离测试直接构造不同 Principal；生产身份认证及可信 Principal 注入仍待部署集成。真实文献质量未在此验证。
+
+## Reconcile 批次失败原子性（2026-11-13）
+
+index_selection(reconcile=True) 现在先解析完整批次，再变更已发布索引。第二篇文档解析注入失败时，数据库字节保持不变，旧版本仍可用；移除故障后重试，两篇新版本一次发布，旧 SHA 不再可读。	ests/test_s1.py::test_reconcile_parse_failure_keeps_published_index_then_retry_succeeds 与 	ests/test_access_control.py::test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp：2 passed。
+

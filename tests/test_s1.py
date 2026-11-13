@@ -5,6 +5,7 @@ from pathlib import Path
 
 import fitz
 import yaml
+import pytest
 
 from papertrail.audit import _hash
 from papertrail.s1_index import (_reading_order_blocks, _title_from_pdf, database_summary,
@@ -175,6 +176,54 @@ def test_reconcile_updates_changed_paths_and_removes_deleted_sources(tmp_path):
     try:
         revision = int(conn.execute("SELECT value FROM app_metadata WHERE key='index_revision'").fetchone()[0])
         assert revision == 4
+    finally:
+        conn.close()
+
+
+def test_reconcile_parse_failure_keeps_published_index_then_retry_succeeds(tmp_path, monkeypatch):
+    import papertrail.s1_index as indexer
+    root = tmp_path / "papers"
+    root.mkdir()
+    paths = [root / "one.pdf", root / "two.pdf"]
+    _pdf(paths[0], "original first anchor appears in this synthetic source document.")
+    _pdf(paths[1], "original second anchor appears in this synthetic source document.")
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "approved", "path": str(root)}]}), encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+    def write_selection():
+        selection.write_text("".join(json.dumps({"root_id": "approved", "file_name": p.name,
+            "relative_path": p.name, "sha256": _hash(p), "kind": "pdf", "source_type": "original_pdf"}) + "\n"
+            for p in paths), encoding="utf-8")
+    db = tmp_path / "index.sqlite3"
+    write_selection()
+    indexer.index_selection(db, config, selection, reconcile=True)
+    before = db.read_bytes()
+    old_hashes = [_hash(p) for p in paths]
+    for i, p in enumerate(paths):
+        p.unlink()
+        _pdf(p, f"revised version {i} contains new synthetic anchor for retry validation.")
+    write_selection()
+    original_parse = indexer.parse_pdf
+    calls = 0
+    def fail_second(path, source_type, ocr_fallback=False):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("injected second document parse failure")
+        return original_parse(path, source_type, ocr_fallback)
+    monkeypatch.setattr(indexer, "parse_pdf", fail_second)
+    with pytest.raises(RuntimeError, match="injected second"):
+        indexer.index_selection(db, config, selection, reconcile=True)
+    assert db.read_bytes() == before
+    monkeypatch.setattr(indexer, "parse_pdf", original_parse)
+    result = indexer.index_selection(db, config, selection, reconcile=True)
+    assert result["added"] == 2 and not result["issues"]
+    assert indexer.search(db, "new synthetic anchor retry validation", source_type="original_pdf")
+    assert all(not indexer.inspect_document(db, digest) for digest in old_hashes)
+    conn = indexer.open_database(db, readonly=True)
+    try:
+        assert conn.execute("SELECT count(*) FROM paper_versions").fetchone()[0] == 2
+        assert conn.execute("SELECT count(*) FROM chunks_fts").fetchone()[0] > 0
     finally:
         conn.close()
 

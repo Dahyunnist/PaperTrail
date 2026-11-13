@@ -517,6 +517,16 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
     seen_sha: set[str] = set()
     locations_changed = False
     try:
+        parsed_batch: dict[str, ParsedDocument] = {}
+        if reconcile:
+            # Parse the full batch before detaching any prior source locations.
+            # A parse failure must leave the published index untouched.
+            for item in selected:
+                if item["sha256"] in parsed_batch:
+                    continue
+                parsed_batch[item["sha256"]] = (
+                    parse_pdf(item["path"], item["source_type"], ocr_fallback)
+                    if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"]))
         if reconcile:
             config = yaml.safe_load(sources.read_text(encoding="utf-8"))
             root_ids = [root["id"] for root in config.get("roots", [])]
@@ -540,7 +550,9 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                 continue
             seen_sha.add(item["sha256"])
             try:
-                parsed = parse_pdf(item["path"], item["source_type"], ocr_fallback) if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"])
+                parsed = parsed_batch[item["sha256"]] if reconcile else (
+                    parse_pdf(item["path"], item["source_type"], ocr_fallback)
+                    if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"]))
                 with conn:
                     locations_changed |= _detach_location(conn, item["root_id"], str(item["path"]), item["sha256"])
                     counts = _insert_document(conn, item, parsed)
