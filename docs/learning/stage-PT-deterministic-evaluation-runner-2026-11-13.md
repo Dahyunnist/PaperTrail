@@ -28,6 +28,7 @@ compare_modes(SQLite index, fixed k, named modes)
 - 入口不调用生成模型。它测检索，不测回答忠实度或端到端问答质量。
 - 新报告附带 `run_manifest`，对齐四项目运行规范：绑定 Git、数据集/gold、split、评分器、运行/trace ID、预算、时间与状态。无模型评测使用 `model_id=none`、来源清单明确声明的 gold 来源、零成本；不适用的 prompt/tool/runtime 哈希与 token 预算写 `null`，不能伪造模型元数据。
 - 额外记录 source manifest/gold SHA、来源类型、检索模式、`k`、总题数和报告指纹。manifest 在报告写盘前校验；无效身份、哈希、时间或模型边界都会拒绝输出。
+- 人工 CSV 先由 PT1 importer 校验并转换成带来源指针的 JSONL，确定性 runner 再消费 JSONL。合成端到端测试验证了 CSV 转换、PDF 引文检查、索引检索与报告生成；它不代表真实人工标注集已经完成。
 
 ## 失败路径
 
@@ -46,7 +47,7 @@ compare_modes(SQLite index, fixed k, named modes)
   --k 5 --minimum-questions 5 --modes bm25 hybrid
 ```
 
-本轮定向 pytest 为 **16 passed**（`test_evaluate_run.py`、`test_evaluate.py`、`test_run_manifest.py`）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。最近全量测试记录为 169 passed、1 项因测试宿主禁止绑定 loopback 被拦截；该环境限制不是应用断言通过。
+本轮定向 pytest 为 **25 passed**（CSV importer、运行入口、检索 evaluator 与 manifest 校验）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。最近全量测试记录为 169 passed、1 项因测试宿主禁止绑定 loopback 被拦截；该环境限制不是应用断言通过。
 
 ## 用户亲手实验（10–20 分钟）
 

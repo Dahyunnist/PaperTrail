@@ -14,6 +14,8 @@ import import_pt1_human_csv as csv_importer
 import import_pt1_gold_jsonl as jsonl_importer
 import validate_pt1_gold_jsonl as jsonl_validator
 from papertrail.gold import load_gold, verify_quotes
+from papertrail.evaluate_run import run_evaluation
+from papertrail.s1_index import index_selection
 
 FIELDS = [
     "task_id", "paper_split", "doi", "title", "pdf_sha256", "candidate_type", "candidate_question",
@@ -88,6 +90,49 @@ def test_csv_command_path_exports_v2_and_imports_runtime_gold(tmp_path, monkeypa
     assert [row["question_type"] for row in v2] == ["fact_location", "unanswerable"]
     assert [row["abstain"] for row in runtime] == [False, True]
     assert verify_quotes(runtime, output_sources) == 1
+
+
+def test_imported_synthetic_csv_runs_deterministic_report(tmp_path, monkeypatch):
+    csv_path, source_manifest = _fixture(tmp_path, monkeypatch)
+    with csv_path.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    rows[0]["candidate_question"] = "trial enrolled 12 participants"
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    output = tmp_path / "converted"
+    runtime_gold = output / "runtime-gold.jsonl"
+    runtime_sources = output / "runtime-sources.yaml"
+    csv_importer.import_csv(csv_path, output / "reviewed-v2.jsonl", runtime_gold,
+                             runtime_sources, source_manifest, min_questions=2, min_papers=2)
+
+    source_rows = json.loads(source_manifest.read_text(encoding="utf-8"))["sources"]
+    selection = tmp_path / "selection.jsonl"
+    selection.write_text("".join(
+        json.dumps({
+            "root_id": "pt1-" + hashlib.sha256(source["doi"].encode("utf-8")).hexdigest()[:12],
+            "file_name": source["local_pdf"], "relative_path": source["local_pdf"],
+            "sha256": source["pdf_sha256"], "kind": "pdf", "source_type": "original_pdf",
+        }) + "\n" for source in source_rows
+    ), encoding="utf-8")
+    database = tmp_path / "index.sqlite3"
+    index_selection(database, runtime_sources, selection)
+
+    manifest = output / "evaluation-manifest.json"
+    manifest.write_text(json.dumps({
+        "dataset_id": "synthetic-csv-runner-test", "split": "development",
+        "source_type": "synthetic_only", "gold_source": "synthetic_fixture",
+        "gold_file": runtime_gold.name,
+        "gold_sha256": hashlib.sha256(runtime_gold.read_bytes()).hexdigest(),
+        "question_count": 2,
+    }), encoding="utf-8")
+    report = run_evaluation(database, runtime_gold, manifest, output / "report.json",
+                            k=1, modes=("bm25",), minimum_questions=2)
+    assert report["evaluation"]["answerable_questions"] == 1
+    assert report["evaluation"]["unanswerable_questions"] == 1
+    assert report["run_manifest"]["gold_source"] == "synthetic_fixture"
 
 
 def test_csv_import_cli_runs_all_steps_with_one_command(tmp_path, monkeypatch, capsys):
