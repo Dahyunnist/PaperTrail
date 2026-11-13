@@ -47,7 +47,7 @@ compare_modes(SQLite index, fixed k, named modes)
   --k 5 --minimum-questions 5 --modes bm25 hybrid
 ```
 
-本轮定向 pytest 为 **25 passed**（CSV importer、运行入口、检索 evaluator 与 manifest 校验）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。最近全量测试记录为 169 passed、1 项因测试宿主禁止绑定 loopback 被拦截；该环境限制不是应用断言通过。
+本轮定向 pytest 为 **25 passed**（CSV importer、运行入口、检索 evaluator 与 manifest 校验）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。本轮全量 pytest 为 173 passed、1 failed；失败项需要在 `127.0.0.1` 绑定 HTTP mock，测试宿主以 Windows `WinError 10013` 拒绝该 socket，属于宿主限制，未通过项不计入通过；该环境限制不是应用断言通过。
 
 ## 用户亲手实验（10–20 分钟）
 
