@@ -663,6 +663,27 @@ def test_unanswerable_no_evidence_is_a_refusal_not_budget_block(tmp_path, monkey
     assert result["usage"]["_diagnostics"]["completion_state"] == "refused"
 
 
+def test_answerable_question_with_wrong_empty_refusal_is_rejected(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    db, _ = _indexed_db(tmp_path)
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "wrong-refusal-test")
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": [0], "targeted_query": "", "sufficient": True, "usage": {},
+    })
+    monkeypatch.setattr(qa, "_sentences", lambda _text: [
+        "CTGAN evaluates mixed continuous and discrete columns with reliable likelihood and utility measurements."])
+    monkeypatch.setattr(qa, "_validate_quote", lambda *_args: True)
+    monkeypatch.setattr(qa, "_synthesize_local", lambda *_args: {
+        "claims": [], "coverage_complete": False, "coverage_requirements": ["state what CTGAN evaluates"],
+        "covered_subquestions": [], "coverage_gaps": ["supported answer omitted"],
+        "generation_retry_used": False, "usage": {},
+    })
+    result = qa.ask(db, "What does CTGAN evaluate?", mode="bm25")
+    assert result["status"] == "abstained"
+    assert result["completion_state"] == "refused"
+    assert not result["claims"]
+
+
 def test_qa_runs_one_focused_retrieval_when_screen_finds_gap(tmp_path, monkeypatch):
     import papertrail.qa as qa
     from papertrail.retrieval import retrieve as real_retrieve
