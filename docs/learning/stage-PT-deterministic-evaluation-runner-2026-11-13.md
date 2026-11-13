@@ -26,6 +26,8 @@ compare_modes(SQLite index, fixed k, named modes)
 - 检索模式和 `k` 固定为命令参数。gold 指标与逐题 trace 放在 `evaluation`；壁钟耗时、执行时间、Python 和平台放在 `runtime`，避免把机器噪声混入检索质量指标。
 - 报告只写数据集标签、哈希和聚合/逐题检索结果，不复制 source manifest 路径或文献全文。现阶段 source manifest 必须是公开、安全可提交的冻结清单。
 - 入口不调用生成模型。它测检索，不测回答忠实度或端到端问答质量。
+- 新报告附带 `run_manifest`，对齐四项目运行规范：绑定 Git、数据集/gold、split、评分器、运行/trace ID、预算、时间与状态。无模型评测使用 `model_id=none`、来源清单明确声明的 gold 来源、零成本；不适用的 prompt/tool/runtime 哈希与 token 预算写 `null`，不能伪造模型元数据。
+- 额外记录 source manifest/gold SHA、来源类型、检索模式、`k`、总题数和报告指纹。manifest 在报告写盘前校验；无效身份、哈希、时间或模型边界都会拒绝输出。
 
 ## 失败路径
 
@@ -44,7 +46,7 @@ compare_modes(SQLite index, fixed k, named modes)
   --k 5 --minimum-questions 5 --modes bm25 hybrid
 ```
 
-本阶段相关 pytest 为 **13 passed**（`test_evaluate_run.py`、`test_evaluate.py`、`test_run_manifest.py`）；当前全套为 **170 passed**，`git diff --check` 通过。测试只运行临时合成 PDF fixture，未访问 `E:\毕设` 私人目录，也没有产出真实论文的指标；不能外推为语料评测成绩。
+本轮定向 pytest 为 **16 passed**（`test_evaluate_run.py`、`test_evaluate.py`、`test_run_manifest.py`）；`git diff --check` 通过。测试只运行临时合成 PDF fixture，没有读取 E 盘毕设论文或调用模型，也没有产出真实论文指标；不能外推为语料评测成绩。最近全量测试记录为 169 passed、1 项因测试宿主禁止绑定 loopback 被拦截；该环境限制不是应用断言通过。
 
 ## 用户亲手实验（10–20 分钟）
 
