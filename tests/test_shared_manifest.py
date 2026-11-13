@@ -1,6 +1,6 @@
 import pytest
 
-from papertrail.shared_manifest import to_shared_manifest
+from papertrail.shared_manifest import to_shared_manifest, validate_shared_manifest
 
 
 def _pt_manifest():
@@ -32,3 +32,23 @@ def test_shared_manifest_rejects_private_fields():
     manifest["absolute_path"] = "E:/private/paper.pdf"
     with pytest.raises(ValueError, match="private field rejected"):
         to_shared_manifest(manifest)
+
+
+@pytest.mark.parametrize("change, message", [
+    ({"dataset_sha256": "bad"}, "dataset_sha256 invalid"),
+    ({"ended_at": "2026-11-12T00:00:00+00:00"}, "timestamp order invalid"),
+    ({"cost_usd": -1}, "cost_usd_estimate invalid"),
+    ({"split": "E:/private/set"}, "private path value rejected"),
+])
+def test_shared_manifest_rejects_bad_values(change, message):
+    source = _pt_manifest()
+    source.update(change)
+    with pytest.raises(ValueError, match=message):
+        to_shared_manifest(source)
+
+
+def test_shared_manifest_validator_rejects_path_in_value():
+    shared = to_shared_manifest(_pt_manifest())
+    shared["dataset_id"] = "/home/user/private"
+    with pytest.raises(ValueError, match="private path value rejected"):
+        validate_shared_manifest(shared)
