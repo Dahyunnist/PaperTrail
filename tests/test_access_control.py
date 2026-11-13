@@ -167,8 +167,10 @@ def test_jsonl_search_export_applies_acl_and_omits_content(tmp_path):
     records_b = [json.loads(line) for line in response_b.data.decode().splitlines()]
     assert {row["source_sha256"] for row in records_a} == {rows[0]["sha256"]}
     assert {row["source_sha256"] for row in records_b} == {rows[1]["sha256"]}
-    assert all(set(row) == {"query_id", "source_sha256", "pdf_page", "chunk_id", "rank_score"}
+    assert response_a.headers["X-Export-Scope"] == "retrieval-only"
+    assert all(set(row) == {"record_type", "query_id", "source_sha256", "pdf_page", "chunk_id", "rank_score"}
                for row in records_a + records_b)
+    assert all(row["record_type"] == "retrieval_result" for row in records_a + records_b)
     assert "alpha-only-needle" not in response_a.get_data(as_text=True)
 
 

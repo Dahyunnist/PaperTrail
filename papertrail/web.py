@@ -144,13 +144,14 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                         continue
                 except ValueError:
                     continue
-                records.append({"query_id": request.args.get("query_id"), "source_sha256": metadata["sha256"],
+                records.append({"record_type": "retrieval_result", "query_id": request.args.get("query_id"), "source_sha256": metadata["sha256"],
                                 "pdf_page": page, "chunk_id": row["chunk_id"],
                                 "rank_score": row["rank_score"]})
             body = "".join(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
                            for record in records)
             response = make_response(body)
             response.headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
+            response.headers["X-Export-Scope"] = "retrieval-only"
             response.headers["Cache-Control"] = "no-store"
             return response
         except (TypeError, ValueError) as exc:

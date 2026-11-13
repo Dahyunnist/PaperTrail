@@ -22,3 +22,10 @@
 
 补充后的相关测试 18 passed；全套 191 passed、1 failed，唯一失败仍为 loopback Ollama 集成测试受宿主 WinError 10013 限制。
 
+
+
+### 导出范围说明
+
+`/api/search.jsonl` 仅是 retrieval export，不输出 question、answer、claims 或证据片段，不能用于人工 answer scoring。响应头 `X-Export-Scope: retrieval-only` 与每行 `record_type=retrieval_result` 明确标注范围。跨用户、过期来源、结果结构回归均通过；无需把检索记录伪装成答案评测。answer-eval JSONL 需独立适配实际 QA 回答 API，并逐条应用同一 collection ACL。
+
+范围标记定向测试 9 passed；全套 191 passed、1 failed（loopback bind 宿主限制）。
