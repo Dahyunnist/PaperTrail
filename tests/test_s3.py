@@ -500,6 +500,76 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     assert result["missing_subquestions"] == ["What result does Paper B report?"]
 
 
+def test_cross_paper_missing_retrieval_slot_stays_partial_without_fabricated_citation(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    from papertrail.retrieval import retrieve as real_retrieve
+
+    corpus = tmp_path / "corpus"
+    source_rows = [
+        ("alpha.pdf", "Alpha Synthetic Study", "Alpha uses wavelet calibration for its samples."),
+        ("beta.pdf", "Beta Synthetic Study", "Beta reports recovery after treatment."),
+    ]
+    selections = []
+    for filename, title, text in source_rows:
+        doc = fitz.open()
+        page = doc.new_page()
+        page.insert_text((40, 60), title, fontsize=16)
+        page.insert_text((40, 100), text, fontsize=11)
+        path = corpus / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        doc.save(path)
+        doc.close()
+        selections.append({"root_id": "papers", "file_name": filename,
+                           "relative_path": filename, "sha256": _hash(path),
+                           "kind": "pdf", "source_type": "original_pdf"})
+
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "papers", "path": str(corpus)}]}),
+                      encoding="utf-8")
+    manifest = tmp_path / "selection.jsonl"
+    manifest.write_text("".join(json.dumps(row) + "\n" for row in selections), encoding="utf-8")
+    db = tmp_path / "local" / "papers.sqlite3"
+    assert index_selection(db, config, manifest)["added"] == 2
+
+    monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "cross-paper-slot-test")
+    subquestions = ["What method does Alpha use?", "What result does Beta report?"]
+    monkeypatch.setattr(qa, "_plan_subquestions", lambda *_args: {
+        "subquestions": subquestions, "usage": {},
+    })
+    queries = []
+
+    def retrieve_for_slot(database, query, *args, **kwargs):
+        queries.append(query)
+        if "Beta" in query:
+            return []
+        return real_retrieve(database, "wavelet calibration Alpha", *args, **kwargs)
+
+    monkeypatch.setattr(qa, "retrieve", retrieve_for_slot)
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": [0] if rows else [], "targeted_query": "", "sufficient": bool(rows), "usage": {},
+    })
+    monkeypatch.setattr(qa, "_synthesize_local", lambda *_args: {
+        "claims": [{"text": "Alpha uses wavelet calibration.", "evidence_ids": [0],
+                    "subquestion_ids": [0], "support": "supported", "relevant": True,
+                    "support_method": "test_judge"}],
+        "coverage_complete": False, "covered_subquestions": [0],
+        "coverage_requirements": ["Alpha method", "Beta result"],
+        "coverage_gaps": ["Beta result evidence missing"],
+        "generation_retry_used": False, "usage": {},
+    })
+
+    result = qa.ask(db, "Compare Alpha's method with Beta's result.", mode="bm25")
+
+    assert queries[:2] == subquestions
+    assert result["status"] == "generated_partial"
+    assert result["completion_state"] == "partial"
+    assert result["claims"][0]["subquestion_ids"] == [0]
+    assert result["missing_subquestions"] == [subquestions[1]]
+    assert "Beta result evidence missing" in result["answer"]
+    citation_hashes = {row["sha256"] for row in result["claims"][0]["support_evidence"]}
+    assert citation_hashes == {_hash(corpus / "alpha.pdf")}
+
+
 def test_qa_preserves_supported_partial_answer_and_logs_reason(tmp_path, monkeypatch):
     import papertrail.qa as qa
 
