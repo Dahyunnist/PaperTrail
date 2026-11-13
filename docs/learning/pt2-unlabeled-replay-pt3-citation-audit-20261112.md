@@ -31,3 +31,8 @@
 ```
 
 无标签回归检查结果不含 query 原文、PDF 文本和本机路径；整个验证没有读取私人来源或调用模型。
+
+## PT-3 部分覆盖回归复核（2026-11-13）
+
+tests/test_s3.py::test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer 验证保留已支持结论并报告 missing 子问题；	ests/test_s3.py::test_qa_preserves_supported_partial_answer_and_logs_reason 验证 API/历史状态为 generated_partial，而非完整或整体拒答。两项通过。行为由 fake generator 驱动，不调用模型；未改 gold。真实 PT-3 人工 gold 仍待标注。
+
