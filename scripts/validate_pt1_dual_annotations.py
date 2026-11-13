@@ -123,7 +123,7 @@ def validate(annotations_path: Path | list[Path], tasks_path: Path = DEFAULT_TAS
                 issues.append(f"line {line_no}: unknown task id")
                 continue
             if not isinstance(annotator_id, str) or not annotator_id.strip():
-                issues.append(f"line {line_no}: annotator_id must be nonempty")
+                issues.append(f"{task_id}: annotator_id must be nonempty")
                 annotator_id = f"invalid-line-{line_no}"
             bucket = grouped[task_id]
             if any(item.get("annotator_id") == annotator_id for item in bucket):
@@ -165,6 +165,10 @@ def validate(annotations_path: Path | list[Path], tasks_path: Path = DEFAULT_TAS
             if not isinstance(evidence, list):
                 issues.append(f"{prefix}: evidence must be a list")
                 evidence = []
+            evidence_ids = [json.dumps(item, ensure_ascii=False, sort_keys=True, default=str)
+                            for item in evidence if isinstance(item, dict)]
+            if len(evidence_ids) != len(set(evidence_ids)):
+                issues.append(f"{prefix}: duplicate evidence reference")
             if answerability == "answerable" and not evidence:
                 issues.append(f"{prefix}: answerable annotation needs evidence")
             if answerability in {"unanswerable", "ambiguous"} and evidence:

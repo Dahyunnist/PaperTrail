@@ -28,4 +28,4 @@
 
 标注者在问题、答案性、答案或证据集合上有分歧时，报告标 `pending_adjudication` 并列出冲突字段。校验器不平均答案、不合并引文、不猜最终结论。`ambiguous` 需先改写问题，再交仲裁。标注结构或来源校验失败时标 `invalid_annotations`；缺少两名不同标注者时标 `insufficient_independent_annotations`。无分歧只标 `agreement_pending_final_review`，不导出 gold；仍需按现有流程由复核者确认。报告不含答案、引文、PDF 路径或文本。
 
-验证：PT-1 双人校验器、现有空白任务模板、CSV 导入器、单人 JSONL 校验器和最小标注包相关回归共 **28 passed**。只用临时合成 PDF 和现有空白模板校验；未读取 PT-1 真实 PDF、未填写真实 gold、未调用模型。双人标注身份仍需由项目流程确认。
+验证：PT-1 双人校验器、现有空白任务模板、CSV 导入器、单人 JSONL 校验器和最小标注包相关回归共 **38 passed**。重复标注、重复证据引用、缺失标注者、字段、DOI/SHA、页码/span 与仲裁状态均有合成负例。只用临时合成 PDF 和现有空白模板校验；未读取 PT-1 真实 PDF、未填写真实 gold、未调用模型。双人标注身份仍需由项目流程确认。

@@ -37,4 +37,4 @@
 .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .tmp/pytest-pt1-delivery tests/test_pt1_dual_task_export.py tests/test_pt1_dual_annotation_validator.py tests/test_pt1_human_annotation_task.py tests/test_pt1_human_csv_import.py tests/test_pt1_gold_jsonl_validator.py tests/test_pt1_minimal_annotation_package.py
 ```
 
-本轮 **36 passed**。覆盖测试使用合成元数据、临时合成 PDF 与空白任务模板；30/40 核对只读现有匿名包、CSV 和 manifest，不读 PDF、不填答案。PT-2 合成回放只作为可复现技术证据，不外推为真实论文质量提升。
+本轮相关双人 CSV、导入、来源校验及模板回归 **38 passed**。覆盖测试使用合成元数据、临时合成 PDF 与空白任务模板；30/40 核对只读现有匿名包、CSV 和 manifest，不读 PDF、不填答案。PT-2 合成回放只作为可复现技术证据，不外推为真实论文质量提升。

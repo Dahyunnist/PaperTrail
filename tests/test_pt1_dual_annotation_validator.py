@@ -102,6 +102,24 @@ def test_validator_requires_two_distinct_independent_annotators(tmp_path, monkey
     assert report[0]["status"] == "insufficient_independent_annotations"
 
 
+def test_validator_rejects_duplicate_evidence_and_marks_row_invalid(tmp_path, monkeypatch):
+    annotations, tasks, manifest, rows, _ = _fixture(tmp_path, monkeypatch)
+    rows[0]["evidence"].append(copy.deepcopy(rows[0]["evidence"][0]))
+    annotations.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    issues, report = validator.validate(annotations, tasks, manifest)
+    assert any("duplicate evidence reference" in issue for issue in issues)
+    assert report[0]["status"] == "invalid_annotations"
+
+
+def test_blank_annotator_id_marks_task_invalid(tmp_path, monkeypatch):
+    annotations, tasks, manifest, rows, _ = _fixture(tmp_path, monkeypatch)
+    rows[0]["annotator_id"] = " "
+    annotations.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    issues, report = validator.validate(annotations, tasks, manifest)
+    assert any("annotator_id must be nonempty" in issue for issue in issues)
+    assert report[0]["status"] == "invalid_annotations"
+
+
 def test_cli_writes_conflicts_as_pending_without_annotation_content(tmp_path, monkeypatch):
     annotations, tasks, manifest, rows, _ = _fixture(tmp_path, monkeypatch)
     rows[1]["expected_answer"] = "A different synthetic answer."
