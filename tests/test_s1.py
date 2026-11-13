@@ -228,6 +228,71 @@ def test_reconcile_parse_failure_keeps_published_index_then_retry_succeeds(tmp_p
         conn.close()
 
 
+def test_reconcile_write_failure_rolls_back_entire_batch_then_retry_succeeds(tmp_path, monkeypatch):
+    import papertrail.s1_index as indexer
+
+    root = tmp_path / "papers"
+    root.mkdir()
+    paths = [root / "one.pdf", root / "two.pdf"]
+    _pdf(paths[0], "published first anchor remains available after transaction rollback.")
+    _pdf(paths[1], "published second anchor remains available after transaction rollback.")
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "approved", "path": str(root)}]}), encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+
+    def write_selection():
+        selection.write_text("".join(json.dumps({
+            "root_id": "approved", "file_name": path.name, "relative_path": path.name,
+            "sha256": _hash(path), "kind": "pdf", "source_type": "original_pdf",
+        }) + "\n" for path in paths), encoding="utf-8")
+
+    db = tmp_path / "index.sqlite3"
+    write_selection()
+    indexer.index_selection(db, config, selection, reconcile=True)
+
+    def snapshot():
+        conn = sqlite3.connect(db)
+        try:
+            tables = ("papers", "paper_versions", "source_locations", "sections", "chunks",
+                      "chunks_fts", "version_dois", "app_metadata")
+            return {table: conn.execute(f"SELECT * FROM {table} ORDER BY 1").fetchall()
+                    for table in tables}
+        finally:
+            conn.close()
+
+    before = snapshot()
+    old_hashes = [_hash(path) for path in paths]
+    for index, path in enumerate(paths):
+        path.unlink()
+        _pdf(path, f"replacement batch {index} has a new anchor after successful retry.")
+    write_selection()
+
+    original_insert = indexer._insert_document
+    calls = 0
+
+    def fail_second_insert(conn, item, parsed):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("injected second document write failure")
+        return original_insert(conn, item, parsed)
+
+    monkeypatch.setattr(indexer, "_insert_document", fail_second_insert)
+    with pytest.raises(RuntimeError, match="injected second document write failure"):
+        indexer.index_selection(db, config, selection, reconcile=True)
+
+    assert snapshot() == before
+    assert indexer.search(db, "published first anchor", source_type="original_pdf")
+    assert indexer.search(db, "published second anchor", source_type="original_pdf")
+    assert not indexer.search(db, "replacement batch", source_type="original_pdf")
+
+    monkeypatch.setattr(indexer, "_insert_document", original_insert)
+    result = indexer.index_selection(db, config, selection, reconcile=True)
+    assert result["added"] == 2 and not result["issues"]
+    assert indexer.search(db, "replacement batch", source_type="original_pdf")
+    assert all(not indexer.inspect_document(db, digest) for digest in old_hashes)
+
+
 def test_two_column_blocks_are_ordered_by_column_with_full_width_anchor():
     def block(text, bbox):
         return {"type": 0, "bbox": bbox, "text": text}

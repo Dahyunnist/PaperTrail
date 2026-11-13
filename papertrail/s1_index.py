@@ -531,13 +531,15 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
             config = yaml.safe_load(sources.read_text(encoding="utf-8"))
             root_ids = [root["id"] for root in config.get("roots", [])]
             selected_paths = {(item["root_id"], str(item["path"])) for item in selected}
-            with conn:
-                for root_id in root_ids:
-                    existing_paths = [row[0] for row in conn.execute(
-                        "SELECT absolute_path FROM source_locations WHERE root_id=?", (root_id,))]
-                    for old_path in existing_paths:
-                        if (root_id, old_path) not in selected_paths:
-                            locations_changed |= _detach_location(conn, root_id, old_path)
+            # Reconciliation publishes one consistent corpus snapshot. Keep source
+            # detachment, document/FTS writes, and revision update in one transaction.
+            conn.execute("BEGIN")
+            for root_id in root_ids:
+                existing_paths = [row[0] for row in conn.execute(
+                    "SELECT absolute_path FROM source_locations WHERE root_id=?", (root_id,))]
+                for old_path in existing_paths:
+                    if (root_id, old_path) not in selected_paths:
+                        locations_changed |= _detach_location(conn, root_id, old_path)
         for item_number, item in enumerate(selected, 1):
             if item["sha256"] in seen_sha:
                 existing = conn.execute("SELECT version_id FROM paper_versions WHERE sha256=?", (item["sha256"],)).fetchone()
@@ -553,9 +555,13 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                 parsed = parsed_batch[item["sha256"]] if reconcile else (
                     parse_pdf(item["path"], item["source_type"], ocr_fallback)
                     if item["kind"] == "pdf" else parse_markdown(item["path"], item["source_type"]))
-                with conn:
+                if reconcile:
                     locations_changed |= _detach_location(conn, item["root_id"], str(item["path"]), item["sha256"])
                     counts = _insert_document(conn, item, parsed)
+                else:
+                    with conn:
+                        locations_changed |= _detach_location(conn, item["root_id"], str(item["path"]), item["sha256"])
+                        counts = _insert_document(conn, item, parsed)
                 totals["added"] += counts["added"]
                 totals["duplicates"] += counts["duplicate"]
                 totals["sections"] += counts["sections"]
@@ -568,13 +574,20 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
                 if parsed.ocr_pages:
                     issues.append({"file_name": item["file_name"], "issue": "ocr_derived_pages", "pages": ",".join(map(str, parsed.ocr_pages))})
             except Exception as exc:
+                if reconcile:
+                    raise
                 issues.append({"file_name": item["file_name"], "issue": f"{type(exc).__name__}: {exc}"})
             if progress_callback:
                 progress_callback(item_number, len(selected), item["file_name"])
-        conn.commit()
-        if totals["added"] or locations_changed:
-            conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
+        if reconcile:
+            if totals["added"] or locations_changed:
+                conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
             conn.commit()
+        else:
+            conn.commit()
+            if totals["added"] or locations_changed:
+                conn.execute("UPDATE app_metadata SET value=CAST(value AS INTEGER)+1 WHERE key='index_revision'")
+                conn.commit()
     finally:
         conn.close()
     totals["issues"] = issues
