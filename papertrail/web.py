@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 import yaml
 
-from .access import LOCAL_PRINCIPAL, Principal, read_evidence, search_papers
+from .access import LOCAL_PRINCIPAL, Principal, document_metadata, read_evidence, search_papers
 from .audit import _hash
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 from .qa import ask, conversation_history
@@ -122,6 +122,37 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                      "section": row["section"], "score": row["rank_score"], "chunk_id": row["chunk_id"]}
                     for row in results]
             return jsonify({"results": safe})
+        except (TypeError, ValueError) as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.get("/api/search.jsonl")
+    def search_jsonl_export() -> Any:
+        query = request.args.get("q", "").strip()
+        if not query:
+            return jsonify({"error": "q is required"}), 400
+        try:
+            limit = min(20, max(1, int(request.args.get("limit", "5"))))
+            results = search_papers(app.config["DATABASE"], query, g.principal, limit=limit)
+            records = []
+            for row in results:
+                page = row.get("pdf_page")
+                if not isinstance(page, int) or page < 1:
+                    continue
+                try:
+                    metadata = document_metadata(app.config["DATABASE"], row["sha256"], g.principal)
+                    if page > metadata["page_count"]:
+                        continue
+                except ValueError:
+                    continue
+                records.append({"query_id": request.args.get("query_id"), "source_sha256": metadata["sha256"],
+                                "pdf_page": page, "chunk_id": row["chunk_id"],
+                                "rank_score": row["rank_score"]})
+            body = "".join(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
+                           for record in records)
+            response = make_response(body)
+            response.headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store"
+            return response
         except (TypeError, ValueError) as exc:
             return jsonify({"error": str(exc)}), 400
 

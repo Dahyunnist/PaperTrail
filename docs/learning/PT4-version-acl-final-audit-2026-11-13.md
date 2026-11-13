@@ -15,3 +15,10 @@
 本轮命令 `python -m pytest tests/test_s1.py tests/test_access_control.py tests/test_mcp_server.py tests/test_s5_web.py tests/test_s4.py tests/test_reward.py -q`：27 passed。全套 pytest：189 passed、1 failed。唯一失败为 `tests/test_local_llm.py::test_local_chat_client_uses_loopback_ollama_json_api`，宿主禁止测试服务器 bind `127.0.0.1`（WinError 10013）；保留原集成测试及断言，另有 `test_ollama_json_contract_with_injected_transport` 验证同一 HTTP 请求契约，不开 socket、不调用模型。
 
 没有新增未经核验的论文数据。没有运行模型。`.tmp/` 未暂存。PT-4 多租户仍需可信身份契约；当前有效 Principal 不代表跨用户工作区隔离。
+
+## JSONL 检索导出补充验收
+
+新增 GET /api/search.jsonl?q=...&query_id=...，复用 search_papers 的 Principal/collection ACL。每行仅含 query_id、source SHA-256、物理页码、chunk_id 与 rank_score；不会输出正文、路径或标题。导出逐条校验来源文件当前 SHA 和页码，过期来源省略；无权来源由 SQL ACL 排除。测试：	ests/test_access_control.py::test_jsonl_search_export_applies_acl_and_omits_content、	est_jsonl_search_export_omits_stale_source_after_hash_changes。
+
+补充后的相关测试 18 passed；全套 191 passed、1 failed，唯一失败仍为 loopback Ollama 集成测试受宿主 WinError 10013 限制。
+

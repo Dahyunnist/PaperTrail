@@ -156,6 +156,37 @@ def test_reindex_keeps_existing_collection_owner(tmp_path, monkeypatch):
         database, "beta-only-needle", Principal("local-dev"))}
 
 
+def test_jsonl_search_export_applies_acl_and_omits_content(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    client = create_app(database).test_client()
+    principal_a = {"papertrail.principal": Principal("local-dev")}
+    principal_b = {"papertrail.principal": Principal("user-b")}
+    response_a = client.get("/api/search.jsonl?q=collection%20evidence", environ_overrides=principal_a)
+    response_b = client.get("/api/search.jsonl?q=collection%20evidence", environ_overrides=principal_b)
+    records_a = [json.loads(line) for line in response_a.data.decode().splitlines()]
+    records_b = [json.loads(line) for line in response_b.data.decode().splitlines()]
+    assert {row["source_sha256"] for row in records_a} == {rows[0]["sha256"]}
+    assert {row["source_sha256"] for row in records_b} == {rows[1]["sha256"]}
+    assert all(set(row) == {"query_id", "source_sha256", "pdf_page", "chunk_id", "rank_score"}
+               for row in records_a + records_b)
+    assert "alpha-only-needle" not in response_a.get_data(as_text=True)
+
+
+def test_jsonl_search_export_omits_stale_source_after_hash_changes(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    pdf = tmp_path / "papers" / "alpha.pdf"
+    replacement = fitz.open()
+    page = replacement.new_page()
+    page.insert_text((40, 60), "alpha revised with changed source bytes")
+    replacement.save(pdf)
+    replacement.close()
+    response = create_app(database).test_client().get(
+        "/api/search.jsonl?q=alpha%20collection%20evidence",
+        environ_overrides={"papertrail.principal": Principal("local-dev")})
+    records = [json.loads(line) for line in response.data.decode().splitlines()]
+    assert rows[0]["sha256"] not in {row["source_sha256"] for row in records}
+
+
 def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp(tmp_path):
     database, rows = _indexed_library(tmp_path)
     root = tmp_path / "papers"
