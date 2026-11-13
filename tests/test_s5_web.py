@@ -203,7 +203,9 @@ def test_web_requires_trusted_principal_when_authentication_is_required(tmp_path
 def test_web_rejects_invalid_identity_provider_result(tmp_path):
     app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
     app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True, PRINCIPAL_PROVIDER=lambda: None)
-    assert app.test_client().get("/reports/study.json").status_code == 401
+    client = app.test_client()
+    assert client.get("/reports/study.json").status_code == 401
+    assert client.post("/compare/evidence/evidence-1/label").status_code == 401
 
 
 def test_web_review_passes_trusted_principal_to_audit_record(tmp_path, monkeypatch):
@@ -224,3 +226,17 @@ def test_web_review_passes_trusted_principal_to_audit_record(tmp_path, monkeypat
         environ_overrides={"papertrail.principal": Principal("reviewer-a")})
     assert response.status_code == 302
     assert seen["reviewer_id"] == "reviewer-a"
+
+
+def test_web_rejects_cross_workspace_export_and_review_overrides(tmp_path):
+    from papertrail.access import Principal
+
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True,
+                      PRINCIPAL_PROVIDER=lambda: Principal("reviewer-a"))
+    client = app.test_client()
+    assert client.get("/reports/study.json?workspace_id=other").status_code == 403
+    token = _csrf(client.get("/"))
+    assert client.post("/compare/evidence/evidence-1/label", data={
+        "_csrf": token, "workspace_id": "other", "comparison_id": "c",
+        "label": "supports"}).status_code == 403

@@ -224,6 +224,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
 
     @app.post("/compare/evidence/<evidence_id>/label")
     def annotate_evidence(evidence_id: str) -> Any:
+        if "workspace_id" in request.form:
+            abort(403, "跨工作区审阅不受支持。")
         comparison_id = request.form.get("comparison_id", "")
         try:
             label_evidence(app.config["DATABASE"], evidence_id,
@@ -248,6 +250,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
 
     @app.get("/reports/study.json")
     def export_report() -> Any:
+        if "workspace_id" in request.args:
+            abort(403, "跨工作区导出不受支持。")
         payload = json.dumps(study_report(app.config["DATABASE"]), ensure_ascii=False, indent=2)
         response = make_response(payload)
         response.headers["Content-Type"] = "application/json; charset=utf-8"

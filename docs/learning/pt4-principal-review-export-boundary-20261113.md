@@ -2,6 +2,8 @@
 
 Web 本机单用户模式仍默认使用 `local-dev`。配置 `REQUIRE_PRINCIPAL=True` 后，缺失 Principal 或身份提供器返回无效值时请求以 401 失败；请求体的 `user_id` 不能充当身份。生产认证仍由可信身份提供器注入，仓库没有伪造登录或 token 验证。
 
+学习报告导出和证据审阅路由拒绝显式 `workspace_id` 覆盖（403）；应用不接受由请求参数切换工作区。每个服务实例仍固定一个数据库。
+
 集合 ACL 继续隔离论文检索、页证据和 MCP 资源。工作区笔记、QA 历史、比较、上传记录及学习报告仍共用一个 SQLite 数据库，尚无 owner 列或按 Principal 分库。因此当前产品边界是单用户本机，不是多租户；即使 Principal 有效，也不能把同一数据库部署给互不信任用户。导出报告是整个本机工作区报告，不提供按用户过滤。
 
 比较证据标注现在持久化 `reviewer_id` 与 `labeled_at`；QA 轨迹评分持久化 `reviewer_id` 与 `rated_at`。Web 标注从可信 Principal 传入审阅者 ID；CLI 与旧调用默认 `local-dev`。启用 `PAPERTRAIL_TRACE_JSONL` 时，两类操作另发隐私受限 `human.reviewed` 事件。SQLite 审阅字段是持久审计记录；JSONL 追踪仍是可选记录。
