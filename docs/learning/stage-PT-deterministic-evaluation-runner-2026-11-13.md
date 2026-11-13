@@ -44,7 +44,7 @@ compare_modes(SQLite index, fixed k, named modes)
   --k 5 --minimum-questions 5 --modes bm25 hybrid
 ```
 
-本阶段相关 pytest 为 **10 passed**（`test_evaluate_run.py`、`test_evaluate.py`、`test_run_manifest.py`），`git diff --check` 通过。测试只运行临时合成 PDF fixture，未访问 `E:\毕设` 私人目录，也没有产出真实论文的指标；不能外推为语料评测成绩。
+本阶段相关 pytest 为 **13 passed**（`test_evaluate_run.py`、`test_evaluate.py`、`test_run_manifest.py`）；当前全套为 **170 passed**，`git diff --check` 通过。测试只运行临时合成 PDF fixture，未访问 `E:\毕设` 私人目录，也没有产出真实论文的指标；不能外推为语料评测成绩。
 
 ## 用户亲手实验（10–20 分钟）
 
