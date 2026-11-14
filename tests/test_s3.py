@@ -566,7 +566,18 @@ def test_cross_paper_missing_retrieval_slot_stays_partial_without_fabricated_cit
     assert result["claims"][0]["subquestion_ids"] == [0]
     assert result["missing_subquestions"] == [subquestions[1]]
     assert "Beta result evidence missing" in result["answer"]
-    citation_hashes = {row["sha256"] for row in result["claims"][0]["support_evidence"]}
+    assert "（部分回答；未覆盖：Beta result evidence missing" in result["answer"]
+    support = result["claims"][0]["support_evidence"]
+    assert len(support) == 1
+    citation = support[0]
+    assert citation["sha256"] == _hash(corpus / "alpha.pdf")
+    assert citation["pdf_page"] == 1
+    assert "wavelet calibration" in citation["quote"].casefold()
+    assert result["claims"][0]["evidence"]["pdf_page"] == citation["pdf_page"]
+    assert result["claims"][0]["evidence"]["quote"] == citation["quote"]
+    assert _validate_quote(str(corpus / "alpha.pdf"), citation["sha256"],
+                           citation["pdf_page"], citation["quote"], {})
+    citation_hashes = {row["sha256"] for row in support}
     assert citation_hashes == {_hash(corpus / "alpha.pdf")}
 
 
