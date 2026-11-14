@@ -189,6 +189,123 @@ def test_jsonl_search_export_omits_stale_source_after_hash_changes(tmp_path):
     assert rows[0]["sha256"] not in {row["source_sha256"] for row in records}
 
 
+def test_answer_eval_export_denies_foreign_principal_even_for_empty_claims(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    database, _rows = _indexed_library(tmp_path)
+    monkeypatch.delenv("PAPERTRAIL_LLM_MODEL", raising=False)
+    result = qa.ask(database, "notpresenttoken", mode="bm25", generate=False)
+    assert result["claims"] == []
+    response = create_app(database).test_client().get(
+        f"/api/answer-eval/{result['conversation_id']}.jsonl",
+        environ_overrides={"papertrail.principal": Principal("user-b")})
+    assert response.status_code == 404
+
+
+def _qa_claim_fixture(tmp_path, quote=None):
+    database, rows = _indexed_library(tmp_path)
+    digest = rows[0]["sha256"]
+    pdf = tmp_path / "papers" / "alpha.pdf"
+    with fitz.open(pdf) as doc:
+        page_text = doc[0].get_text("text")
+    quote = quote or page_text.strip()
+    import papertrail.qa as qa
+    conn = open_database(database)
+    try:
+        qa._ensure_qa_schema(conn)
+        conn.execute("INSERT INTO qa_conversations(conversation_id,title,created_at,updated_at,owner_id) VALUES(?,?,?,?,?)",
+                     ("answer-eval-fixture", "fixture", "2026-11-13T00:00:00+00:00",
+                      "2026-11-13T00:00:00+00:00", "local-dev"))
+        conn.execute("INSERT INTO qa_turns(turn_id,conversation_id,question,answer,status,retrieval_mode,context_query,created_at,coverage_json,coverage_complete) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                     ("turn-fixture", "answer-eval-fixture", "Fixture question", "Fixture answer",
+                      "generated_claims_reviewed", "bm25", None, "2026-11-13T00:00:00+00:00", "[]", 1))
+        evidence = {"sha256": digest, "pdf_page": 1, "quote": quote, "support_evidence": [
+            {"sha256": digest, "pdf_page": 1, "quote": quote}]}
+        conn.execute("INSERT INTO qa_claims VALUES(?,?,?,?,?)",
+                     ("claim-fixture", "turn-fixture", 1, "Fixture claim", json.dumps(evidence)))
+        conn.commit()
+    finally:
+        conn.close()
+    return database, pdf
+
+
+def test_answer_eval_jsonl_exports_claim_and_truncates_verified_evidence(tmp_path):
+    database, _pdf = _qa_claim_fixture(tmp_path)
+    client = create_app(database).test_client()
+    response = client.get("/api/answer-eval/answer-eval-fixture.jsonl",
+                          environ_overrides={"papertrail.principal": Principal("local-dev")})
+    assert response.status_code == 200
+    record = json.loads(response.data.decode().splitlines()[0])
+    assert record["question"] == "Fixture question" and record["answer"] == "Fixture answer"
+    assert record["claims"][0]["text"] == "Fixture claim"
+    assert record["claims"][0]["evidence"][0]["snippet"]
+    assert record["claims"][0]["evidence"][0]["snippet_truncated"] is False
+    assert record["human_score"] is None and record["reviewer"] is None
+
+
+def test_answer_eval_jsonl_rejects_expired_claim_source(tmp_path):
+    database, pdf = _qa_claim_fixture(tmp_path)
+    doc = fitz.open()
+    doc.new_page().insert_text((40, 60), "replacement source has different bytes")
+    doc.save(pdf)
+    doc.close()
+    response = create_app(database).test_client().get(
+        "/api/answer-eval/answer-eval-fixture.jsonl",
+        environ_overrides={"papertrail.principal": Principal("local-dev")})
+    assert response.status_code == 404
+
+
+def test_answer_eval_jsonl_truncates_long_evidence_snippet(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    pdf = tmp_path / "papers" / "alpha.pdf"
+    long_text = ("verifiable synthetic evidence phrase " * 20).strip()
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_textbox(fitz.Rect(30, 30, 560, 800), long_text, fontsize=9)
+    doc.save(pdf)
+    doc.close()
+    # Reindex fixture to make the replacement SHA an authorized current version.
+    config, selection = tmp_path / "sources.yaml", tmp_path / "selection.jsonl"
+    rows[0]["sha256"] = hashlib.sha256(pdf.read_bytes()).hexdigest()
+    selection.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    index_selection(database, config, selection, reconcile=True)
+    conn = open_database(database)
+    try:
+        import papertrail.qa as qa
+        qa._ensure_qa_schema(conn)
+        ev = {"sha256": rows[0]["sha256"], "pdf_page": 1, "quote": long_text,
+              "support_evidence": [{"sha256": rows[0]["sha256"], "pdf_page": 1, "quote": long_text}]}
+        conn.execute("INSERT INTO qa_conversations(conversation_id,title,created_at,updated_at,owner_id) VALUES(?,?,?,?,?)",
+                     ("long-evidence", "fixture", "now", "now", "local-dev"))
+        conn.execute("INSERT INTO qa_turns(turn_id,conversation_id,question,answer,status,retrieval_mode,context_query,created_at,coverage_json,coverage_complete) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                     ("long-turn", "long-evidence", "q", "a", "generated_partial", "bm25", None, "now", "[]", 0))
+        conn.execute("INSERT INTO qa_claims VALUES(?,?,?,?,?)",
+                     ("long-claim", "long-turn", 1, "claim", json.dumps(ev)))
+        conn.commit()
+    finally:
+        conn.close()
+    response = create_app(database).test_client().get(
+        "/api/answer-eval/long-evidence.jsonl", environ_overrides={"papertrail.principal": Principal("local-dev")})
+    assert response.status_code == 200
+    evout = json.loads(response.data.decode())["claims"][0]["evidence"][0]
+    assert len(evout["snippet"]) == 500 and evout["snippet_truncated"] is True
+
+
+def test_qa_conversation_owner_is_bound_and_checked_on_reuse_and_history(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+    database, _rows = _indexed_library(tmp_path)
+    monkeypatch.delenv("PAPERTRAIL_LLM_MODEL", raising=False)
+    result = qa.ask(database, "notpresenttoken", mode="bm25", generate=False,
+                    conversation_id="owned-conversation", principal_id="user-b")
+    assert result["claims"] == []
+    assert qa.conversation_history(database, "owned-conversation", "user-b")
+    import pytest
+    with pytest.raises(ValueError, match="conversation not found"):
+        qa.conversation_history(database, "owned-conversation", "local-dev")
+    with pytest.raises(ValueError, match="conversation not found"):
+        qa.ask(database, "follow up", conversation_id="owned-conversation",
+               generate=False, principal_id="local-dev")
+
+
 def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp(tmp_path):
     database, rows = _indexed_library(tmp_path)
     root = tmp_path / "papers"

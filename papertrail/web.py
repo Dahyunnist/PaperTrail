@@ -90,7 +90,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             notes=search_notes(app.config["DATABASE"], request.args.get("note_q", "")),
             note_query=request.args.get("note_q", ""), recent_conversations=recent,
             conversation_id=conversation_id,
-            turns=conversation_history(app.config["DATABASE"], conversation_id) if conversation_id else [],
+            turns=conversation_history(app.config["DATABASE"], conversation_id, g.principal.user_id) if conversation_id else [],
             comparison=comparison_report(app.config["DATABASE"], comparison_id) if comparison_id else None,
             can_load_config=sources_config.is_file() and selection_manifest.is_file(),
         )
@@ -156,6 +156,58 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             return response
         except (TypeError, ValueError) as exc:
             return jsonify({"error": str(exc)}), 400
+
+    @app.get("/api/answer-eval/<conversation_id>.jsonl")
+    def answer_eval_export(conversation_id: str) -> Any:
+        try:
+            turns = conversation_history(app.config["DATABASE"], conversation_id, g.principal.user_id)
+        except ValueError:
+            abort(404)
+        if not turns:
+            abort(404)
+        records = []
+        for turn in turns:
+            claims = []
+            if len(turn["claims"]) > 20:
+                return jsonify({"error": "answer evaluation claim limit exceeded"}), 413
+            for claim in turn["claims"]:
+                evidence_rows = claim["evidence"].get("support_evidence") or [claim["evidence"]]
+                safe_evidence = []
+                if len(evidence_rows) > 40:
+                    return jsonify({"error": "answer evaluation evidence limit exceeded"}), 413
+                for item in evidence_rows:
+                    sha = item.get("sha256")
+                    page = item.get("pdf_page")
+                    if not isinstance(sha, str) or not isinstance(page, int):
+                        return jsonify({"error": "invalid evidence reference"}), 409
+                    try:
+                        metadata = document_metadata(app.config["DATABASE"], sha, g.principal)
+                    except ValueError:
+                        return jsonify({"error": "evidence source unavailable or unauthorized"}), 404
+                    if page < 1 or page > metadata["page_count"]:
+                        return jsonify({"error": "evidence page is invalid"}), 409
+                    quote = str(item.get("quote", ""))
+                    try:
+                        source_page = read_evidence(app.config["DATABASE"], sha, page, g.principal)["text"]
+                    except ValueError:
+                        return jsonify({"error": "evidence source unavailable or unauthorized"}), 404
+                    if " ".join(quote.split()).casefold() not in " ".join(source_page.split()).casefold():
+                        return jsonify({"error": "evidence snippet does not match source page"}), 409
+                    snippet = quote[:500]
+                    safe_evidence.append({"source_sha256": metadata["sha256"], "pdf_page": page,
+                                          "snippet": snippet, "snippet_truncated": len(str(item.get("quote", ""))) > 500})
+                claims.append({"text": str(claim["text"])[:1000], "evidence": safe_evidence})
+            records.append({"record_type": "answer_eval", "turn_id": turn["turn_id"],
+                            "question": turn["question"][:500], "answer": turn["answer"][:3000],
+                            "claims": claims, "status": turn["status"],
+                            "coverage_complete": bool(turn["coverage_complete"]) if turn["coverage_complete"] is not None else None,
+                            "human_score": None, "reviewer": None, "review_notes": None})
+        response = make_response("".join(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
+                                               for row in records))
+        response.headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
+        response.headers["X-Export-Scope"] = "answer-evaluation"
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
     @app.get("/api/evidence/<sha256>/<int:page_number>")
     def evidence_api(sha256: str, page_number: int) -> Any:

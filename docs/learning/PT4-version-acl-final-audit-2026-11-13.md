@@ -29,3 +29,17 @@
 `/api/search.jsonl` 仅是 retrieval export，不输出 question、answer、claims 或证据片段，不能用于人工 answer scoring。响应头 `X-Export-Scope: retrieval-only` 与每行 `record_type=retrieval_result` 明确标注范围。跨用户、过期来源、结果结构回归均通过；无需把检索记录伪装成答案评测。answer-eval JSONL 需独立适配实际 QA 回答 API，并逐条应用同一 collection ACL。
 
 范围标记定向测试 9 passed；全套 191 passed、1 failed（loopback bind 宿主限制）。
+
+## QA 会话 owner 迁移
+
+qa_conversations.owner_id 通过兼容迁移加入，历史行默认归 local-dev；新会话按 principal_id 归属。复用 conversation_id、Web history 和 answer-eval export 均校验 owner；越权会话统一 404，包括无 claims 会话。	ests/test_access_control.py 与 	ests/test_s3.py：42 passed。
+
+loopback Ollama 集成测试在受限执行环境曾因 WinError 10013 失败；用户在宿主权限重跑为 1 passed（0.60s）。cache warning 是 .pytest_cache 写入权限提示，不是产品测试失败。
+
+
+## Answer-eval JSONL 与会话归属
+
+QA 会话 owner_id 迁移将旧记录归 local-dev，新会话绑定 principal；复用、history 与导出校验 owner。GET /api/answer-eval/<conversation_id>.jsonl 从已存 QA turn/claims 导出实际 question、answer、claim 和来源页证据；每个来源须通过 Principal ACL、当前文件 SHA 和 PDF 页码检查，否则整份导出失败。question/answer/claim/snippet 分别限 500/3000/1000/500 字，JSONL 提供空白人工评审字段，不含路径或全文。定向 owner/export 测试 5 passed，独立截断测试 1 passed。
+
+全套测试 196 passed、1 failed；唯一失败是受限执行环境拒绝 loopback bind 的 Ollama 本机集成测试。用户此前宿主复跑为 1 passed（0.60s）；受限环境的 pytest cache warning 不代表产品失败。
+

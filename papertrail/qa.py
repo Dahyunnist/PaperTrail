@@ -56,7 +56,7 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
     conn.executescript("""
     CREATE TABLE IF NOT EXISTS qa_conversations (
         conversation_id TEXT PRIMARY KEY, title TEXT NOT NULL,
-        created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL, owner_id TEXT NOT NULL DEFAULT 'local-dev'
     );
     CREATE TABLE IF NOT EXISTS qa_turns (
         turn_id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL
@@ -82,6 +82,9 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
     );
     """)
     columns = {row[1] for row in conn.execute("PRAGMA table_info(qa_turns)")}
+    conversation_columns = {row[1] for row in conn.execute("PRAGMA table_info(qa_conversations)")}
+    if "owner_id" not in conversation_columns:
+        conn.execute("ALTER TABLE qa_conversations ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'local-dev'")
     if "coverage_json" not in columns:
         conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_json TEXT NOT NULL DEFAULT '[]'")
     if "coverage_complete" not in columns:
@@ -485,10 +488,14 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
     try:
         _ensure_qa_schema(conn)
         previous = conn.execute(
-            "SELECT question FROM qa_turns WHERE conversation_id=? ORDER BY created_at DESC LIMIT 1",
-            (conversation_id,)).fetchone()
-        if previous is None and conn.execute(
-                "SELECT 1 FROM qa_conversations WHERE conversation_id=?", (conversation_id,)).fetchone():
+            "SELECT t.question FROM qa_turns t JOIN qa_conversations c USING(conversation_id) "
+            "WHERE t.conversation_id=? AND c.owner_id=? ORDER BY t.created_at DESC LIMIT 1",
+            (conversation_id, principal_id)).fetchone()
+        owner = conn.execute("SELECT owner_id FROM qa_conversations WHERE conversation_id=?",
+                             (conversation_id,)).fetchone()
+        if owner and owner["owner_id"] != principal_id:
+            raise ValueError("conversation not found")
+        if previous is None and owner:
             raise ValueError("该对话尚无历史问题")
         context_query = None
         retrieval_query = question
@@ -814,8 +821,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         exists = conn.execute("SELECT 1 FROM qa_conversations WHERE conversation_id=?",
                               (conversation_id,)).fetchone()
         if not exists:
-            conn.execute("INSERT INTO qa_conversations VALUES(?,?,?,?)",
-                         (conversation_id, question[:120], now, now))
+            conn.execute("INSERT INTO qa_conversations(conversation_id,title,created_at,updated_at,owner_id) VALUES(?,?,?,?,?)",
+                         (conversation_id, question[:120], now, now, principal_id))
         else:
             conn.execute("UPDATE qa_conversations SET updated_at=? WHERE conversation_id=?",
                          (now, conversation_id))
@@ -889,10 +896,15 @@ def _add_usage(left: dict[str, Any] | None, right: dict[str, Any] | None) -> dic
             for key in ("prompt_eval_count", "eval_count", "total_duration", "estimated_usd")}
 
 
-def conversation_history(database: Path, conversation_id: str) -> list[dict[str, Any]]:
+def conversation_history(database: Path, conversation_id: str,
+                         principal_id: str = "local-dev") -> list[dict[str, Any]]:
     conn = open_database(database)
     try:
         _ensure_qa_schema(conn)
+        owner = conn.execute("SELECT owner_id FROM qa_conversations WHERE conversation_id=?",
+                             (conversation_id,)).fetchone()
+        if not owner or owner["owner_id"] != principal_id:
+            raise ValueError("conversation not found")
         turns = conn.execute("SELECT * FROM qa_turns WHERE conversation_id=? ORDER BY created_at",
                              (conversation_id,)).fetchall()
         result = []
