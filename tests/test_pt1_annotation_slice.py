@@ -35,6 +35,15 @@ def test_gold_rejects_pending_source_location():
     assert any("source locator incomplete" in issue for issue in validate(rows))
 
 
+def test_gold_rejects_bad_hash_or_nonpositive_page():
+    rows = _gold()
+    rows[0]["source"]["pdf_sha256"] = "bad"
+    assert any("source hash/page invalid" in issue for issue in validate(rows))
+    rows = _gold()
+    rows[0]["source"]["evidence_page"] = 0
+    assert any("source hash/page invalid" in issue for issue in validate(rows))
+
+
 def test_gold_requires_two_distinct_independent_annotators():
     rows = _gold()
     rows[0]["annotations"][1]["annotator"] = "A"

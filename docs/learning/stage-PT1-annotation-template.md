@@ -11,4 +11,15 @@ validator 只核字段和流程门槛，不核实真实身份、PDF 字节或人
 
 ## 人工操作
 
-两位标注者各自填写一份副本，不互看答案。每题分别记录 `question_type`、`answerability`、`expected_answer`、最小证据集合、`support_conflict`、证据页与定位、标注者 ID 和独立声明。第三人裁决分歧并填 `adjudication=resolved`；之后才可设 `status=gold`。PT-1 总进度仍 **0/40**，这五题不会自动计入完成数。
+1. 两位标注者分别复制 `evals/pt1-annotation-slice-5-20261114.jsonl` 到各自本机，不共享填写结果。各自核对权威 manifest 中 PDF SHA，再在本机 PDF 核对物理页和最小短引文；填写来源定位，不把长摘录抄入跟踪文件。
+2. 每题分别填写 `question_type`、`answerability`、答案或拒答理由、最小充分证据、`support_conflict`、页码/定位、不同的标注者 ID 和 `independent=true`。不要修改候选集文件。
+3. 双方完成后由第三人逐题对照原文裁决，记录理由并统一结果。未决冲突保持 `draft`。
+4. 人工结果整理到另一份 JSONL，再运行：
+
+   ```powershell
+   .\.venv\Scripts\python.exe scripts\validate_pt1_annotation_slice.py .local\pt1-annotation-slice-adjudicated.jsonl
+   ```
+
+5. 此 validator 只检查 SHA 格式、正页码、双人独立字段和裁决状态；它不读取 PDF，也不能证明标注真实正确。之后仍须用正式 PT-1 来源校验器验证 SHA、页码和逐字 span。
+
+PT-1 总进度仍 **0/40**。这五题只有经人工完成和来源复核后才可计入人工标注进度；当前模板不能算 gold，也不代表 PT-2 验收完成。
