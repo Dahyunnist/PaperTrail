@@ -80,7 +80,9 @@ def run(directory: Path, output: Path) -> dict:
             for rank, hit in enumerate(hits, 1):
                 value = _evidence_key(hit)
                 if value and value not in [item["evidence"] for item in found]:
-                    found.append({"evidence": value, "rank": rank, "score": round(float(hit.get("rank_score", 0.0)), 8)})
+                    # BLAS may vary in the last few float32 bits across identical SVD builds.
+                    # Keep the report stable while retaining useful score precision.
+                    found.append({"evidence": value, "rank": rank, "score": round(float(hit.get("rank_score", 0.0)), 4)})
             found_quotes = [item["evidence"] for item in found]
             missing = [quote for quote in case["gold"] if quote not in found_quotes]
             records.append({"case_id": case["id"], "method": label, "query_sha256": hashlib.sha256(case["query"].encode()).hexdigest(),

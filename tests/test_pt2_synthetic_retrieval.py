@@ -12,7 +12,10 @@ SPEC.loader.exec_module(evaluate)
 def test_frozen_synthetic_fixture_has_full_evidence_coverage(tmp_path):
     result_path = tmp_path / "results.jsonl"
     result = evaluate.run(tmp_path / "fixture", result_path)
+    repeated_path = tmp_path / "results-repeated.jsonl"
+    repeated = evaluate.run(tmp_path / "fixture", repeated_path)
     rows = [json.loads(line) for line in result_path.read_text(encoding="utf-8").splitlines()]
+    repeated_rows = [json.loads(line) for line in repeated_path.read_text(encoding="utf-8").splitlines()]
     assert result["fixture_version"] == "pt2-synthetic-evidence-v1"
     assert len(result["pdf_sha256"]) == 3
     assert len(rows) == 9
@@ -20,6 +23,8 @@ def test_frozen_synthetic_fixture_has_full_evidence_coverage(tmp_path):
     assert all(row["complete_evidence_set"] and not row["missing_evidence"] for row in rows)
     assert all(all(hit["rank"] > 0 and isinstance(hit["score"], float) for hit in row["hit_evidence"])
                for row in rows)
+    assert rows == repeated_rows
+    assert result["report_sha256"] == repeated["report_sha256"]
 
 
 def test_frozen_query_set_hash_and_decomposition_trigger():

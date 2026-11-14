@@ -14,7 +14,7 @@
 
 JSONL 报告逐项记录冻结题 ID、query SHA、gold evidence、命中证据排名与检索分数、缺失证据和失败归因：`evals/pt2-synthetic-retrieval-report-20261112.jsonl`。当前没有失败项，故失败归因为空。冻结 query/gold SHA-256：`003e7b11fc8ce3309cc12df140ce408b8f3f42ba58d52a4e093d0832c70a6269`。
 
-测试验证 3 种模式全覆盖、排名分数存在、冻结集 SHA 固定、比较 query 命中现有拆题触发条件，以及评测脚本不含网络导入。运行命令：
+测试验证 3 种模式全覆盖、排名分数存在、冻结集 SHA 固定、同一合成夹具重复运行得到相同 JSONL 和报告 SHA、比较 query 命中现有拆题触发条件，以及评测脚本不含网络导入。报告分数保留 4 位小数，以避免不同 BLAS 实现的末位浮点差异改变报告哈希；检索排名仍由完整精度分数决定。运行命令：
 
 ```powershell
 python scripts/evaluate_pt2_synthetic.py --fixture-dir .tmp/pt2-synthetic-run --output .tmp/pt2-synthetic-run/results.jsonl
