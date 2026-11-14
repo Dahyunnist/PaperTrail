@@ -195,3 +195,13 @@ def test_csv_import_rejects_nonmatching_page_span(tmp_path, monkeypatch):
 
     with pytest.raises(ValueError, match="quote span does not exactly match"):
         csv_importer.export_csv_rows(csv_path, manifest)
+
+
+@pytest.mark.parametrize("filename", ["paper-1.pdf", "paper-2.pdf"])
+def test_csv_import_rejects_source_pdf_changed_after_manifest_freeze(tmp_path, monkeypatch, filename):
+    csv_path, manifest = _fixture(tmp_path, monkeypatch)
+    source = tmp_path / filename
+    source.write_bytes(source.read_bytes() + b" changed after freeze")
+
+    with pytest.raises(ValueError, match="local PDF SHA-256 does not match the frozen manifest"):
+        csv_importer.export_csv_rows(csv_path, manifest)

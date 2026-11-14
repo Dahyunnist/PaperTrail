@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -126,6 +127,12 @@ def export_csv_rows(csv_path: Path, manifest_path: Path = validate_pt1_gold_json
                 raise ValueError("question_type must be unanswerable exactly when answerability is 不可答")
 
             citations: list[dict[str, Any]] = []
+            pdf_path = (validate_pt1_gold_jsonl.ROOT / source["local_pdf"]).resolve()
+            if validate_pt1_gold_jsonl.ROOT.resolve() not in pdf_path.parents:
+                raise ValueError("manifest PDF path escapes repository")
+            actual_sha256 = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
+            if actual_sha256 != source["pdf_sha256"]:
+                raise ValueError("local PDF SHA-256 does not match the frozen manifest")
             evidence_fields = ("minimal_complete_evidence_quote", "evidence_pdf_pages", "original_pdf_excerpt",
                                "span_start_char", "span_end_char")
             if answerability == "unanswerable":
@@ -140,9 +147,6 @@ def export_csv_rows(csv_path: Path, manifest_path: Path = validate_pt1_gold_json
                 if any(not isinstance(value, str) or not value for value in quotes + excerpts):
                     raise ValueError("quotes and excerpts must be nonempty strings")
                 spans = _span_list(row, len(quotes))
-                pdf_path = (validate_pt1_gold_jsonl.ROOT / source["local_pdf"]).resolve()
-                if validate_pt1_gold_jsonl.ROOT.resolve() not in pdf_path.parents:
-                    raise ValueError("manifest PDF path escapes repository")
                 import pymupdf
                 with pymupdf.open(pdf_path) as document:
                     for quote, page_number, excerpt, span in zip(quotes, pages, excerpts, spans):
