@@ -9,7 +9,7 @@
 | PT-1 真实论文基准 | 未完成 | 候选来源30篇、人工任务40题；但用户尚未完成并复核标注，当前0/40 gold。来源均为 `development_seen`，不可当盲测。路线目标未达成。 |
 | PT-2 完整证据检索 | 部分 | 原混合完整证据覆盖仍为7/10。两个遗留题的非盲固定开发回归中，显式双论文 opt-in 策略 Recall@10 为3/4、Recall@20 为4/4；默认结果与冻结轨迹一致。详见 `docs/learning/pt2-two-paper-repair-20261111.md` 和 `evals/pt2-two-paper-balance-20261111.json`。仍需独立真实集复验，依赖 PT1 人工标注。 |
 | PT-3 可信回答/错误拒答 | 未完成 | 历史 PT17 结果仅是旧评测记录：4 道可答题完整回答0、引用1/7、不可答正确拒答0/1；不是当前 PT1 真实论文集结果。当前 PT1 人工 gold 为0/40，新的真实论文模型质量评估必须等用户标注与第二人复核，并通过导入校验及预算门禁后进行。 |
-| PT-4 权限、索引、Web 评测 | 部分 | 已补集合 owner ACL、HTTP/MCP 共用 Principal 授权、直接 SHA 跨 owner 拒绝及 A/B 合成测试；详见 `docs/learning/stage-PT4.md`。仍缺认证中间件生产集成、Web 评测审阅验收和完整多租户安全验证。 |
+| PT-4 权限、索引、Web 评测 | 部分 | 已补集合 owner ACL、HTTP/MCP 共用 Principal 授权、更新/删除失效、整批 reconcile 原子回滚、search JSONL 与 owner-bound answer-eval JSONL；证据见 `docs/learning/stage-PT4.md`、`docs/learning/PT4-version-acl-final-audit-2026-11-13.md`。QA owner 迁移旧会话归 local-dev；answer-eval 逐项核验 ACL/SHA/页码并限长。owner/export 定向5项、截断单测1项通过；仍缺生产认证中间件集成和完整多租户安全验证。全套受限环境 196 passed、1 loopback bind failure；宿主该用例通过。 |
 
 ## PT-1 候选来源目录（30 篇）
 
