@@ -130,9 +130,15 @@ def test_imported_synthetic_csv_runs_deterministic_report(tmp_path, monkeypatch)
     }), encoding="utf-8")
     report = run_evaluation(database, runtime_gold, manifest, output / "report.json",
                             k=1, modes=("bm25",), minimum_questions=2)
+    repeat = run_evaluation(database, runtime_gold, manifest, output / "report-repeat.json",
+                            k=1, modes=("bm25",), minimum_questions=2)
     assert report["evaluation"]["answerable_questions"] == 1
     assert report["evaluation"]["unanswerable_questions"] == 1
+    assert repeat["evaluation"] == report["evaluation"]
+    assert repeat["dataset"] == report["dataset"]
     assert report["run_manifest"]["gold_source"] == "synthetic_fixture"
+    assert report["run_manifest"]["model_id"] == "none"
+    assert report["run_manifest"]["cost_usd_estimate"] == 0
 
 
 def test_csv_import_cli_runs_all_steps_with_one_command(tmp_path, monkeypatch, capsys):
@@ -195,6 +201,24 @@ def test_csv_import_rejects_nonmatching_page_span(tmp_path, monkeypatch):
 
     with pytest.raises(ValueError, match="quote span does not exactly match"):
         csv_importer.export_csv_rows(csv_path, manifest)
+
+
+def test_csv_import_rejects_duplicate_task_ids_without_creating_outputs(tmp_path, monkeypatch):
+    csv_path, manifest = _fixture(tmp_path, monkeypatch)
+    with csv_path.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    rows[1]["task_id"] = rows[0]["task_id"]
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    outputs = [tmp_path / "out" / name for name in
+               ("reviewed-v2.jsonl", "runtime-gold.jsonl", "runtime-sources.yaml")]
+    with pytest.raises(ValueError, match="task_id is duplicated"):
+        csv_importer.import_csv(csv_path, *outputs, manifest, min_questions=2, min_papers=2)
+
+    assert all(not output.exists() for output in outputs)
 
 
 @pytest.mark.parametrize("filename", ["paper-1.pdf", "paper-2.pdf"])
