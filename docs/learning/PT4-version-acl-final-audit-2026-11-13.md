@@ -43,3 +43,14 @@ QA 会话 owner_id 迁移将旧记录归 local-dev，新会话绑定 principal�
 
 全套测试 196 passed、1 failed；唯一失败是受限执行环境拒绝 loopback bind 的 Ollama 本机集成测试。用户此前宿主复跑为 1 passed（0.60s）；受限环境的 pytest cache warning 不代表产品失败。
 
+## 2026-11-14 删除/替换与版本 ACL 复查
+
+复查发现两个缺口并已修复：
+
+- reconcile 之前，来源文件一旦删除或字节变化，Web/MCP 搜索仍可能返回旧索引片段。`search_papers` 现在在输出前检查当前文件 SHA；MCP `resources/list` 也只列出仍匹配冻结 SHA 的来源。无法访问或哈希不符的条目 fail closed。
+- 同一路径出现新 SHA 时，新版本此前会进入默认集合。reconcile 现在继承该路径原有 collection ACL；若路径对应多个冲突 ACL，整批 reconcile 失败关闭，不猜测 owner。
+
+新增合成回归覆盖：替换后 reconcile 前 Web/MCP 搜索隐藏旧命中、MCP 资源列表隐藏旧版本；reconcile 后新 SHA 仍只对原 owner 可见，覆盖 Web search/direct evidence、MCP search/resource list/resource read 和跨 owner 拒绝。定向验证：`tests/test_access_control.py tests/test_s1.py tests/test_mcp_server.py tests/test_s5_web.py`，33 passed。没有读取私人 PDF 或调用模型。
+
+限制仍是身份来源：这些测试以可信 `Principal` 注入验证 ACL 决策，不证明生产 Web 身份中间件或 MCP transport 已建立认证。单用户本机部署仍是默认安全边界。
+

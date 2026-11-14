@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .access import LOCAL_PRINCIPAL, Principal, document_metadata, read_evidence, search_papers
+from .access import (LOCAL_PRINCIPAL, Principal, _source_matches_sha, document_metadata,
+                     read_evidence, search_papers)
 from .s1_index import open_database
 
 SERVER_INFO = {"name": "papertrail", "version": "0.1.0"}
@@ -53,16 +54,25 @@ def get_evidence(database: Path, sha256: str, page_number: int,
 def _resource_list(database: Path, principal: Principal = LOCAL_PRINCIPAL) -> list[dict[str, Any]]:
     conn = _readonly(database)
     try:
-        rows = conn.execute("SELECT v.sha256,v.page_count,p.title_candidate FROM paper_versions v "
+        rows = conn.execute("SELECT v.sha256,v.page_count,p.title_candidate,l.absolute_path FROM paper_versions v "
                             "JOIN papers p ON p.paper_id=v.paper_id "
+                            "JOIN source_locations l ON l.version_id=v.version_id "
                             "JOIN collections col ON col.collection_id=v.collection_id "
                             "WHERE v.source_type='original_pdf' AND col.owner_id=? "
                             "ORDER BY p.title_candidate", (principal.user_id,)).fetchall()
-        return [{"uri": f"papertrail://documents/{row['sha256']}", "name": row["title_candidate"],
-                 "description": f"Original PDF metadata; {row['page_count']} pages",
-                 "mimeType": "application/json"} for row in rows]
     finally:
         conn.close()
+    resources = []
+    seen: set[str] = set()
+    for row in rows:
+        digest = row["sha256"]
+        if digest in seen or not _source_matches_sha(Path(row["absolute_path"]), digest):
+            continue
+        seen.add(digest)
+        resources.append({"uri": f"papertrail://documents/{digest}", "name": row["title_candidate"],
+                          "description": f"Original PDF metadata; {row['page_count']} pages",
+                          "mimeType": "application/json"})
+    return resources
 
 
 def _resource_read(database: Path, uri: str, principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:

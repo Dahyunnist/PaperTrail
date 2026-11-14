@@ -105,6 +105,56 @@ def test_mcp_direct_resources_enforce_collection_acl(tmp_path):
     assert "beta-only-needle" in own["result"]["contents"][0]["text"]
 
 
+def test_replaced_version_hides_stale_search_and_preserves_acl_across_web_mcp_resources(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    root = tmp_path / "papers"
+    beta = root / "beta.pdf"
+    replacement = fitz.open()
+    page = replacement.new_page()
+    page.insert_text((40, 60), "beta.pdf revised")
+    page.insert_text((40, 100), "beta revised-only synthetic collection evidence")
+    replacement.save(beta)
+    replacement.close()
+    old_sha = rows[1]["sha256"]
+    new_sha = hashlib.sha256(beta.read_bytes()).hexdigest()
+
+    client = create_app(database).test_client()
+    user_b = {"papertrail.principal": Principal("user-b")}
+    stale_web = client.get("/api/search?q=beta-only-needle", environ_overrides=user_b)
+    assert stale_web.status_code == 200 and stale_web.json["results"] == []
+    stale_mcp = _call(database, "search_papers", {"query": "beta-only-needle"}, Principal("user-b"))
+    assert stale_mcp["structuredContent"]["results"] == []
+    listed_before_reconcile = handle(database, {"jsonrpc": "2.0", "id": 40,
+                                                "method": "resources/list"}, Principal("user-b"))
+    assert all(old_sha not in item["uri"] for item in listed_before_reconcile["result"]["resources"])
+
+    selection = tmp_path / "selection.jsonl"
+    updated_rows = [dict(rows[0]), dict(rows[1], sha256=new_sha)]
+    selection.write_text("".join(json.dumps(row) + "\n" for row in updated_rows), encoding="utf-8")
+    assert index_selection(database, tmp_path / "sources.yaml", selection, reconcile=True)["added"] == 1
+
+    web_b = client.get("/api/search?q=beta%20revised-only", environ_overrides=user_b)
+    assert {row["sha256"] for row in web_b.json["results"]} == {new_sha}
+    web_a = client.get("/api/search?q=beta%20revised-only")
+    assert new_sha not in {row["sha256"] for row in web_a.json["results"]}
+    mcp_b = _call(database, "search_papers", {"query": "beta revised-only"}, Principal("user-b"))
+    assert {row["sha256"] for row in mcp_b["structuredContent"]["results"]} == {new_sha}
+    mcp_a = _call(database, "search_papers", {"query": "beta revised-only"}, Principal("local-dev"))
+    assert new_sha not in {row["sha256"] for row in mcp_a["structuredContent"]["results"]}
+    assert client.get(f"/api/evidence/{new_sha}/1", environ_overrides=user_b).status_code == 200
+    assert client.get(f"/api/evidence/{new_sha}/1").status_code == 404
+    listed_after_reconcile = handle(database, {"jsonrpc": "2.0", "id": 41,
+                                               "method": "resources/list"}, Principal("user-b"))
+    assert {item["uri"] for item in listed_after_reconcile["result"]["resources"]} == {
+        f"papertrail://documents/{new_sha}"}
+    assert handle(database, {"jsonrpc": "2.0", "id": 42, "method": "resources/read",
+                             "params": {"uri": f"papertrail://evidence/{new_sha}/1"}},
+                  Principal("user-b"))["result"]["contents"]
+    assert handle(database, {"jsonrpc": "2.0", "id": 43, "method": "resources/read",
+                             "params": {"uri": f"papertrail://evidence/{new_sha}/1"}},
+                  Principal("local-dev"))["error"]["code"] == -32602
+
+
 def test_default_single_user_principal_keeps_existing_local_library_access(tmp_path):
     database, rows = _indexed_library(tmp_path)
     app = create_app(database)

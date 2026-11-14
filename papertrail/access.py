@@ -50,12 +50,25 @@ def assign_version_to_collection(database: Path, version_id: str, collection_id:
 def search_papers(database: Path, query: str, principal: Principal,
                   limit: int = 5) -> list[dict[str, Any]]:
     """Filter by collection owner inside SQL before ranked results are returned."""
-    rows = bm25_search(database, query, limit=limit, source_type="original_pdf",
+    rows = bm25_search(database, query, limit=max(limit, limit * 4), source_type="original_pdf",
                        readonly=True, principal_id=principal.user_id)
+    current: list[dict[str, Any]] = []
+    source_status: dict[tuple[str, str], bool] = {}
+    for row in rows:
+        path = row.get("path")
+        digest = row.get("sha256")
+        key = (str(path), str(digest))
+        if key not in source_status:
+            source_status[key] = (isinstance(path, str) and isinstance(digest, str)
+                                  and _source_matches_sha(Path(path), digest))
+        if source_status[key]:
+            current.append(row)
+            if len(current) >= limit:
+                break
     from .trace import emit
     emit("access.checked", operation="search_papers", allowed=True,
          principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
-    return rows
+    return current
 
 
 def authorized_version_ids(database: Path, principal_id: str) -> set[str]:

@@ -455,7 +455,8 @@ def _insert_document(conn: sqlite3.Connection, item: dict[str, Any], parsed: Par
         return {"added": 0, "duplicate": 1, "sections": 0, "chunks": 0}
     if existing:
         _remove_version_content(conn, version_id)
-    collection_id = existing["collection_id"] if existing else "local-dev-default"
+    collection_id = (existing["collection_id"] if existing else
+                     item.get("collection_id", "local-dev-default"))
     stat = path.stat()
     conn.execute(
         "INSERT OR REPLACE INTO paper_versions(version_id,paper_id,collection_id,sha256,source_type,file_name,file_size,page_count,parseable_pages,low_text_pages_json,parse_status,doi_candidates_json,ocr_pages_json,ocr_errors_json,parser_version,indexed_at) "
@@ -535,6 +536,18 @@ def index_selection(database: Path, sources: Path, selection: Path, ocr_fallback
             # Reconciliation publishes one consistent corpus snapshot. Keep source
             # detachment, document/FTS writes, and revision update in one transaction.
             conn.execute("BEGIN")
+            for item in selected:
+                locations = conn.execute(
+                    "SELECT DISTINCT v.collection_id FROM source_locations l "
+                    "JOIN paper_versions v ON v.version_id=l.version_id "
+                    "WHERE l.root_id=? AND l.absolute_path=?",
+                    (item["root_id"], str(item["path"])),
+                ).fetchall()
+                collection_ids = {row[0] for row in locations}
+                if len(collection_ids) > 1:
+                    raise ValueError("cannot reconcile source path with conflicting collection ACLs")
+                if collection_ids:
+                    item["collection_id"] = next(iter(collection_ids))
             for root_id in root_ids:
                 existing_paths = [row[0] for row in conn.execute(
                     "SELECT absolute_path FROM source_locations WHERE root_id=?", (root_id,))]
