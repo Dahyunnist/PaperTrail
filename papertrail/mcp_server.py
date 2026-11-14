@@ -41,7 +41,7 @@ def _database() -> Path:
 
 
 def _readonly(database: Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(f"file:{database.as_posix()}?mode=ro", uri=True)
+    conn = sqlite3.connect(f"{database.resolve().as_uri()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA query_only=ON")
     return conn
