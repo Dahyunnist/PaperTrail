@@ -168,16 +168,26 @@ def test_reconcile_updates_changed_paths_and_removes_deleted_sources(tmp_path):
     assert not inspect_document(db, old_hash)
     assert search(db, "oldversionmarker", source_type="original_pdf") == []
     assert search(db, "newversionmarker", source_type="original_pdf")
+    replacement_hash = _hash(source)
+    replacement_bytes = source.read_bytes()
     source.unlink()
     selection.write_text("", encoding="utf-8")
     assert index_selection(db, config, selection, reconcile=True)["added"] == 0
     assert library_documents(db) == []
+    assert not inspect_document(db, replacement_hash)
+    assert search(db, "newversionmarker", source_type="original_pdf") == []
     conn = open_database(db, readonly=True)
     try:
         revision = int(conn.execute("SELECT value FROM app_metadata WHERE key='index_revision'").fetchone()[0])
         assert revision == 4
     finally:
         conn.close()
+
+    source.write_bytes(replacement_bytes)
+    save_selection()
+    assert index_selection(db, config, selection, reconcile=True)["added"] == 1
+    assert inspect_document(db, replacement_hash)
+    assert search(db, "newversionmarker", source_type="original_pdf")
 
 
 def test_reconcile_parse_failure_keeps_published_index_then_retry_succeeds(tmp_path, monkeypatch):
