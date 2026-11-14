@@ -1,6 +1,8 @@
 import pytest
+import json
+from pathlib import Path
 
-from papertrail.shared_manifest import to_shared_manifest, validate_shared_manifest
+from papertrail.shared_manifest import to_shared_manifest, to_shared_manifest_v1, validate_shared_manifest
 
 
 def _pt_manifest():
@@ -25,6 +27,27 @@ def test_shared_manifest_maps_existing_metadata_and_nulls_absent_fields():
     assert shared["tool_schema_sha"] is None and shared["max_steps"] is None
     assert shared["span_id"] is None
     assert shared["runtime_digest"]
+    assert shared["field_status"]["tool_schema_sha"] == "not_applicable"
+    assert to_shared_manifest_v1(_pt_manifest()) == shared
+    assert shared["project"] == "PaperTrail"
+    assert shared["max_steps"] is None
+    assert shared["field_status"]["max_steps"] == "not_applicable"
+
+
+def test_shared_manifest_derives_stable_dataset_identity_when_legacy_input_lacks_id():
+    source = _pt_manifest()
+    source.pop("dataset_id")
+    shared = to_shared_manifest_v1(source)
+    assert shared["dataset_id"] == f"sha256:{source['dataset_sha256']}"
+    assert shared["field_status"]["span_id"] == "not_recorded"
+
+
+def test_shared_manifest_schema_matches_projection_contract():
+    schema = json.loads((Path(__file__).resolve().parents[1] / "evals/run-manifest-v1.schema.json").read_text(encoding="utf-8"))
+    shared = to_shared_manifest(_pt_manifest())
+    assert set(schema["required"]) == set(shared)
+    assert schema["properties"]["field_status"]["additionalProperties"]["enum"] == [
+        "recorded", "not_applicable", "not_recorded", "blocked"]
 
 
 def test_shared_manifest_rejects_private_fields():
@@ -51,4 +74,29 @@ def test_shared_manifest_validator_rejects_path_in_value():
     shared = to_shared_manifest(_pt_manifest())
     shared["dataset_id"] = "/home/user/private"
     with pytest.raises(ValueError, match="private path value rejected"):
+        validate_shared_manifest(shared)
+
+
+def test_shared_manifest_rejects_null_without_state_and_bad_state():
+    shared = to_shared_manifest(_pt_manifest())
+    del shared["field_status"]["span_id"]
+    with pytest.raises(ValueError, match="null field status missing"):
+        validate_shared_manifest(shared)
+    shared = to_shared_manifest(_pt_manifest())
+    shared["field_status"]["max_steps"] = "available"
+    with pytest.raises(ValueError, match="field status invalid"):
+        validate_shared_manifest(shared)
+
+
+@pytest.mark.parametrize("field, value, message", [
+    ("git_sha", "bad", "git_sha invalid"),
+    ("max_steps", True, "max_steps invalid"),
+    ("max_tokens", 0, "max_tokens invalid"),
+    ("run_id", " ", "run_id invalid"),
+])
+def test_shared_manifest_rejects_invalid_common_fields(field, value, message):
+    shared = to_shared_manifest(_pt_manifest())
+    shared[field] = value
+    shared["field_status"][field] = "recorded"
+    with pytest.raises(ValueError, match=message):
         validate_shared_manifest(shared)

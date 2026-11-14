@@ -1,19 +1,46 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Offline evaluation run manifest v1",
+  "title": "Shared Evaluation Run Manifest v1",
   "type": "object",
-  "required": ["schema_version", "run_id", "trace_id", "git_sha", "dataset_sha256", "prompt_sha256", "scorer_sha256", "split", "runtime", "model_id", "gold_source", "budget", "cost_usd", "status", "started_at", "completed_at"],
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "project", "git_sha", "dataset_id", "dataset_sha256", "split",
+    "model_id", "prompt_sha", "tool_schema_sha", "runtime_digest", "max_steps", "max_tokens",
+    "scorer_sha", "gold_source", "cost_usd_estimate", "run_id", "trace_id", "span_id",
+    "started_at", "ended_at", "status", "budget", "field_status"
+  ],
   "properties": {
-    "schema_version": {"const": 1}, "run_id": {"type": "string", "minLength": 1},
-    "trace_id": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "project": {"const": "PaperTrail"},
     "git_sha": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
-    "dataset_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "prompt_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
-    "scorer_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "split": {"type": "string", "minLength": 1}, "runtime": {"type": "object", "required": ["python", "platform", "lock_sha256"], "properties": {"python": {"type": "string"}, "platform": {"type": "string"}, "lock_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
-    "model_id": {"type": ["string", "null"]}, "gold_source": {"type": "string"},
-    "budget": {"type": "object", "required": ["cap_usd", "spent_usd", "status"], "properties": {"cap_usd": {"type": ["number", "null"]}, "spent_usd": {"type": ["number", "null"]}, "status": {"type": "string"}}},
-    "cost_usd": {"type": ["number", "null"]}, "status": {"enum": ["passed", "failed", "blocked"]},
-    "started_at": {"type": "string", "format": "date-time"}, "completed_at": {"type": "string", "format": "date-time"}
+    "dataset_id": {"type": "string", "minLength": 1},
+    "dataset_sha256": {"$ref": "#/$defs/sha256"},
+    "split": {"type": "string", "minLength": 1},
+    "model_id": {"type": "string", "minLength": 1},
+    "prompt_sha": {"$ref": "#/$defs/nullableSha256"},
+    "tool_schema_sha": {"$ref": "#/$defs/nullableSha256"},
+    "runtime_digest": {"$ref": "#/$defs/nullableSha256"},
+    "max_steps": {"type": ["integer", "null"], "minimum": 0},
+    "max_tokens": {"type": ["integer", "null"], "minimum": 1},
+    "scorer_sha": {"$ref": "#/$defs/sha256"},
+    "gold_source": {"type": "string", "minLength": 1},
+    "cost_usd_estimate": {"type": ["number", "null"], "minimum": 0},
+    "run_id": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1},
+    "span_id": {"type": ["string", "null"], "minLength": 1},
+    "started_at": {"type": "string", "format": "date-time"},
+    "ended_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["passed", "failed", "blocked"]},
+    "budget": {"type": "object"},
+    "field_status": {
+      "type": "object",
+      "additionalProperties": {"enum": ["recorded", "not_applicable", "not_recorded", "blocked"]}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {
+      "anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    }
   }
 }
