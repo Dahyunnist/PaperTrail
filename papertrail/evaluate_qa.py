@@ -20,7 +20,7 @@ def _copy_database(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
         destination.unlink()
-    src = sqlite3.connect(f"file:{source.resolve().as_posix()}?mode=ro", uri=True)
+    src = sqlite3.connect(f"{source.resolve().as_uri()}?mode=ro", uri=True)
     dst = sqlite3.connect(destination)
     try:
         src.backup(dst)
@@ -63,9 +63,18 @@ def _gold_quote_coverage(expected: list[dict[str, Any]], citations: list[dict[st
             "all_expected_quotes_cited": bool(expected_quotes) and covered == len(expected_quotes)}
 
 
-def _correct_abstention(row: dict[str, Any]) -> bool:
-    return (not row["answered"] and
-            row.get("completion_state") in {"refused", "no_evidence"})
+def _outcome_class(row: dict[str, Any], expected_abstain: bool) -> str:
+    if row.get("unsupported_claim"):
+        return "unsupported_claim"
+    if expected_abstain:
+        return "correct_abstention" if not row["answered"] and row.get("completion_state") in {"refused", "no_evidence"} else "false_answer"
+    if not row["answered"] and row.get("completion_state") in {"refused", "no_evidence"}:
+        return "false_refusal"
+    return "answered"
+
+
+def _correct_abstention(row: dict[str, Any], expected_abstain: bool = True) -> bool:
+    return _outcome_class(row, expected_abstain) == "correct_abstention"
 
 
 def _complete_answer_rate(rows: list[dict[str, Any]]) -> float | None:
@@ -104,8 +113,11 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                      (result["turn_id"],)).fetchone()[0]
         finally:
             trace.close()
+        outcome = {"answered": bool(result["claims"]), "completion_state": result.get("completion_state"),
+                   "unsupported_claim": rejected > 0}
         cases.append({"id": item["id"], "type": item["question_type"], "question": item["question"],
                       "expected_answer": item["expected_answer"], "abstain_expected": item["abstain"],
+                      "outcome_class": _outcome_class(outcome, item["abstain"]),
                       "status": result["status"], "answered": bool(result["claims"]),
                       "completion_state": result.get("completion_state"),
                       "coverage_complete": result.get("coverage_complete"),
@@ -140,7 +152,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
                                                      if group_answerable else None),
                          "all_expected_pages_cited_rate": (sum(row["all_expected_pages_cited"] for row in group_answerable) / len(group_answerable)
                                                            if group_answerable else None),
-                         "correct_abstention_rate": (sum(_correct_abstention(row) for row in group_unanswerable) / len(group_unanswerable)
+                         "correct_abstention_rate": (sum(_correct_abstention(row, expected_abstain=True) for row in group_unanswerable) / len(group_unanswerable)
                                                      if group_unanswerable else None)}
     citations = [citation for row in answerable for citation in row["citations"]]
     gold_pages_by_id = {item["id"]: {(e["sha256"], e["pdf_page"]) for e in item["evidence"]} for item in items}
@@ -159,7 +171,7 @@ def _run_mode(database: Path, items: list[dict[str, Any]], mode: str,
             "gold_page_coverage": (sum(row["expected_pages_cited"] for row in answerable) /
                                    sum(row["expected_page_count"] for row in answerable)
                                    if sum(row["expected_page_count"] for row in answerable) else None),
-            "correct_abstention_rate": sum(_correct_abstention(row) for row in unanswerable) / len(unanswerable) if unanswerable else None,
+            "correct_abstention_rate": sum(_correct_abstention(row, expected_abstain=True) for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "false_answer_rate": sum(row["answered"] for row in unanswerable) / len(unanswerable) if unanswerable else None,
             "mean_latency_ms": statistics.mean(latencies) if latencies else 0,
             "median_latency_ms": statistics.median(latencies) if latencies else 0,
