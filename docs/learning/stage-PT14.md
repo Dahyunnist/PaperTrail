@@ -39,3 +39,7 @@ k=10 时，只有向量检索在四题均命中至少一个黄金页，但完整
 ```
 
 PT14 阶段结束时，公开组达到 30 篇论文、50 道题；PT9 与 PT12 共 6 篇测试论文、12 道题尚未评测。随后按计划完成一次合并评测，结果见[最终 holdout 评测](final-public-holdout-evaluation-20261023.md)。测试结果未用于调参。
+
+## 冻结输入复核（2026-11-14）
+
+公开许可 registry 校验通过。PT14 冻结 gold 复核为 4 题、6 条引文均通过来源 SHA、PDF 物理页与原文校验。gold SHA-256 `dbe99316c71830fc530ac5b48b2064b1370aab56b13bee68d38d636d6ad87a7a` 与 source manifest 一致；manifest SHA-256 `985d19e588733b09ccb21dcd6892fd928e806406f8215a7ae197ebf3c71601f8`。本次只复核冻结公开输入，没有重建索引或重跑 `.local` 评测。PT14 是已接触开发诊断组；PT1 仍 0/40，真实双人 gold 阻塞未解除。
