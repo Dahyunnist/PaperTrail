@@ -2,7 +2,7 @@
 
 ## 产品闭环
 
-`python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl` 启动本机 Flask 页面，绑定 `127.0.0.1`，默认端口 5000。页面提供：
+`python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl --allow-local-dev-principal` 启动本机 Flask 演示页面，绑定 `127.0.0.1`，默认端口 5000。演示开关明确启用固定 `local-dev` Principal；不带该开关时必须由服务端 `PRINCIPAL_PROVIDER` 提供有效 Principal，否则返回 401。客户端 header、query 或 body 不会设定身份。页面提供：
 
 - **文献库**：刷新明确选择的授权文献；查看题名候选、版本 SHA、来源类型、页数、解析状态、低文本页和配置来源；上传 PDF 并查看处理状态；删除个人上传。
 - **原文问答**：连续追问，回看会话；每条 claim 展示逐字短引文、来源论文、PDF 页、SHA 前缀和相关性排序值；无可核验证据时明确拒答。
@@ -19,7 +19,7 @@
 ## 使用与数据位置
 
 ```powershell
-python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl --port 5000
+python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl --port 5000 --allow-local-dev-principal
 ```
 
 本机访问 `http://127.0.0.1:5000`。上传 PDF、SQLite 数据库、向量制品、会话、笔记和评测轨迹均位于 `.local/`；源 PDF 只读。报告导出会保留 SHA、版本和 PDF 页码以供核验，同时剔除本机绝对路径和全文。

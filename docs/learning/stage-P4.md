@@ -2,7 +2,7 @@
 
 ## 实现
 
-`python -m papertrail mcp --db ...` 启动 stdio MCP server。服务声明 `tools` 与 `resources` 能力，实现初始化、ping、工具列表和调用、资源列表和读取。只读 SQLite 连接带 `mode=ro` 与 `query_only`，原有检索增加可选只读连接。
+`python -m papertrail mcp --db ... --allow-local-dev-principal` 显式启动本机 stdio 演示身份。未提供可信 Principal 时，工具调用、资源列表与资源读取默认拒绝；JSON-RPC payload 不接受调用方自报身份。服务声明 `tools` 与 `resources` 能力，实现初始化、ping、工具列表和调用、资源列表和读取。只读 SQLite 连接带 `mode=ro` 与 `query_only`，原有检索增加可选只读连接。
 
 工具 `search_papers` 只查 `original_pdf`，返回论文 SHA、页码、章节和检索分数，不泄露本机绝对路径。`get_evidence` 校验 SHA 格式、来源文件当前哈希和页码，再返回该原文页。资源 URI 提供论文元数据和原文页。个人笔记、对话记忆和写操作不开放。
 

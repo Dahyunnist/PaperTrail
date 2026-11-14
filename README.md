@@ -44,7 +44,7 @@ py -3.12 -m venv .venv
 
 检索命令支持 `--mode bm25|vector|hybrid|bge|hybrid_bge|hybrid_bge_wide|hybrid_bge_rerank`；LLM rerank 需要配置 OpenAI-compatible model。页面排序实验可用 `python -m papertrail.evaluate --compare --modes hybrid_bge_wide hybrid_bge_rerank ...`。当前保持默认 `bm25`。需要重建潜在向量索引时使用 `python -m papertrail vector-build`。可用 `python -m papertrail index --ocr-fallback ...` 对低文本 PDF 页尝试本机 Tesseract OCR；OCR 文本会标为派生内容，不可直接作为引用。
 
-本机单用户只读 MCP stdio 服务可用 `python -m papertrail mcp --db .local/papertrail.sqlite3` 启动。提供 `search_papers`、`get_evidence`、文献元数据资源和原文页资源；工具与资源直读共用集合 ACL，证据调用会重新校验 PDF SHA-256。stdio 默认 Principal 固定为 `local-dev`，没有调用方身份认证；不能据此宣称支持多租户。个人笔记不会进入 MCP 搜索。
+本机只读 MCP stdio 演示可用 `python -m papertrail mcp --db .local/papertrail.sqlite3 --allow-local-dev-principal` 显式启动。提供 `search_papers`、`get_evidence`、文献元数据资源和原文页资源；工具与资源直读共用集合 ACL，证据调用会重新校验 PDF SHA-256。未注入可信 Principal 时，MCP 工具和资源操作默认拒绝；演示开关只使用固定 `local-dev` 身份，不提供多租户身份认证。个人笔记不会进入 MCP 搜索。
 
 可选本机生成需先启动本机 Ollama 并准备模型，再设置 `PAPERTRAIL_LLM_MODEL`；服务只连接 `PAPERTRAIL_OLLAMA_URL`（默认 loopback `http://127.0.0.1:11434`），没有云端回退。生成 claim 会引用已校验的原文页，并经本机模型逐条审查；模型不可用或没有支持证据时拒答。请把 LLM 支持性判断视为审查信号，不等同于人工核验。
 
@@ -54,4 +54,6 @@ S3 使用 `python -m papertrail ask --db .local/papertrail.sqlite3 --question "�
 
 S4 使用 `python -m papertrail compare --db .local/papertrail.sqlite3 --topic "主题" --claim "待比较论断"` 收集并列原文；通过 `compare-label` 逐条标记 `supports|contradicts|conditions|context|unclear`，也可通过 `compare-gap` 记录用户提出、待复核的研究空白候选。`compare-report` 汇总标注和证据。
 
-启动最终工作台：`python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl`，再打开 `http://127.0.0.1:5000`。页面可更新明确选择的授权文献、上传/删除个人 PDF、问答、创建隔离的个人笔记、标注跨论文证据并导出 JSON 学习报告。服务仅监听本机；所有工作数据保存在 `.local/`。
+启动本机演示工作台：`python -m papertrail web --db .local/papertrail.sqlite3 --sources configs/sources.example.yaml --selection configs/s1-pilot.jsonl --allow-local-dev-principal`，再打开 `http://127.0.0.1:5000`。演示开关仅在 loopback 请求中生效，并让所有请求共享固定 `local-dev` 身份。没有服务端 Principal provider 时，请求默认返回 401；请求 header、query 或 body 不能声明身份。工作数据保存在 `.local/`。
+
+`PRINCIPAL_PROVIDER` 必须由可信服务端认证集成注入。项目当前未接入生产 SSO/认证中间件；本机演示身份不构成生产身份或多租户隔离。

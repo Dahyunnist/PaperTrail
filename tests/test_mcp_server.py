@@ -29,7 +29,8 @@ def test_stdio_mcp_tools_and_resources_are_read_only(tmp_path):
     index_selection(db, config, selection)
     before = hashlib.sha256(db.read_bytes()).hexdigest()
     env = dict(os.environ, PAPERTRAIL_DB=str(db))
-    proc = subprocess.Popen([sys.executable, "-m", "papertrail.mcp_server"], stdin=subprocess.PIPE,
+    proc = subprocess.Popen([sys.executable, "-m", "papertrail.mcp_server",
+                             "--allow-local-dev-principal"], stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", env=env)
 
     def call(request_id, method, params=None):

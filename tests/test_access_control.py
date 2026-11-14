@@ -1,6 +1,7 @@
 import hashlib
 import json
 import sqlite3
+from pathlib import Path
 
 import fitz
 import yaml
@@ -42,6 +43,14 @@ def _indexed_library(tmp_path):
     return database, rows
 
 
+def _local_demo_app(database):
+    return create_app(database, allow_local_dev_principal=True)
+
+
+def _trusted_app(database, user_id):
+    return create_app(database, principal_provider=lambda: Principal(user_id))
+
+
 def test_collection_acl_filters_search_and_direct_evidence_reads(tmp_path):
     database, rows = _indexed_library(tmp_path)
     principal_a = Principal("local-dev")
@@ -64,25 +73,34 @@ def test_collection_acl_filters_search_and_direct_evidence_reads(tmp_path):
 
 def test_http_and_mcp_share_acl_and_http_ignores_body_user_id(tmp_path):
     database, rows = _indexed_library(tmp_path)
-    app = create_app(database)
+    app = _trusted_app(database, "user-b")
     client = app.test_client()
     response = client.get("/api/search?q=collection%20evidence",
-                          environ_overrides={"papertrail.principal": Principal("user-b")},
+                          headers={"X-User-ID": "local-dev", "X-Papertrail-Principal": "local-dev"},
                           json={"user_id": "local-dev"})
     assert {row["sha256"] for row in response.json["results"]} == {rows[1]["sha256"]}
 
     direct = client.get(f"/api/evidence/{rows[0]['sha256']}/1",
-                        environ_overrides={"papertrail.principal": Principal("user-b")})
+                        headers={"X-User-ID": "local-dev"})
     assert direct.status_code == 404
 
     mcp_search = _call(database, "search_papers", {"query": "collection evidence"}, Principal("user-b"))
     assert {row["sha256"] for row in mcp_search["structuredContent"]["results"]} == {rows[1]["sha256"]}
+    mcp_spoofed_search = handle(database, {"jsonrpc": "2.0", "id": 5,
+                                          "method": "tools/call", "principal": "local-dev",
+                                          "params": {"name": "search_papers", "arguments": {
+                                              "query": "alpha-only-needle", "user_id": "local-dev"}}},
+                                Principal("user-b"))
+    assert mcp_spoofed_search["result"]["isError"] is True
+    assert "unknown search_papers argument" in mcp_spoofed_search["result"]["content"][0]["text"]
     mcp_read = handle(database, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
                                  "params": {"name": "get_evidence", "arguments": {
                                      "sha256": rows[0]["sha256"], "page": 1}}}, Principal("user-b"))
     assert mcp_read["result"]["isError"] is True
     mcp_resource = handle(database, {"jsonrpc": "2.0", "id": 2, "method": "resources/read",
-                                     "params": {"uri": f"papertrail://documents/{rows[0]['sha256']}"}},
+                                     "principal": "local-dev",
+                                     "params": {"uri": f"papertrail://documents/{rows[0]['sha256']}",
+                                                "user_id": "local-dev"}},
                           Principal("user-b"))
     assert mcp_resource["error"]["code"] == -32602
 
@@ -118,9 +136,9 @@ def test_replaced_version_hides_stale_search_and_preserves_acl_across_web_mcp_re
     old_sha = rows[1]["sha256"]
     new_sha = hashlib.sha256(beta.read_bytes()).hexdigest()
 
-    client = create_app(database).test_client()
-    user_b = {"papertrail.principal": Principal("user-b")}
-    stale_web = client.get("/api/search?q=beta-only-needle", environ_overrides=user_b)
+    client_b = _trusted_app(database, "user-b").test_client()
+    client_a = _local_demo_app(database).test_client()
+    stale_web = client_b.get("/api/search?q=beta-only-needle")
     assert stale_web.status_code == 200 and stale_web.json["results"] == []
     stale_mcp = _call(database, "search_papers", {"query": "beta-only-needle"}, Principal("user-b"))
     assert stale_mcp["structuredContent"]["results"] == []
@@ -133,16 +151,16 @@ def test_replaced_version_hides_stale_search_and_preserves_acl_across_web_mcp_re
     selection.write_text("".join(json.dumps(row) + "\n" for row in updated_rows), encoding="utf-8")
     assert index_selection(database, tmp_path / "sources.yaml", selection, reconcile=True)["added"] == 1
 
-    web_b = client.get("/api/search?q=beta%20revised-only", environ_overrides=user_b)
+    web_b = client_b.get("/api/search?q=beta%20revised-only")
     assert {row["sha256"] for row in web_b.json["results"]} == {new_sha}
-    web_a = client.get("/api/search?q=beta%20revised-only")
+    web_a = client_a.get("/api/search?q=beta%20revised-only")
     assert new_sha not in {row["sha256"] for row in web_a.json["results"]}
     mcp_b = _call(database, "search_papers", {"query": "beta revised-only"}, Principal("user-b"))
     assert {row["sha256"] for row in mcp_b["structuredContent"]["results"]} == {new_sha}
     mcp_a = _call(database, "search_papers", {"query": "beta revised-only"}, Principal("local-dev"))
     assert new_sha not in {row["sha256"] for row in mcp_a["structuredContent"]["results"]}
-    assert client.get(f"/api/evidence/{new_sha}/1", environ_overrides=user_b).status_code == 200
-    assert client.get(f"/api/evidence/{new_sha}/1").status_code == 404
+    assert client_b.get(f"/api/evidence/{new_sha}/1").status_code == 200
+    assert client_a.get(f"/api/evidence/{new_sha}/1").status_code == 404
     listed_after_reconcile = handle(database, {"jsonrpc": "2.0", "id": 41,
                                                "method": "resources/list"}, Principal("user-b"))
     assert {item["uri"] for item in listed_after_reconcile["result"]["resources"]} == {
@@ -155,9 +173,9 @@ def test_replaced_version_hides_stale_search_and_preserves_acl_across_web_mcp_re
                   Principal("local-dev"))["error"]["code"] == -32602
 
 
-def test_default_single_user_principal_keeps_existing_local_library_access(tmp_path):
+def test_explicit_local_demo_principal_keeps_existing_local_library_access(tmp_path):
     database, rows = _indexed_library(tmp_path)
-    app = create_app(database)
+    app = _local_demo_app(database)
     client = app.test_client()
 
     response = client.get("/api/search?q=alpha-only-needle")
@@ -166,6 +184,39 @@ def test_default_single_user_principal_keeps_existing_local_library_access(tmp_p
     evidence = client.get(f"/api/evidence/{rows[0]['sha256']}/1")
     assert evidence.status_code == 200
     assert "alpha-only-needle" in evidence.json["text"]
+
+
+def test_web_missing_principal_fails_closed_despite_client_identity_fields(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+    client = create_app(database).test_client()
+    headers = {"X-User-ID": "local-dev", "X-Papertrail-Principal": "local-dev"}
+    assert client.get("/api/search?q=alpha-only-needle", headers=headers).status_code == 401
+    assert client.get(f"/api/evidence/{rows[0]['sha256']}/1", headers=headers).status_code == 401
+
+
+def test_local_demo_principal_is_loopback_only_and_provider_none_does_not_fallback(tmp_path):
+    database, _rows = _indexed_library(tmp_path)
+    demo = create_app(database, allow_local_dev_principal=True).test_client()
+    assert demo.get("/api/search?q=alpha-only-needle",
+                    environ_overrides={"REMOTE_ADDR": "192.0.2.10"},
+                    headers={"X-User-ID": "local-dev"}).status_code == 401
+    provider_none = create_app(database, principal_provider=lambda: None,
+                               allow_local_dev_principal=True).test_client()
+    assert provider_none.get("/api/search?q=alpha-only-needle").status_code == 401
+
+
+def test_mcp_protected_routes_require_injected_principal_and_ignore_payload_identity():
+    database = Path("unused-unopened.sqlite3")
+    for message in (
+        {"jsonrpc": "2.0", "id": 51, "method": "tools/call", "user_id": "local-dev",
+         "params": {"name": "search_papers", "arguments": {"query": "private", "user_id": "local-dev"}}},
+        {"jsonrpc": "2.0", "id": 52, "method": "resources/list", "principal": "local-dev"},
+        {"jsonrpc": "2.0", "id": 53, "method": "resources/read",
+         "params": {"uri": "papertrail://documents/" + "a" * 64, "user_id": "local-dev"}},
+    ):
+        response = handle(database, message)
+        assert response["error"]["code"] == -32001
+    assert handle(database, {"jsonrpc": "2.0", "id": 54, "method": "tools/list"})["result"]["tools"]
 
 
 def test_legacy_database_migrates_existing_versions_to_local_dev(tmp_path):
@@ -208,11 +259,10 @@ def test_reindex_keeps_existing_collection_owner(tmp_path, monkeypatch):
 
 def test_jsonl_search_export_applies_acl_and_omits_content(tmp_path):
     database, rows = _indexed_library(tmp_path)
-    client = create_app(database).test_client()
-    principal_a = {"papertrail.principal": Principal("local-dev")}
-    principal_b = {"papertrail.principal": Principal("user-b")}
-    response_a = client.get("/api/search.jsonl?q=collection%20evidence", environ_overrides=principal_a)
-    response_b = client.get("/api/search.jsonl?q=collection%20evidence", environ_overrides=principal_b)
+    client_a = _local_demo_app(database).test_client()
+    client_b = _trusted_app(database, "user-b").test_client()
+    response_a = client_a.get("/api/search.jsonl?q=collection%20evidence")
+    response_b = client_b.get("/api/search.jsonl?q=collection%20evidence")
     records_a = [json.loads(line) for line in response_a.data.decode().splitlines()]
     records_b = [json.loads(line) for line in response_b.data.decode().splitlines()]
     assert {row["source_sha256"] for row in records_a} == {rows[0]["sha256"]}
@@ -232,9 +282,8 @@ def test_jsonl_search_export_omits_stale_source_after_hash_changes(tmp_path):
     page.insert_text((40, 60), "alpha revised with changed source bytes")
     replacement.save(pdf)
     replacement.close()
-    response = create_app(database).test_client().get(
-        "/api/search.jsonl?q=alpha%20collection%20evidence",
-        environ_overrides={"papertrail.principal": Principal("local-dev")})
+    response = _local_demo_app(database).test_client().get(
+        "/api/search.jsonl?q=alpha%20collection%20evidence")
     records = [json.loads(line) for line in response.data.decode().splitlines()]
     assert rows[0]["sha256"] not in {row["source_sha256"] for row in records}
 
@@ -245,9 +294,8 @@ def test_answer_eval_export_denies_foreign_principal_even_for_empty_claims(tmp_p
     monkeypatch.delenv("PAPERTRAIL_LLM_MODEL", raising=False)
     result = qa.ask(database, "notpresenttoken", mode="bm25", generate=False)
     assert result["claims"] == []
-    response = create_app(database).test_client().get(
-        f"/api/answer-eval/{result['conversation_id']}.jsonl",
-        environ_overrides={"papertrail.principal": Principal("user-b")})
+    response = _trusted_app(database, "user-b").test_client().get(
+        f"/api/answer-eval/{result['conversation_id']}.jsonl")
     assert response.status_code == 404
 
 
@@ -280,9 +328,8 @@ def _qa_claim_fixture(tmp_path, quote=None):
 
 def test_answer_eval_jsonl_exports_claim_and_truncates_verified_evidence(tmp_path):
     database, _pdf = _qa_claim_fixture(tmp_path)
-    client = create_app(database).test_client()
-    response = client.get("/api/answer-eval/answer-eval-fixture.jsonl",
-                          environ_overrides={"papertrail.principal": Principal("local-dev")})
+    client = _local_demo_app(database).test_client()
+    response = client.get("/api/answer-eval/answer-eval-fixture.jsonl")
     assert response.status_code == 200
     record = json.loads(response.data.decode().splitlines()[0])
     assert record["question"] == "Fixture question" and record["answer"] == "Fixture answer"
@@ -298,9 +345,8 @@ def test_answer_eval_jsonl_rejects_expired_claim_source(tmp_path):
     doc.new_page().insert_text((40, 60), "replacement source has different bytes")
     doc.save(pdf)
     doc.close()
-    response = create_app(database).test_client().get(
-        "/api/answer-eval/answer-eval-fixture.jsonl",
-        environ_overrides={"papertrail.principal": Principal("local-dev")})
+    response = _local_demo_app(database).test_client().get(
+        "/api/answer-eval/answer-eval-fixture.jsonl")
     assert response.status_code == 404
 
 
@@ -333,8 +379,8 @@ def test_answer_eval_jsonl_truncates_long_evidence_snippet(tmp_path):
         conn.commit()
     finally:
         conn.close()
-    response = create_app(database).test_client().get(
-        "/api/answer-eval/long-evidence.jsonl", environ_overrides={"papertrail.principal": Principal("local-dev")})
+    response = _local_demo_app(database).test_client().get(
+        "/api/answer-eval/long-evidence.jsonl")
     assert response.status_code == 200
     evout = json.loads(response.data.decode())["claims"][0]["evidence"][0]
     assert len(evout["snippet"]) == 500 and evout["snippet_truncated"] is True
@@ -373,7 +419,8 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
     replacement.close()
     stale_before_reconcile = handle(database, {"jsonrpc": "2.0", "id": 20,
                                                "method": "resources/read",
-                                               "params": {"uri": f"papertrail://documents/{old_alpha_sha}"}})
+                                               "params": {"uri": f"papertrail://documents/{old_alpha_sha}"}},
+                                     Principal("local-dev"))
     assert stale_before_reconcile["error"]["code"] == -32602
     stale = index_selection(database, config, selection, reconcile=True)
     assert any(issue["issue"] == "source_missing_or_changed" for issue in stale["issues"])
@@ -388,7 +435,8 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
     for uri in (f"papertrail://documents/{old_alpha_sha}",
                 f"papertrail://evidence/{old_alpha_sha}/1"):
         stale_resource = handle(database, {"jsonrpc": "2.0", "id": 21,
-                                           "method": "resources/read", "params": {"uri": uri}})
+                                           "method": "resources/read", "params": {"uri": uri}},
+                                 Principal("local-dev"))
         assert stale_resource["error"]["code"] == -32602
 
     new_alpha_sha = hashlib.sha256(alpha.read_bytes()).hexdigest()
@@ -419,6 +467,5 @@ def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mc
                                              "method": "resources/read", "params": {"uri": uri}},
                                   Principal("user-b"))
         assert deleted_resource["error"]["code"] == -32602
-    client = create_app(database).test_client()
-    assert client.get(f"/api/evidence/{beta_sha}/1",
-                      environ_overrides={"papertrail.principal": Principal("user-b")}).status_code == 404
+    client = _trusted_app(database, "user-b").test_client()
+    assert client.get(f"/api/evidence/{beta_sha}/1").status_code == 404

@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import hmac
+import ipaddress
 import json
 import os
 import secrets
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from flask import Flask, abort, flash, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
@@ -31,7 +32,9 @@ WEB_RETRIEVAL_MODES = {"bm25", "vector", "hybrid", "bge", "hybrid_bge", "hybrid_
 def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                upload_root: Path | str | None = None,
                sources_config: Path | str | None = None,
-               selection_manifest: Path | str | None = None) -> Flask:
+               selection_manifest: Path | str | None = None, *,
+               principal_provider: Callable[[], Principal | None] | None = None,
+               allow_local_dev_principal: bool = False) -> Flask:
     database = Path(database).resolve()
     upload_root = Path(upload_root).resolve() if upload_root else database.parent / "uploads"
     project_root = Path(__file__).resolve().parent.parent
@@ -46,8 +49,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     app = Flask(__name__)
     app.config.update(SECRET_KEY=secrets.token_hex(32), MAX_CONTENT_LENGTH=100 * 1024 * 1024,
                       DATABASE=database, UPLOAD_ROOT=upload_root, CSRF_ENABLED=True,
-                      PRINCIPAL_PROVIDER=None,
-                      REQUIRE_PRINCIPAL=False,
+                      PRINCIPAL_PROVIDER=principal_provider,
+                      ALLOW_LOCAL_DEV_PRINCIPAL=allow_local_dev_principal,
                       QA_MODE=os.environ.get("PAPERTRAIL_RETRIEVAL_MODE", "bm25"),
                       QA_LIMIT=qa_limit)
     if app.config["QA_MODE"] not in WEB_RETRIEVAL_MODES:
@@ -56,11 +59,17 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     @app.before_request
     def csrf_guard() -> None:
         provider = app.config["PRINCIPAL_PROVIDER"]
-        principal = provider() if provider else request.environ.get("papertrail.principal")
+        principal = provider() if provider is not None else None
         if principal is None:
-            if app.config["REQUIRE_PRINCIPAL"]:
-                abort(401, "请求未认证。")
-            principal = LOCAL_PRINCIPAL
+            remote_addr = request.remote_addr or ""
+            try:
+                loopback = ipaddress.ip_address(remote_addr).is_loopback
+            except ValueError:
+                loopback = False
+            if provider is None and app.config["ALLOW_LOCAL_DEV_PRINCIPAL"] and loopback:
+                principal = LOCAL_PRINCIPAL
+            else:
+                abort(401, "请求未认证；服务端必须提供可信身份。")
         if not isinstance(principal, Principal):
             abort(401, "服务端未提供有效身份。")
         g.principal = principal
@@ -359,8 +368,11 @@ def main() -> None:
     parser.add_argument("--sources", type=Path)
     parser.add_argument("--selection", type=Path)
     parser.add_argument("--port", type=int, default=5000)
+    parser.add_argument("--allow-local-dev-principal", action="store_true",
+                         help="仅用于 loopback 本机演示；所有请求共享 local-dev 身份")
     args = parser.parse_args()
-    create_app(args.db, args.upload_root, args.sources, args.selection).run(host="127.0.0.1", port=args.port,
+    create_app(args.db, args.upload_root, args.sources, args.selection,
+               allow_local_dev_principal=args.allow_local_dev_principal).run(host="127.0.0.1", port=args.port,
                                               debug=False, threaded=True)
 
 

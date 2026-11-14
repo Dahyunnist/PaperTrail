@@ -13,6 +13,10 @@ from papertrail.web import create_app
 from papertrail.workspace import library_documents, list_uploads
 
 
+def _local_demo_app(*args, **kwargs):
+    return create_app(*args, allow_local_dev_principal=True, **kwargs)
+
+
 def _pdf(title: str, paragraphs: list[str]) -> bytes:
     doc = fitz.open()
     page = doc.new_page()
@@ -60,7 +64,7 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
         "claims": [{"text": "Shared claim.", "evidence": primary}],
         "coverage_complete": True, "coverage_gaps": [],
     }])
-    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app = _local_demo_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
     app.config.update(TESTING=True)
 
     response = app.test_client().get("/?conversation_id=example")
@@ -76,7 +80,7 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):
     db = tmp_path / "workspace.sqlite3"
     uploads = tmp_path / "uploads"
-    app = create_app(db, uploads)
+    app = _local_demo_app(db, uploads)
     app.config.update(TESTING=True)
     client = app.test_client()
 
@@ -151,7 +155,7 @@ def test_web_can_index_explicit_authorized_selection(tmp_path):
     selection.write_text(json.dumps({"root_id": "approved", "file_name": source.name,
         "relative_path": source.name, "sha256": _hash(source), "kind": "pdf",
         "source_type": "original_pdf"}) + "\n", encoding="utf-8")
-    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads", config, selection)
+    app = _local_demo_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads", config, selection)
     app.config.update(TESTING=True)
     client = app.test_client()
     page = client.get("/")
@@ -182,7 +186,7 @@ def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeyp
                     limit=limit, mode=mode, principal_id=principal_id)
         return {"claims": [{}], "conversation_id": "demo-conversation"}
     monkeypatch.setattr(web, "ask", fake_ask)
-    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app = _local_demo_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
     app.config.update(TESTING=True, QA_MODE="hybrid_bge_wide", QA_LIMIT=8)
     client = app.test_client()
     page = client.get("/")
@@ -195,14 +199,15 @@ def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeyp
 
 def test_web_requires_trusted_principal_when_authentication_is_required(tmp_path):
     app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
-    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True)
+    app.config.update(TESTING=True)
     client = app.test_client()
     assert client.get("/").status_code == 401
 
 
 def test_web_rejects_invalid_identity_provider_result(tmp_path):
-    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
-    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True, PRINCIPAL_PROVIDER=lambda: None)
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads",
+                     principal_provider=lambda: None)
+    app.config.update(TESTING=True)
     client = app.test_client()
     assert client.get("/reports/study.json").status_code == 401
     assert client.post("/compare/evidence/evidence-1/label").status_code == 401
@@ -216,14 +221,14 @@ def test_web_review_passes_trusted_principal_to_audit_record(tmp_path, monkeypat
     def fake_label(_database, evidence_id, label, rationale, *, reviewer_id):
         seen.update(evidence_id=evidence_id, label=label, rationale=rationale, reviewer_id=reviewer_id)
     monkeypatch.setattr(web, "label_evidence", fake_label)
-    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
+    app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads",
+                     principal_provider=lambda: Principal("reviewer-a"))
     app.config.update(TESTING=True)
     client = app.test_client()
     page = client.get("/")
     response = client.post("/compare/evidence/evidence-1/label", data={
         "_csrf": _csrf(page), "comparison_id": "comparison-1", "label": "supports",
-        "rationale": "Synthetic review."},
-        environ_overrides={"papertrail.principal": Principal("reviewer-a")})
+        "rationale": "Synthetic review."})
     assert response.status_code == 302
     assert seen["reviewer_id"] == "reviewer-a"
 
@@ -232,8 +237,7 @@ def test_web_rejects_cross_workspace_export_and_review_overrides(tmp_path):
     from papertrail.access import Principal
 
     app = create_app(tmp_path / "workspace.sqlite3", tmp_path / "uploads")
-    app.config.update(TESTING=True, REQUIRE_PRINCIPAL=True,
-                      PRINCIPAL_PROVIDER=lambda: Principal("reviewer-a"))
+    app.config.update(TESTING=True, PRINCIPAL_PROVIDER=lambda: Principal("reviewer-a"))
     client = app.test_client()
     assert client.get("/reports/study.json?workspace_id=other").status_code == 403
     token = _csrf(client.get("/"))

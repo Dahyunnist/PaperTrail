@@ -88,9 +88,13 @@ def _parser() -> argparse.ArgumentParser:
     web_parser.add_argument("--sources", type=Path, help="已授权来源目录配置")
     web_parser.add_argument("--selection", type=Path, help="明确选择的 PDF/笔记清单")
     web_parser.add_argument("--port", type=int, default=5000)
+    web_parser.add_argument("--allow-local-dev-principal", action="store_true",
+                            help="仅用于 loopback 本机演示；所有请求共享 local-dev 身份")
 
     mcp_parser = commands.add_parser("mcp", help="以本机单用户只读 MCP stdio 服务暴露论文证据")
     mcp_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
+    mcp_parser.add_argument("--allow-local-dev-principal", action="store_true",
+                            help="仅用于本机 stdio 演示；所有请求共享 local-dev 身份")
 
     rate_parser = commands.add_parser("trajectory-rate", help="为 QA 轨迹记录人工结果评分")
     rate_parser.add_argument("--db", type=Path, default=Path(".local/papertrail.sqlite3"))
@@ -162,11 +166,12 @@ def main(argv: list[str] | None = None) -> int:
             _print_json(add_gap_candidate(args.db, args.comparison_id, args.note, args.evidence_id))
         elif args.command == "web":
             from .web import create_app
-            create_app(args.db, args.upload_root, args.sources, args.selection).run(host="127.0.0.1", port=args.port,
+            create_app(args.db, args.upload_root, args.sources, args.selection,
+                       allow_local_dev_principal=args.allow_local_dev_principal).run(host="127.0.0.1", port=args.port,
                                                        debug=False, threaded=True)
         elif args.command == "mcp":
             from .mcp_server import main as mcp_main
-            mcp_main(args.db)
+            mcp_main(args.db, allow_local_dev_principal=args.allow_local_dev_principal)
         elif args.command == "trajectory-rate":
             _print_json(rate_trajectory(args.db, args.turn_id, args.rating, args.note))
         elif args.command == "trajectory-export":

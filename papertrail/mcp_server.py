@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import argparse
 import os
 import re
 import sqlite3
@@ -47,11 +48,15 @@ def _readonly(database: Path) -> sqlite3.Connection:
 
 
 def get_evidence(database: Path, sha256: str, page_number: int,
-                 principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
+                 principal: Principal | None = None) -> dict[str, Any]:
+    if not isinstance(principal, Principal):
+        raise PermissionError("trusted principal required")
     return read_evidence(database, sha256, page_number, principal)
 
 
-def _resource_list(database: Path, principal: Principal = LOCAL_PRINCIPAL) -> list[dict[str, Any]]:
+def _resource_list(database: Path, principal: Principal | None = None) -> list[dict[str, Any]]:
+    if not isinstance(principal, Principal):
+        raise PermissionError("trusted principal required")
     conn = _readonly(database)
     try:
         rows = conn.execute("SELECT v.sha256,v.page_count,p.title_candidate,l.absolute_path FROM paper_versions v "
@@ -75,7 +80,9 @@ def _resource_list(database: Path, principal: Principal = LOCAL_PRINCIPAL) -> li
     return resources
 
 
-def _resource_read(database: Path, uri: str, principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
+def _resource_read(database: Path, uri: str, principal: Principal | None = None) -> dict[str, Any]:
+    if not isinstance(principal, Principal):
+        raise PermissionError("trusted principal required")
     parsed = urlparse(uri)
     parts = parsed.path.strip("/").split("/")
     if parsed.scheme != "papertrail" or parsed.netloc not in {"documents", "evidence"}:
@@ -91,7 +98,9 @@ def _resource_read(database: Path, uri: str, principal: Principal = LOCAL_PRINCI
 
 
 def _call(database: Path, name: str, arguments: dict[str, Any],
-          principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any]:
+          principal: Principal | None = None) -> dict[str, Any]:
+    if not isinstance(principal, Principal):
+        raise PermissionError("trusted principal required")
     if not isinstance(arguments, dict):
         raise ValueError("tool arguments must be an object")
     if name == "search_papers":
@@ -116,7 +125,7 @@ def _call(database: Path, name: str, arguments: dict[str, Any],
 
 
 def handle(database: Path, message: dict[str, Any],
-           principal: Principal = LOCAL_PRINCIPAL) -> dict[str, Any] | None:
+           principal: Principal | None = None) -> dict[str, Any] | None:
     method = message.get("method")
     request_id = message.get("id")
     params = message.get("params", {})
@@ -132,13 +141,22 @@ def handle(database: Path, message: dict[str, Any],
         elif method == "tools/list":
             result = {"tools": TOOLS}
         elif method == "tools/call":
+            if not isinstance(principal, Principal):
+                return {"jsonrpc": "2.0", "id": request_id,
+                        "error": {"code": -32001, "message": "trusted principal required"}}
             try:
                 result = _call(database, params.get("name", ""), params.get("arguments", {}), principal)
-            except (ValueError, OSError, sqlite3.Error) as exc:
+            except (PermissionError, ValueError, OSError, sqlite3.Error) as exc:
                 result = {"content": [{"type": "text", "text": str(exc)}], "isError": True}
         elif method == "resources/list":
+            if not isinstance(principal, Principal):
+                return {"jsonrpc": "2.0", "id": request_id,
+                        "error": {"code": -32001, "message": "trusted principal required"}}
             result = {"resources": _resource_list(database, principal)}
         elif method == "resources/read":
+            if not isinstance(principal, Principal):
+                return {"jsonrpc": "2.0", "id": request_id,
+                        "error": {"code": -32001, "message": "trusted principal required"}}
             result = _resource_read(database, params.get("uri", ""), principal)
         else:
             return {"jsonrpc": "2.0", "id": request_id,
@@ -151,7 +169,13 @@ def handle(database: Path, message: dict[str, Any],
                 "error": {"code": -32602, "message": str(exc)}}
 
 
-def main(database_path: Path | None = None, principal: Principal = LOCAL_PRINCIPAL) -> None:
+def main(database_path: Path | None = None, principal: Principal | None = None,
+         *, allow_local_dev_principal: bool = False) -> None:
+    if principal is None and allow_local_dev_principal:
+        principal = LOCAL_PRINCIPAL
+    if principal is not None and not isinstance(principal, Principal):
+        print("invalid trusted principal", file=sys.stderr)
+        raise SystemExit(2)
     try:
         database = database_path.resolve() if database_path else _database()
         if not database.is_file():
@@ -176,4 +200,9 @@ def main(database_path: Path | None = None, principal: Principal = LOCAL_PRINCIP
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--db", type=Path)
+    parser.add_argument("--allow-local-dev-principal", action="store_true",
+                        help="仅用于本机 stdio 演示；所有请求共享 local-dev 身份")
+    args = parser.parse_args()
+    main(args.db, allow_local_dev_principal=args.allow_local_dev_principal)
