@@ -15,3 +15,5 @@ PT-4 定向测试 **5 项通过**：来源替换/删除/恢复、解析与写入
 ## MCP/Web ACL 复核（2026-11-14）
 
 再次运行 `tests/test_access_control.py` 与 `tests/test_s1.py`：**27 passed**。负例确认：删除/替换源后旧 SHA 不再出现在检索结果，HTTP 证据和 MCP `get_evidence`/`resources/read` 均拒绝旧引用；`resources/list` 只列出 owner 当前可读且源文件 SHA 匹配的 PDF。跨 owner 的 Web 搜索、MCP `search_papers`、MCP 资源列表/直读、HTTP evidence 均一致拒绝；新版本只继承预期集合 ACL。未发现需修复的实现缺口，因此本次不改生产代码，只补恢复索引测试和本审计记录。
+
+后续 Windows 临时目录复验发现 MCP `_readonly` 仍以未编码路径拼 SQLite URI，路径含 `#!` 时触发 `unable to open database file`，导致资源 ACL 负例无法运行。已改用 `Path.as_uri()` 编码；`tests/test_access_control.py` 与 `tests/test_s1.py` 复跑 **27 passed**。这修复测试与实际部署中的特殊 Windows 路径兼容，不改变 ACL 判定。
