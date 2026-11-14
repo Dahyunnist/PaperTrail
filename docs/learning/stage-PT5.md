@@ -52,3 +52,7 @@ Recall 为目标 PDF 页的微平均召回；MRR 按去重后的物理页排名�
 .\.venv\Scripts\python.exe -m papertrail.evaluate --compare --db .local/pt5-public-eval.sqlite3 --gold evals/pt5-public-gold-20261023.jsonl --k 5 --minimum-questions 1 --modes bm25 vector hybrid --vector-artifact .local/pt5-public-eval.vectors.joblib --trace-out .local/pt5-public-retrieval-k5.json
 .\.venv\Scripts\python.exe -m papertrail.evaluate --compare --db .local/pt5-public-eval.sqlite3 --gold evals/pt5-public-gold-20261023.jsonl --k 10 --minimum-questions 1 --modes bm25 vector hybrid --vector-artifact .local/pt5-public-eval.vectors.joblib --trace-out .local/pt5-public-retrieval-k10.json
 ```
+
+## 冻结输入复核（2026-11-14）
+
+重新运行公开许可登记校验与 `papertrail.gold` 原文验证：登记通过，6 题、6 条引文通过。gold SHA-256 为 `695dd992dd13cd091c9aa384cac97fb8e68c1d962075a3bb70ea6c6eda93584d`，与 `evals/pt5-public-retrieval-summary-20261023.json` 一致；manifest SHA-256 为 `336f62f6f69b4aa79586323fceeaf6b9e518692ea25bd002285ce5dd44a979e9`。本次只验收冻结公开输入和已存检索摘要，没有重建 `.local` 索引或重跑检索。该组仍是 3 篇论文的开发诊断，不是独立 holdout；PT-1 真实双人 gold 仍为 0/40，等待人工数据。
