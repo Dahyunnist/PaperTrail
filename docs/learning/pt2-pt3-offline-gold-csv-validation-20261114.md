@@ -19,3 +19,7 @@ PT3 已提交的合成 gold 使用仓库内合成 PDF 做原文校验：6 题、
 ## 远端主线复验（2026-11-14）
 
 确认远端 `master` 已含共享 manifest v1 提交 `9f32aa38e6ad772739001521eb23b98df2bf4fe8`，本地与远端一致。CSV importer、确定性 runner、PT2 合成检索、PT3 引用/部分覆盖、共享 manifest 定向组合：**42 passed**。PT3 合成 gold 再验为 6 题、7 条引文通过。未重读 PT2 私人开发集；PT1 仍 0/40，不能宣称真实论文评测完成。
+
+## PT-1 暂停期间离线复验（2026-11-15）
+
+重跑 CSV importer、manifest runner、PT2 frozen synthetic 与 PT3 citation failure 组：**26 passed**。这仅验证合成 fixture 和导入拒绝路径；未使用 PT-1 pending 模板作为 gold。真实 PT-2/PT-3 评测仍等人工双标、裁决与来源校验。
