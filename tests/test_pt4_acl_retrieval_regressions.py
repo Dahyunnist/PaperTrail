@@ -299,6 +299,8 @@ def test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers(
                             "WHERE v.sha256=?", (old_sha,)).fetchone()[0] == 0
     finally:
         conn.close()
+
+
     assert search(database, "Versionoldmarker", source_type="original_pdf") == []
     with pytest.raises(ValueError, match="original paper not found"):
         read_evidence(database, old_sha, old_citation["pdf_page"], Principal("local-dev"))
@@ -349,3 +351,50 @@ def test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers(
         assert conn.execute("SELECT count(*) FROM chunks").fetchone()[0] > 0
     finally:
         conn.close()
+
+
+def test_web_export_direct_read_and_mcp_share_acl_and_render_verified_evidence(tmp_path):
+    database, _root, rows = _index_docs(tmp_path, [
+        ("visible.pdf", "Interfaceprobe provides synthetic evidence for a measured result."),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        version_id = conn.execute("SELECT version_id FROM paper_versions").fetchone()["version_id"]
+    finally:
+        conn.close()
+    assign_version_to_collection(database, version_id, "workspace-b")
+    principal = Principal("workspace-b-user")
+    result = ask(database, "What does Interfaceprobe provide?", generate=False,
+                 principal_id=principal.user_id)
+    assert result["status"] == "verified_excerpts"
+    citation = result["claims"][0]["evidence"]
+    client = create_app(database, principal_provider=lambda: principal).test_client()
+    page = client.get(f"/?conversation_id={result['conversation_id']}")
+    assert page.status_code == 200
+    html = page.get_data(as_text=True)
+    assert citation["quote"] in html
+    assert f"版本 {version_id}" in html
+    assert f"PDF 第 {citation['pdf_page']} 页" in html
+    assert "覆盖审查：未执行" in html
+
+    exported = client.get(f"/api/answer-eval/{result['conversation_id']}.jsonl")
+    assert exported.status_code == 200
+    record = json.loads(exported.data.decode().splitlines()[0])
+    evidence = record["claims"][0]["evidence"][0]
+    assert evidence["source_sha256"] == citation["sha256"]
+    assert evidence["pdf_page"] == citation["pdf_page"]
+    assert evidence["snippet"] == citation["quote"]
+    assert record["coverage_complete"] is None
+    assert "path" not in evidence and "absolute_path" not in evidence
+
+    uri = f"papertrail://evidence/{citation['sha256']}/{citation['pdf_page']}"
+    mcp = handle(database, {"jsonrpc": "2.0", "id": 1, "method": "resources/read",
+                            "params": {"uri": uri}}, principal)
+    assert citation["quote"] in mcp["result"]["contents"][0]["text"]
+    denied = create_app(database, principal_provider=lambda: Principal("local-dev")).test_client()
+    assert denied.get(f"/api/evidence/{citation['sha256']}/{citation['pdf_page']}").status_code == 404
+    assert denied.get(f"/api/answer-eval/{result['conversation_id']}.jsonl").status_code == 404
+    denied_mcp = handle(database, {"jsonrpc": "2.0", "id": 2, "method": "resources/read",
+                                   "params": {"uri": uri}}, Principal("local-dev"))
+    assert denied_mcp["error"]["code"] == -32602
