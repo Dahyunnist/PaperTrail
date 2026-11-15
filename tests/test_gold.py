@@ -1,4 +1,7 @@
+import json
 from pathlib import Path
+
+import pytest
 
 from papertrail.gold import _normalize_excerpt, load_gold, verify_quotes
 
@@ -35,3 +38,25 @@ def test_gold_rejects_unanswerable_questions_with_supporting_quotes(tmp_path):
 def test_quote_normalization_joins_hyphenated_line_wraps():
     assert _normalize_excerpt("membership in- ference attack") == \
         _normalize_excerpt("membership inference attack")
+def test_gold_rejects_boolean_pdf_page_in_synthetic_fixture(tmp_path):
+    synthetic_gold = tmp_path / "synthetic.jsonl"
+    synthetic_gold.write_text(
+        json.dumps({
+            "id": "SYN-PAGE-BOOL",
+            "question_type": "fact_location",
+            "question": "Synthetic question?",
+            "expected_answer": "Synthetic answer",
+            "abstain": False,
+            "evidence": [{
+                "root_id": "synthetic",
+                "file_name": "synthetic.pdf",
+                "sha256": "a" * 64,
+                "pdf_page": True,
+                "quote": "Synthetic quote",
+            }],
+        }) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="页码或 SHA-256 格式错误"):
+        load_gold(synthetic_gold, minimum_questions=1)

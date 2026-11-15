@@ -57,7 +57,8 @@ def load_gold(path: Path, minimum_questions: int = 30) -> list[dict[str, Any]]:
                 raise ValueError(f"{item['id']}: evidence 指针字段不完整")
             if len(pointer["quote"]) > 180:
                 raise ValueError(f"{item['id']}: 引文过长，S0 只保留短摘录")
-            if pointer["pdf_page"] < 1 or len(pointer["sha256"]) != 64:
+            page = pointer["pdf_page"]
+            if not isinstance(page, int) or isinstance(page, bool) or page < 1 or len(pointer["sha256"]) != 64:
                 raise ValueError(f"{item['id']}: 页码或 SHA-256 格式错误")
         items.append(item)
     if len(items) < minimum_questions:
