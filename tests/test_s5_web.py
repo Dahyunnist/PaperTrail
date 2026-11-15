@@ -73,8 +73,10 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
     assert response.status_code == 200
     assert html.count("Primary source quote.") == 1
     assert html.count("Secondary source quote.") == 1
+    assert "版本 v1" in html and "版本 v2" in html
     assert "PDF 第 2 页" in html
     assert "PDF 第 7 页" in html
+    assert "覆盖审查：完整" in html
 
 
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):
