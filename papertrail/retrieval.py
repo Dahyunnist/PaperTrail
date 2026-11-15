@@ -140,11 +140,13 @@ def vector_search(database: Path, query: str, limit: int = 5,
     if not query.strip():
         return []
     _, np, _, _, normalize = _vector_dependencies()
+    allowed = authorized_version_ids(database, principal_id)
+    if not allowed:
+        return []
     artifact = artifact or database.with_name(database.stem + ".vectors.joblib")
     bundle = _load_index(database, artifact)
     query_vector = bundle["reducer"].transform(bundle["vectorizer"].transform([query]))
     query_vector = normalize(query_vector).astype(np.float32)
-    allowed = authorized_version_ids(database, principal_id)
     eligible = [index for index, row in enumerate(bundle["rows"])
                 if row["version_id"] in allowed]
     if not eligible:
