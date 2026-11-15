@@ -3,10 +3,23 @@ import json
 from pathlib import Path
 
 import fitz
+import pytest
 import yaml
 
 from papertrail.evaluate import compare_modes, evaluate
 from papertrail.s1_index import index_selection
+
+
+@pytest.mark.parametrize("runner", [evaluate, compare_modes])
+@pytest.mark.parametrize("k", [0, -1, True, 1.5])
+def test_evaluation_rejects_nonpositive_k_before_reading_inputs(tmp_path, runner, k):
+    with pytest.raises(ValueError, match="k must be >= 1"):
+        if runner is compare_modes:
+            runner(tmp_path / "missing.sqlite3", tmp_path / "missing.jsonl",
+                   k=k, modes=("bm25",), minimum_questions=1)
+        else:
+            runner(tmp_path / "missing.sqlite3", tmp_path / "missing.jsonl", k=k,
+                   minimum_questions=1)
 
 
 def _sha(path: Path) -> str:

@@ -15,8 +15,14 @@ from .s1_index import open_database, search
 from .retrieval import retrieve
 
 
+def _validate_k(k: int) -> None:
+    if not isinstance(k, int) or isinstance(k, bool) or k < 1:
+        raise ValueError("k must be >= 1")
+
+
 def evaluate(database: Path, gold_path: Path, k: int = 5,
              minimum_questions: int = 30) -> dict[str, Any]:
+    _validate_k(k)
     items = load_gold(gold_path, minimum_questions=minimum_questions)
     trace: list[dict[str, Any]] = []
     page_hits = 0
@@ -141,6 +147,7 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
                   modes: tuple[str, ...] = ("bm25", "vector", "hybrid", "bge", "hybrid_bge"),
                   artifact: Path | None = None,
                   minimum_questions: int = 30) -> dict[str, Any]:
+    _validate_k(k)
     all_items = load_gold(gold_path, minimum_questions=minimum_questions)
     items = [item for item in all_items if not item["abstain"]]
     output: dict[str, Any] = {"k": k, "answerable_questions": len(items), "modes": {}}
