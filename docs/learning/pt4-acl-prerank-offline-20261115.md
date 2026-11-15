@@ -35,3 +35,9 @@
 ## BGE ACL 回归补充
 
 原定向回归覆盖 BM25 SQL 与 TF-IDF/SVD 向量检索，但没有直接固定 BGE 后端的 ACL 顺序。本轮新增完全合成的 BGE bundle 测试：外部文档相似度更高，`bge_search` 仍先按 Principal 过滤，再评分和 top-k；无权限用户结果为空。测试 mock 编码器和索引加载，不调用 embedding 模型；不验证 BGE 质量或生产认证集成。
+
+## direct-resource 与 MCP 权限边界
+
+核查顺序：`_authorized_document` 的 SQL 同时约束 SHA、`original_pdf` 类型和 collection owner；无匹配时返回通用 not-found。只有授权后才读取路径并校验文件 SHA，再打开 PDF 页。MCP `get_evidence`、`resources/list`、`resources/read` 都要求服务端注入 `Principal`；请求内容里的 user id 不作为身份来源。`resources/list` 限定 owner 的原始 PDF，并按需校验文件 SHA；两个资源读取 URI 都回到授权文档查询。
+
+新增合成集成回归，在两位 owner 间交叉调用直接页读取、文档 metadata、MCP evidence tool、资源列表和资源读取；确认只可读取各自 PDF，伪造 user id 参数无权扩权。测试不读取真实或私有 PDF。MCP stdio 服务本身仍是本地单用户进程，不提供调用者认证；多租户部署仍需可信身份注入层。

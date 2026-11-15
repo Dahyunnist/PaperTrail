@@ -4,12 +4,14 @@ from pathlib import Path
 
 import fitz
 import numpy as np
+import pytest
 import yaml
 
 from papertrail.access import (Principal, assign_version_to_collection, authorized_version_ids,
-                               create_collection, read_evidence)
+                               create_collection, document_metadata, read_evidence)
 from papertrail.retrieval import vector_search
 from papertrail.semantic import bge_search
+from papertrail.mcp_server import _call, _resource_list, handle
 from papertrail.s1_index import index_selection, open_database, search
 from papertrail.web import create_app
 
@@ -152,6 +154,56 @@ def test_bge_candidates_are_filtered_before_scoring_and_top_k(tmp_path, monkeypa
     local_result = bge_search(database, "bgeworkspace", limit=1, principal_id="local-dev")
     assert [row["sha256"] for row in local_result] == [rows[1]["sha256"]]
     assert bge_search(database, "bgeworkspace", limit=1, principal_id="no-access") == []
+
+
+def test_direct_reads_and_mcp_tools_resources_share_collection_acl(tmp_path):
+    database, _root, rows = _index_docs(tmp_path, [
+        ("local.pdf", "directacl local-only synthetic evidence."),
+        ("workspace.pdf", "directacl workspace-only synthetic evidence."),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        versions = {row["sha256"]: row["version_id"] for row in conn.execute(
+            "SELECT version_id,sha256 FROM paper_versions")}
+    finally:
+        conn.close()
+    assign_version_to_collection(database, versions[rows[1]["sha256"]], "workspace-b")
+    local = Principal("local-dev")
+    workspace = Principal("workspace-b-user")
+    local_sha, workspace_sha = rows[0]["sha256"], rows[1]["sha256"]
+
+    assert "local-only" in read_evidence(database, local_sha, 1, local)["text"]
+    assert "workspace-only" in read_evidence(database, workspace_sha, 1, workspace)["text"]
+    assert document_metadata(database, workspace_sha, workspace)["sha256"] == workspace_sha
+    with pytest.raises(ValueError, match="original paper not found"):
+        read_evidence(database, workspace_sha, 1, local)
+    with pytest.raises(ValueError, match="original paper not found"):
+        read_evidence(database, local_sha, 1, workspace)
+    with pytest.raises(ValueError, match="original paper not found"):
+        document_metadata(database, local_sha, workspace)
+
+    workspace_tool = _call(database, "get_evidence",
+                            {"sha256": workspace_sha, "page": 1}, workspace)
+    assert "workspace-only" in workspace_tool["structuredContent"]["text"]
+    assert {row["uri"] for row in _resource_list(database, workspace)} == {
+        f"papertrail://documents/{workspace_sha}"}
+    allowed_uri = f"papertrail://evidence/{workspace_sha}/1"
+    allowed_read = handle(database, {"jsonrpc": "2.0", "id": 1,
+                                     "method": "resources/read", "params": {"uri": allowed_uri}},
+                          workspace)
+    assert "workspace-only" in allowed_read["result"]["contents"][0]["text"]
+    for uri in (f"papertrail://documents/{local_sha}",
+                f"papertrail://evidence/{local_sha}/1"):
+        denied = handle(database, {"jsonrpc": "2.0", "id": 2,
+                                   "method": "resources/read", "params": {"uri": uri}},
+                        workspace)
+        assert denied["error"]["code"] == -32602
+    spoofed = handle(database, {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                               "params": {"name": "get_evidence", "arguments": {
+                                   "sha256": local_sha, "page": 1, "user_id": "local-dev"}}},
+                     workspace)
+    assert spoofed["result"]["isError"] is True
 
 
 def test_reconcile_update_and_delete_clean_versions_and_acl_visibility(tmp_path):
