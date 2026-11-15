@@ -23,7 +23,7 @@
     "max_steps": {"type": ["integer", "null"], "minimum": 0},
     "max_tokens": {"type": ["integer", "null"], "minimum": 1},
     "scorer_sha": {"$ref": "#/$defs/sha256"},
-    "gold_source": {"type": "string", "minLength": 1},
+    "gold_source": {"type": ["string", "null"], "minLength": 1},
     "cost_usd_estimate": {"type": ["number", "null"], "minimum": 0},
     "run_id": {"type": "string", "minLength": 1},
     "trace_id": {"type": "string", "minLength": 1},

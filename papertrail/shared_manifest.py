@@ -64,9 +64,12 @@ def validate_shared_manifest(value: dict[str, Any]) -> None:
         raise ValueError("field_status invalid")
     if not isinstance(value["budget"], dict):
         raise ValueError("budget invalid")
-    for key in ("project", "dataset_id", "split", "model_id", "gold_source", "run_id", "trace_id"):
+    for key in ("project", "dataset_id", "split", "model_id", "run_id", "trace_id"):
         if not isinstance(value[key], str) or not value[key].strip():
             raise ValueError(f"{key} invalid")
+    if value["gold_source"] is not None and (
+            not isinstance(value["gold_source"], str) or not value["gold_source"].strip()):
+        raise ValueError("gold_source invalid")
     if not re.fullmatch(r"[0-9a-f]{7,40}", str(value["git_sha"])):
         raise ValueError("git_sha invalid")
     if value["span_id"] is not None and (not isinstance(value["span_id"], str) or not value["span_id"].strip()):

@@ -64,3 +64,11 @@ def test_trace_requires_standard_ids_and_event_name():
     assert "missing:span_id" in issues
     assert "missing:timestamp" in issues
     assert "invalid:event_name" in issues
+
+
+def test_trace_rejects_unallowlisted_attributes():
+    event = {"run_id": "r", "trace_id": "t", "span_id": "s",
+             "event_name": "evaluation.failed", "timestamp": "2026-11-12T00:00:00Z",
+             "stage": "compare_modes", "error_type": "RuntimeError",
+             "error_message": "private details"}
+    assert "unsupported_field:error_message" in validate_trace_event(event)

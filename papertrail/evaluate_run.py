@@ -15,26 +15,30 @@ from typing import Any
 
 from .evaluate import compare_modes
 from .gold import load_gold
+from .shared_manifest import to_shared_manifest_v1
+from .trace import bind_trace, emit, reset_trace
 
 RUN_FIELDS = ("schema_version", "project", "git_sha", "dataset_id", "dataset_sha256", "split",
               "model_id", "prompt_sha", "tool_schema_sha", "runtime_digest", "max_steps",
               "max_tokens", "scorer_sha", "gold_source", "cost_usd_estimate", "run_id",
-              "trace_id", "started_at", "ended_at", "status", "source_type",
+              "trace_id", "span_id", "budget", "started_at", "ended_at", "status", "source_type",
               "source_manifest_sha256", "gold_sha256", "retrieval_modes", "k",
               "question_count", "report_fingerprint")
 SENSITIVE_FIELD = re.compile(r"(api.?key|secret|password|token|private.?key|chain.?of.?thought|raw.?prompt)", re.I)
 
 
 def build_run_manifest(*, git_sha: str, dataset_id: str, dataset_sha256: str, split: str,
-                       scorer_sha: str, gold_source: str, started_at: str, ended_at: str,
+                       scorer_sha: str, gold_source: str | None, started_at: str, ended_at: str,
                        run_id: str, trace_id: str, max_steps: int = 1,
-                       status: str = "completed") -> dict[str, Any]:
-    return {"schema_version": 1, "project": "papertrail", "git_sha": git_sha,
+                       status: str = "passed") -> dict[str, Any]:
+    return {"schema_version": 1, "project": "PaperTrail", "git_sha": git_sha,
             "dataset_id": dataset_id, "dataset_sha256": dataset_sha256, "split": split,
             "model_id": "none", "prompt_sha": None, "tool_schema_sha": None,
             "runtime_digest": None, "max_steps": max_steps, "max_tokens": None,
             "scorer_sha": scorer_sha, "gold_source": gold_source,
             "cost_usd_estimate": 0, "run_id": run_id, "trace_id": trace_id,
+            "span_id": None,
+            "budget": {"cap_usd": 0, "spent_usd": 0, "status": "not_applicable"},
             "started_at": started_at, "ended_at": ended_at, "status": status}
 
 
@@ -44,10 +48,12 @@ def validate_run_manifest(value: Any) -> None:
     if set(RUN_FIELDS) - value.keys():
         raise ValueError("run manifest fields missing")
     if (not isinstance(value["schema_version"], int) or isinstance(value["schema_version"], bool)
-            or value["schema_version"] != 1 or value["project"] != "papertrail"):
+            or value["schema_version"] != 1 or value["project"] != "PaperTrail"):
         raise ValueError("run manifest identity invalid")
     if any(key != "max_tokens" and SENSITIVE_FIELD.search(str(key)) for key in value):
         raise ValueError("run manifest contains a sensitive field")
+    if set(value) - set(RUN_FIELDS):
+        raise ValueError("run manifest has unsupported fields")
     for key in ("git_sha",):
         if not isinstance(value[key], str) or not re.fullmatch(r"[0-9a-f]{40}", value[key], re.I):
             raise ValueError(f"run manifest {key} invalid")
@@ -63,12 +69,20 @@ def validate_run_manifest(value: Any) -> None:
         raise ValueError("run manifest max_steps invalid")
     if (not isinstance(value["cost_usd_estimate"], (int, float))
             or isinstance(value["cost_usd_estimate"], bool)
-            or value["cost_usd_estimate"] != 0 or value["status"] != "completed"):
+            or value["cost_usd_estimate"] != 0 or value["status"] not in {"passed", "failed", "blocked"}):
         raise ValueError("run manifest cost or status invalid")
-    if not isinstance(value["gold_source"], str) or not value["gold_source"].strip():
-        raise ValueError("run manifest gold_source must identify the actual source")
+    if value["span_id"] is not None and (not isinstance(value["span_id"], str) or not value["span_id"].strip()):
+        raise ValueError("run manifest span_id invalid")
+    budget = value["budget"]
+    if (not isinstance(budget, dict) or budget.get("status") not in {"not_applicable", "recorded", "blocked"}
+            or any(not isinstance(budget.get(key), (int, float)) or isinstance(budget.get(key), bool)
+                   or budget[key] < 0 for key in ("cap_usd", "spent_usd"))):
+        raise ValueError("run manifest budget invalid")
+    if value["gold_source"] is not None and (
+            not isinstance(value["gold_source"], str) or not value["gold_source"].strip()):
+        raise ValueError("run manifest gold_source invalid")
     if any(not isinstance(value[k], str) or not value[k] for k in
-           ("dataset_id", "split", "gold_source", "run_id", "trace_id", "started_at", "ended_at",
+           ("dataset_id", "split", "run_id", "trace_id", "started_at", "ended_at",
             "source_type")):
         raise ValueError("run manifest metadata invalid")
     if (not isinstance(value["retrieval_modes"], list) or not value["retrieval_modes"]
@@ -98,6 +112,21 @@ def _git_sha() -> str:
     ).stdout.strip()
 
 
+def _attach_run_manifest(report: dict[str, Any], run_manifest: dict[str, Any]) -> None:
+    run_manifest["report_fingerprint"] = "0" * 64
+    validate_run_manifest(run_manifest)
+    report["run_manifest"] = run_manifest
+    report["shared_manifest"] = to_shared_manifest_v1(run_manifest)
+    fingerprint_body = json.dumps(report, ensure_ascii=False, sort_keys=True).encode()
+    run_manifest["report_fingerprint"] = hashlib.sha256(fingerprint_body).hexdigest()
+    validate_run_manifest(run_manifest)
+
+
+def _write_report(report_path: Path, report: dict[str, Any]) -> None:
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def run_evaluation(
     database: Path,
     gold_path: Path,
@@ -123,7 +152,7 @@ def run_evaluation(
     if not isinstance(split, str) or not split.strip():
         raise ValueError("source manifest must declare split or dataset_role")
     if not isinstance(gold_source, str) or not gold_source.strip():
-        gold_source = "unspecified"
+        gold_source = None
     declared_gold = manifest.get("gold_file")
     if declared_gold is not None:
         declared_path = Path(declared_gold)
@@ -146,8 +175,46 @@ def run_evaluation(
 
     started_at = datetime.now(timezone.utc).isoformat()
     started = time.perf_counter()
-    raw = compare_modes(database, gold_path, k=k, modes=modes,
-                        minimum_questions=minimum_questions)
+    git_sha = _git_sha()
+    source_manifest_sha = sha256(source_manifest)
+    run_id = hashlib.sha256((git_sha + actual_gold_hash + started_at).encode()).hexdigest()[:32]
+    trace_id = hashlib.sha256((actual_gold_hash + started_at).encode()).hexdigest()[:32]
+    trace_token = bind_trace(run_id, trace_id)
+    try:
+        raw = compare_modes(database, gold_path, k=k, modes=modes,
+                            minimum_questions=minimum_questions)
+    except Exception as exc:
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        ended_at = datetime.now(timezone.utc).isoformat()
+        emit("evaluation.failed", stage="compare_modes", error_type=type(exc).__name__)
+        failure_report = {
+            "schema_version": 1,
+            "dataset": {"dataset_id": dataset_id, "source_type": source_type,
+                        "question_count": len(items)},
+            "provenance": {"git_sha": git_sha, "gold_sha256": actual_gold_hash,
+                           "source_manifest_sha256": source_manifest_sha},
+            "evaluation": {"k": k, "modes": list(modes), "status": "failed"},
+            "runtime": {"generated_at_utc": ended_at, "python": platform.python_version(),
+                        "platform": platform.platform(), "elapsed_ms": elapsed_ms},
+            "failure": {"stage": "compare_modes", "error_type": type(exc).__name__},
+        }
+        run_manifest = build_run_manifest(
+            git_sha=git_sha, dataset_id=dataset_id,
+            dataset_sha256=hashlib.sha256(json.dumps({
+                "source_manifest_sha256": source_manifest_sha,
+                "gold_sha256": actual_gold_hash,
+            }, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+            split=split, scorer_sha=sha256(Path(__file__)), gold_source=gold_source,
+            started_at=started_at, ended_at=ended_at, run_id=run_id, trace_id=trace_id,
+            max_steps=1, status="failed")
+        run_manifest.update({"source_type": source_type,
+            "source_manifest_sha256": source_manifest_sha, "gold_sha256": actual_gold_hash,
+            "retrieval_modes": list(modes), "k": k, "question_count": len(items)})
+        _attach_run_manifest(failure_report, run_manifest)
+        _write_report(report_path, failure_report)
+        raise
+    finally:
+        reset_trace(trace_token)
     elapsed_ms = (time.perf_counter() - started) * 1000
 
     runtime_by_mode: dict[str, dict[str, float]] = {}
@@ -165,9 +232,9 @@ def run_evaluation(
             "question_count": len(items),
         },
         "provenance": {
-            "git_sha": _git_sha(),
+            "git_sha": git_sha,
             "gold_sha256": actual_gold_hash,
-            "source_manifest_sha256": sha256(source_manifest),
+            "source_manifest_sha256": source_manifest_sha,
         },
         "evaluation": {
             "k": k,
@@ -183,31 +250,26 @@ def run_evaluation(
             "elapsed_ms": elapsed_ms,
             "query_latency_by_mode": runtime_by_mode,
         },
-        "limits": manifest.get("limits", []),
     }
     ended_at = datetime.now(timezone.utc).isoformat()
     report["dataset"]["dataset_id"] = dataset_id
     report["run_manifest"] = build_run_manifest(
         git_sha=report["provenance"]["git_sha"], dataset_id=report["dataset"]["dataset_id"],
         dataset_sha256=hashlib.sha256(json.dumps({
-            "source_manifest_sha256": sha256(source_manifest), "gold_sha256": actual_gold_hash,
+        "source_manifest_sha256": source_manifest_sha, "gold_sha256": actual_gold_hash,
         }, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
         split=split,
         scorer_sha=sha256(Path(__file__)), gold_source=gold_source,
         started_at=started_at, ended_at=ended_at,
-        run_id=hashlib.sha256((report["provenance"]["git_sha"] + actual_gold_hash + started_at).encode()).hexdigest()[:32],
-        trace_id=hashlib.sha256((actual_gold_hash + started_at).encode()).hexdigest()[:32],
+        run_id=run_id,
+        trace_id=trace_id,
         max_steps=1)
     report["run_manifest"].update({"source_type": source_type,
-        "source_manifest_sha256": report["provenance"]["source_manifest_sha256"],
+        "source_manifest_sha256": source_manifest_sha,
         "gold_sha256": actual_gold_hash, "retrieval_modes": list(modes), "k": k,
-        "question_count": len(items), "report_fingerprint": "0" * 64})
-    validate_run_manifest(report["run_manifest"])
-    fingerprint_body = json.dumps(report, ensure_ascii=False, sort_keys=True).encode()
-    report["run_manifest"]["report_fingerprint"] = hashlib.sha256(fingerprint_body).hexdigest()
-    validate_run_manifest(report["run_manifest"])
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        "question_count": len(items)})
+    _attach_run_manifest(report, report["run_manifest"])
+    _write_report(report_path, report)
     return report
 
 

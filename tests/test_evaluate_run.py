@@ -5,8 +5,10 @@ from copy import deepcopy
 import fitz
 import pytest
 
+import papertrail.evaluate_run as evaluate_run_module
 from papertrail.evaluate_run import main, run_evaluation, validate_run_manifest
 from papertrail.s1_index import index_selection
+from papertrail.run_manifest import validate_trace_event
 
 
 def _sha(path):
@@ -64,12 +66,22 @@ def test_manifest_bound_evaluation_separates_runtime(tmp_path):
     assert report["evaluation"]["answerable_questions"] == 1
     assert report["evaluation"]["unanswerable_questions"] == 1
     run_manifest = report["run_manifest"]
-    assert run_manifest["project"] == "papertrail"
+    assert run_manifest["project"] == "PaperTrail"
     assert run_manifest["model_id"] == "none"
     assert run_manifest["gold_source"] == "synthetic_fixture"
     assert run_manifest["cost_usd_estimate"] == 0
     assert run_manifest["question_count"] == 2
     assert run_manifest["report_fingerprint"]
+    assert report["shared_manifest"]["status"] == "passed"
+    assert report["shared_manifest"]["span_id"] is None
+    assert report["shared_manifest"]["field_status"]["span_id"] == "not_recorded"
+    expected_dataset_hash = hashlib.sha256(json.dumps({
+        "source_manifest_sha256": _sha(manifest), "gold_sha256": _sha(gold),
+    }, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    assert run_manifest["dataset_sha256"] == expected_dataset_hash
+    assert run_manifest["gold_sha256"] == _sha(gold)
+    assert run_manifest["source_manifest_sha256"] == _sha(manifest)
+    assert "limits" not in report
     validate_run_manifest(run_manifest)
     assert json.loads(report_path.read_text(encoding="utf-8")) == report
 
@@ -137,14 +149,62 @@ def test_manifest_requires_dataset_identity_before_writing_report(tmp_path):
     assert not output.exists()
 
 
-def test_missing_gold_source_is_reported_as_unspecified(tmp_path):
+def test_missing_gold_source_is_null_and_marked_not_recorded(tmp_path):
     database, gold, source_manifest = _fixture(tmp_path)
     source = json.loads(source_manifest.read_text(encoding="utf-8"))
     source.pop("gold_source")
     source_manifest.write_text(json.dumps(source), encoding="utf-8")
     report = run_evaluation(database, gold, source_manifest, tmp_path / "out.json",
                             k=1, modes=("bm25",), minimum_questions=1)
-    assert report["run_manifest"]["gold_source"] == "unspecified"
+    assert report["run_manifest"]["gold_source"] is None
+    assert report["shared_manifest"]["gold_source"] is None
+    assert report["shared_manifest"]["field_status"]["gold_source"] == "not_recorded"
+
+
+def test_evaluation_report_and_failure_trace_are_safe_and_correlated(tmp_path, monkeypatch):
+    database, gold, manifest = _fixture(tmp_path)
+    gold_rows = [json.loads(line) for line in gold.read_text(encoding="utf-8").splitlines()]
+    gold_rows[0]["question"] = "QUESTION_SENTINEL_PRIVATE"
+    gold_rows[0]["expected_answer"] = "ANSWER_SENTINEL_PRIVATE"
+    gold.write_text("".join(json.dumps(row) + "\n" for row in gold_rows), encoding="utf-8")
+    source = json.loads(manifest.read_text(encoding="utf-8"))
+    source["gold_sha256"] = _sha(gold)
+    source["limits"] = ["LIMITS_SENTINEL_PRIVATE"]
+    manifest.write_text(json.dumps(source), encoding="utf-8")
+    trace_path = tmp_path / "trace.jsonl"
+    monkeypatch.setenv("PAPERTRAIL_TRACE_JSONL", str(trace_path))
+
+    def fail_comparison(*args, **kwargs):
+        from papertrail.trace import emit
+        emit("retrieval.completed", mode="bm25", result_count=0, status="failed")
+        raise RuntimeError("FAILURE_SENTINEL_PRIVATE")
+
+    monkeypatch.setattr(evaluate_run_module, "compare_modes", fail_comparison)
+    report_path = tmp_path / "failure.json"
+    with pytest.raises(RuntimeError, match="FAILURE_SENTINEL_PRIVATE"):
+        run_evaluation(database, gold, manifest, report_path,
+                       k=1, modes=("bm25",), minimum_questions=1)
+
+    report_text = report_path.read_text(encoding="utf-8")
+    report = json.loads(report_text)
+    assert report["run_manifest"]["status"] == "failed"
+    assert report["shared_manifest"]["status"] == "failed"
+    assert report["failure"] == {"stage": "compare_modes", "error_type": "RuntimeError"}
+    assert report["run_manifest"]["git_sha"]
+    assert report["run_manifest"]["dataset_sha256"]
+    assert report["run_manifest"]["scorer_sha"]
+    assert report["run_manifest"]["gold_sha256"] == _sha(gold)
+    assert report["run_manifest"]["source_manifest_sha256"] == _sha(manifest)
+    assert all(secret not in report_text for secret in (
+        "QUESTION_SENTINEL_PRIVATE", "ANSWER_SENTINEL_PRIVATE",
+        "LIMITS_SENTINEL_PRIVATE", "FAILURE_SENTINEL_PRIVATE"))
+    events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
+    assert [event["event_name"] for event in events] == ["retrieval.completed", "evaluation.failed"]
+    assert all(validate_trace_event(event) == [] for event in events)
+    assert all(event["run_id"] == report["run_manifest"]["run_id"] for event in events)
+    assert all(event["trace_id"] == report["run_manifest"]["trace_id"] for event in events)
+    assert len({event["span_id"] for event in events}) == 2
+    assert "FAILURE_SENTINEL_PRIVATE" not in trace_path.read_text(encoding="utf-8")
 
 
 def test_manifest_bound_evaluation_rejects_changed_gold_hash(tmp_path):
