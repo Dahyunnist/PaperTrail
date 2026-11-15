@@ -7,7 +7,7 @@ import yaml
 
 from papertrail.audit import _hash
 from papertrail.qa import ask, conversation_history, _term_overlap, _validate_quote
-from papertrail.s1_index import index_selection
+from papertrail.s1_index import index_selection, open_database
 
 
 def test_flash_peak_budget_reserves_current_output_rate():
@@ -48,6 +48,19 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     assert first["status"] == "verified_excerpts"
     assert first["claims"]
     citation = first["claims"][0]["evidence"]
+    trace = first["retrieval_trace"]
+    assert trace["retrieval_mode"] == "bm25"
+    assert trace["index_revision_consistent"] is True
+    assert len(trace["query_hash"]) == 64
+    assert citation["chunk_id"] in trace["candidate_chunk_ids"]
+    assert trace["citation_chunk_ids"] == [citation["chunk_id"]]
+    conn = open_database(db, readonly=True)
+    try:
+        stored_trace = conn.execute("SELECT run_json FROM qa_trajectories WHERE turn_id=?",
+                                    (first["turn_id"],)).fetchone()["run_json"]
+    finally:
+        conn.close()
+    assert json.loads(stored_trace) == trace
     assert citation["text_origin"] == "native_text"
     assert citation["sha256"] == _hash(source)
     page_cache = {}

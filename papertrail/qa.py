@@ -74,6 +74,7 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS qa_trajectories (
         turn_id TEXT PRIMARY KEY REFERENCES qa_turns(turn_id) ON DELETE CASCADE,
         retrieval_json TEXT NOT NULL, evidence_json TEXT NOT NULL,
+        run_json TEXT NOT NULL DEFAULT '{}',
         model_name TEXT, usage_json TEXT, prompt_chars INTEGER NOT NULL,
         latency_ms REAL NOT NULL, answer_status TEXT NOT NULL,
         total_claims INTEGER NOT NULL, rejected_claims INTEGER NOT NULL,
@@ -90,6 +91,8 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
     if "coverage_complete" not in columns:
         conn.execute("ALTER TABLE qa_turns ADD COLUMN coverage_complete INTEGER")
     trajectory_columns = {row[1] for row in conn.execute("PRAGMA table_info(qa_trajectories)")}
+    if "run_json" not in trajectory_columns:
+        conn.execute("ALTER TABLE qa_trajectories ADD COLUMN run_json TEXT NOT NULL DEFAULT '{}'")
     if "reviewer_id" not in trajectory_columns:
         conn.execute("ALTER TABLE qa_trajectories ADD COLUMN reviewer_id TEXT")
 
@@ -503,6 +506,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
     conn = open_database(database)
     try:
         _ensure_qa_schema(conn)
+        index_revision = int(conn.execute(
+            "SELECT value FROM app_metadata WHERE key='index_revision'").fetchone()[0])
         previous = conn.execute(
             "SELECT t.question FROM qa_turns t JOIN qa_conversations c USING(conversation_id) "
             "WHERE t.conversation_id=? AND c.owner_id=? ORDER BY t.created_at DESC LIMIT 1",
@@ -520,6 +525,8 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             retrieval_query = context_query + " " + question
         search_queries = subquestions if len(subquestions) > 1 else [retrieval_query]
         search_mode = "bm25_expanded" if model and mode == "bm25" else mode
+        query_hash = hashlib.sha256(json.dumps(
+            search_queries, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
         per_query_rows = [retrieve(database, query, max(limit * 4, 12),
                                    source_type="original_pdf", mode=search_mode, artifact=artifact,
                                    principal_id=principal_id)
@@ -806,6 +813,28 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
     else:
         completion_state = "evidence_only" if evidence else "no_evidence"
 
+    candidate_chunk_ids = list(dict.fromkeys(row["chunk_id"] for row in result_rows))
+    citation_chunk_ids = list(dict.fromkeys(
+        ref["chunk_id"]
+        for claim in claims
+        for ref in (claim.get("support_evidence") or [claim.get("evidence", {})])
+        if isinstance(ref, dict) and ref.get("chunk_id")))
+    revision_conn = open_database(database, readonly=True)
+    try:
+        final_index_revision = int(revision_conn.execute(
+            "SELECT value FROM app_metadata WHERE key='index_revision'").fetchone()[0])
+    finally:
+        revision_conn.close()
+    run_trace = {
+        "retrieval_mode": search_mode,
+        "index_revision": index_revision,
+        "index_revision_after": final_index_revision,
+        "index_revision_consistent": index_revision == final_index_revision,
+        "query_hash": query_hash,
+        "candidate_chunk_ids": candidate_chunk_ids,
+        "citation_chunk_ids": citation_chunk_ids,
+    }
+
     if generation_usage is not None:
         generation_usage["_diagnostics"] = {
             "retrieved_pages": len(set(retrieval_pages)),
@@ -861,11 +890,12 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         evidence_trace = [{"chunk_id": item["chunk_id"], "sha256": item["sha256"], "page": item["pdf_page"],
                            "quote_sha256": hashlib.sha256(item["quote"].encode()).hexdigest()}
                           for item in evidence]
-        conn.execute("INSERT INTO qa_trajectories(turn_id,retrieval_json,evidence_json,model_name,usage_json,"
+        conn.execute("INSERT INTO qa_trajectories(turn_id,retrieval_json,evidence_json,run_json,model_name,usage_json,"
                      "prompt_chars,latency_ms,answer_status,total_claims,rejected_claims,created_at) "
-                     "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                     "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                      (turn_id, json.dumps(retrieval_trace, ensure_ascii=False),
-                      json.dumps(evidence_trace, ensure_ascii=False), model,
+                      json.dumps(evidence_trace, ensure_ascii=False),
+                      json.dumps(run_trace, ensure_ascii=False), model,
                       json.dumps(generation_usage, ensure_ascii=False) if generation_usage is not None else None,
                       prompt_chars, latency_ms, status, reviewed_claim_count,
                       rejected_claim_count, now))
@@ -881,6 +911,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             "coverage_gaps": coverage_gaps,
             "coverage_requirements": coverage_requirements,
             "missing_subquestions": missing_subquestions,
+            "retrieval_trace": run_trace,
             "created_at": now,
             "latency_ms": latency_ms, "model_name": model, "usage": generation_usage}
 

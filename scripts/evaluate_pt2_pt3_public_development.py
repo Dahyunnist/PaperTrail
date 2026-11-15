@@ -17,12 +17,10 @@ sys.path.insert(0, str(ROOT))
 
 from papertrail import qa
 from papertrail.qa import _validate_quote, ask
-from papertrail.retrieval import retrieve
 from papertrail.s1_index import index_selection, open_database
 
 GROUPS = ("pt7", "pt8", "pt10", "pt11")
 DATE = "20261023"
-DEPTHS = (20, 40, 80)
 
 
 def _sha256(path: Path) -> str:
@@ -42,9 +40,8 @@ def _empty_type() -> dict[str, Any]:
         "questions": 0,
         "answerable_questions": 0,
         "gold_evidence_slots": 0,
-        "complete_questions_at_depth": {str(depth): 0 for depth in DEPTHS},
-        "retrieved_evidence_slots_at_depth": {str(depth): 0 for depth in DEPTHS},
-        "retrieved_gold_phrase_chunks_at_depth": {str(depth): 0 for depth in DEPTHS},
+        "qa_candidate_page_slots": 0,
+        "qa_candidate_gold_phrase_chunks": 0,
         "gold_quotes_on_registered_pdf_pages": 0,
         "gold_quotes_in_indexed_chunks": 0,
         "cited_gold_page_slots": 0,
@@ -110,15 +107,50 @@ def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]
         stats = by_type.setdefault(question_type, _empty_type())
         stats["questions"] += 1
         result = ask(database, item["question"], limit=5, mode=qa_mode, generate=False)
+        trace = result["retrieval_trace"]
+        if (trace["retrieval_mode"] != qa_mode or not trace["index_revision_consistent"]
+                or len(trace["query_hash"]) != 64):
+            raise ValueError(f"{group} question {question_index}: inconsistent QA retrieval trace")
+        stored_trace = conn.execute(
+            "SELECT retrieval_json,evidence_json,run_json FROM qa_trajectories WHERE turn_id=?",
+            (result["turn_id"],)).fetchone()
+        if not stored_trace:
+            raise ValueError(f"{group} question {question_index}: QA trajectory missing")
+        stored_candidates = json.loads(stored_trace["retrieval_json"])
+        stored_citations = json.loads(stored_trace["evidence_json"])
+        trace_matches = json.loads(stored_trace["run_json"]) == trace
+        candidates_match = ([row["chunk_id"] for row in stored_candidates]
+                            == trace["candidate_chunk_ids"])
+        citations_match = (list(dict.fromkeys(row["chunk_id"] for row in stored_citations))
+                           == trace["citation_chunk_ids"])
+        if not (trace_matches and candidates_match and citations_match):
+            conn.close()
+            raise ValueError(f"{group} question {question_index}: QA trace mismatch "
+                             f"({trace_matches},{candidates_match},{citations_match}); "
+                             f"stored citations={len(stored_citations)}, "
+                             f"reported citations={len(trace['citation_chunk_ids'])}")
+        candidate_rows = []
+        candidate_ids = trace["candidate_chunk_ids"]
+        if candidate_ids:
+            marks = ",".join("?" for _ in candidate_ids)
+            candidate_rows = conn.execute(
+                f"SELECT c.chunk_id,c.page_number,c.body,v.sha256 FROM chunks c "
+                f"JOIN paper_versions v USING(version_id) WHERE c.chunk_id IN ({marks})",
+                candidate_ids).fetchall()
         question_stats: dict[str, Any] = {
             "question_index": question_index,
             "question_type": question_type,
             "answerable": not item["abstain"],
             "gold_evidence_slots": len(item["evidence"]),
             "extractive_citation_count": len(result["claims"]),
-            "complete_questions_at_depth": {str(depth): False for depth in DEPTHS},
-            "retrieved_evidence_slots_at_depth": {str(depth): 0 for depth in DEPTHS},
-            "retrieved_gold_phrase_chunks_at_depth": {str(depth): 0 for depth in DEPTHS},
+            "retrieval_mode": trace["retrieval_mode"],
+            "index_revision": trace["index_revision"],
+            "index_revision_consistent": trace["index_revision_consistent"],
+            "query_hash": trace["query_hash"],
+            "candidate_chunk_ids": candidate_ids,
+            "citation_chunk_ids": trace["citation_chunk_ids"],
+            "qa_candidate_page_slots": 0,
+            "qa_candidate_gold_phrase_chunks": 0,
             "gold_quotes_on_registered_pdf_pages": 0,
             "gold_quotes_in_indexed_chunks": 0,
             "cited_gold_page_slots": 0,
@@ -135,25 +167,17 @@ def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]
         stats["answerable_questions"] += 1
         evidence = item["evidence"]
         stats["gold_evidence_slots"] += len(evidence)
-        for depth in DEPTHS:
-            candidates = retrieve(database, item["question"], depth,
-                                  source_type="original_pdf", mode="bm25_expanded")
-            pages = {(candidate["sha256"], candidate["pdf_page"]) for candidate in candidates}
-            target_pages = {(slot["sha256"], slot["pdf_page"]) for slot in evidence}
-            complete = target_pages <= pages
-            retrieved_slots = sum(
-                (slot["sha256"], slot["pdf_page"]) in pages for slot in evidence)
-            phrase_chunks = sum(
-                any(candidate["sha256"] == slot["sha256"]
-                    and candidate["pdf_page"] == slot["pdf_page"]
-                    and _normalize(slot["quote"]) in _normalize(candidate["text"])
-                    for candidate in candidates) for slot in evidence)
-            stats["complete_questions_at_depth"][str(depth)] += int(complete)
-            stats["retrieved_evidence_slots_at_depth"][str(depth)] += retrieved_slots
-            stats["retrieved_gold_phrase_chunks_at_depth"][str(depth)] += phrase_chunks
-            question_stats["complete_questions_at_depth"][str(depth)] = complete
-            question_stats["retrieved_evidence_slots_at_depth"][str(depth)] = retrieved_slots
-            question_stats["retrieved_gold_phrase_chunks_at_depth"][str(depth)] = phrase_chunks
+        candidate_pages = {(row["sha256"], row["page_number"]) for row in candidate_rows}
+        candidate_page_slots = sum((slot["sha256"], slot["pdf_page"]) in candidate_pages
+                                   for slot in evidence)
+        candidate_phrase_chunks = sum(any(
+            row["sha256"] == slot["sha256"] and row["page_number"] == slot["pdf_page"]
+            and _normalize(slot["quote"]) in _normalize(row["body"])
+            for row in candidate_rows) for slot in evidence)
+        stats["qa_candidate_page_slots"] += candidate_page_slots
+        stats["qa_candidate_gold_phrase_chunks"] += candidate_phrase_chunks
+        question_stats["qa_candidate_page_slots"] = candidate_page_slots
+        question_stats["qa_candidate_gold_phrase_chunks"] = candidate_phrase_chunks
 
         citations = [claim["evidence"] for claim in result["claims"]]
         for slot in evidence:
@@ -233,7 +257,7 @@ def run(output: Path | None = None, qa_mode: str = "bm25") -> dict[str, Any]:
         qa.chat_json = original_chat_json
 
     report = {
-        "schema_version": 2,
+        "schema_version": 3,
         "dataset_role": "development_diagnostic",
         "scope": {
             "groups": list(GROUPS),
@@ -268,7 +292,7 @@ def run(output: Path | None = None, qa_mode: str = "bm25") -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path(
-        "evals/pt2-pt3-public-development-diagnostic-20261115.json"))
+        "evals/pt2-pt3-public-qa-candidate-audit-20261115.json"))
     parser.add_argument("--qa-mode", choices=("bm25", "bm25_expanded"), default="bm25")
     args = parser.parse_args()
     output = args.output if args.output.is_absolute() else ROOT / args.output

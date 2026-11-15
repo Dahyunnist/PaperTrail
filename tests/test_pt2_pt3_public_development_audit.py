@@ -15,19 +15,19 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert report["scope"]["fresh_temporary_indexes"] is True
     assert report["scope"]["model_calls"] == 0
     assert all(group["indexed_public_pdfs"] == 3 for group in report["groups"])
-    assert report["schema_version"] == 2
+    assert report["schema_version"] == 3
     assert report["refusal_quality"]["status"] == "not_assessed_without_generation"
     assert all("heldout" not in group["group_id"] for group in report["groups"])
     assert report["scope"]["extractive_qa_mode"] == "bm25"
     groups = {group["group_id"].split("-")[0]: group for group in report["groups"]}
     cross_paper = [groups[group]["by_question_type"]["cross_paper"]
                    for group in ("pt7", "pt10", "pt11")]
-    assert sum(row["complete_questions_at_depth"]["20"] for row in cross_paper) == 1
-    assert sum(row["complete_questions_at_depth"]["80"] for row in cross_paper) == 3
+    assert sum(row["qa_candidate_page_slots"] for row in cross_paper) >= sum(
+        row["cited_gold_page_slots"] for row in cross_paper)
     assert sum(row["citation_contains_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["gold_quotes_on_registered_pdf_pages"] for row in cross_paper) == 6
     assert sum(row["gold_quotes_in_indexed_chunks"] for row in cross_paper) == 6
-    assert sum(row["retrieved_gold_phrase_chunks_at_depth"]["80"] for row in cross_paper) == 4
+    assert sum(row["qa_candidate_gold_phrase_chunks"] for row in cross_paper) == 2
     assert sum(row["citation_chunk_metadata_valid"] for row in cross_paper) == 13
     assert sum(row["citation_quote_in_indexed_chunk"] for row in cross_paper) == 13
     assert sum(row["citation_source_validation_failures"] for row in cross_paper) == 0
@@ -41,6 +41,12 @@ def test_public_development_audit_scope_and_no_model_guard():
             range(1, group["question_count"] + 1))
         assert all("question" not in row and "quote" not in row and "evidence" not in row
                    for row in group["by_question"])
+        for row in group["by_question"]:
+            assert row["retrieval_mode"] == "bm25"
+            assert row["index_revision_consistent"] is True
+            assert len(row["query_hash"]) == 64
+            assert row["candidate_chunk_ids"]
+            assert set(row["citation_chunk_ids"]).issubset(row["candidate_chunk_ids"])
 
 
 def test_public_development_audit_labels_only_offline_bm25_modes():
