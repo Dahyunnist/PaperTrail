@@ -72,3 +72,13 @@ def test_trace_rejects_unallowlisted_attributes():
              "stage": "compare_modes", "error_type": "RuntimeError",
              "error_message": "private details"}
     assert "unsupported_field:error_message" in validate_trace_event(event)
+
+
+def test_evaluation_usage_trace_requires_observed_zero_request_counts():
+    event = {"run_id": "r", "trace_id": "t", "span_id": "s",
+             "event_name": "evaluation.usage", "timestamp": "2026-11-12T00:00:00Z",
+             "request_count": 0, "response_count": 0, "cost_usd_estimate": 0,
+             "usage_status": "observed_zero_requests"}
+    assert validate_trace_event(event) == []
+    event["request_count"] = 1
+    assert "invalid:evaluation_usage" in validate_trace_event(event)

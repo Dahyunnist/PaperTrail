@@ -20,6 +20,7 @@ _ALLOWED = {
     "access.checked": {"operation", "allowed", "principal_hash"},
     "human.reviewed": {"label", "evidence_id_hash"},
     "evaluation.failed": {"stage", "error_type"},
+    "evaluation.usage": {"request_count", "response_count", "cost_usd_estimate", "usage_status"},
 }
 
 

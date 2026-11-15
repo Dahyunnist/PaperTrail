@@ -20,6 +20,17 @@ _FORBIDDEN = {"path", "absolute_path", "prompt", "raw_prompt", "full_text",
 _PRIVATE_PATH = re.compile(r"(?:[A-Za-z]:[\\/]|/(?:Users|home|private)/)", re.IGNORECASE)
 
 
+def _is_observed_zero_usage(value: Any) -> bool:
+    return (isinstance(value, dict)
+            and set(value) == {"request_count", "response_count", "cost_usd_estimate", "status"}
+            and type(value["request_count"]) is int and value["request_count"] == 0
+            and type(value["response_count"]) is int and value["response_count"] == 0
+            and isinstance(value["cost_usd_estimate"], (int, float))
+            and not isinstance(value["cost_usd_estimate"], bool)
+            and value["cost_usd_estimate"] == 0
+            and value["status"] == "observed_zero_requests")
+
+
 def _reject_private(value: Any, location: str = "manifest") -> None:
     if isinstance(value, dict):
         for key, child in value.items():
@@ -156,3 +167,40 @@ def to_shared_manifest_v1(pt_manifest: dict[str, Any]) -> dict[str, Any]:
 def to_shared_manifest(pt_manifest: dict[str, Any]) -> dict[str, Any]:
     """Backward-compatible name for the v1 projection."""
     return to_shared_manifest_v1(pt_manifest)
+
+
+def to_shared_manifest_v2(pt_manifest: dict[str, Any]) -> dict[str, Any]:
+    """Project explicit request/response usage, preserving unknown usage as null."""
+    base = to_shared_manifest_v1(pt_manifest)
+    usage = pt_manifest.get("usage")
+    if usage is not None:
+        if not _is_observed_zero_usage(usage):
+            raise ValueError("usage must be explicit observed_zero_requests or null")
+        usage = dict(usage)
+    result = {**base, "schema_version": 2, "usage": usage}
+    result["field_status"] = dict(base["field_status"])
+    if usage is None and pt_manifest.get("cost_usd") is None and pt_manifest.get("cost_usd_estimate") is None:
+        result["cost_usd_estimate"] = None
+        result["field_status"]["cost_usd_estimate"] = "not_recorded"
+    result["field_status"]["usage"] = "recorded" if usage is not None else "not_recorded"
+    validate_shared_manifest_v2(result)
+    return result
+
+
+def validate_shared_manifest_v2(value: dict[str, Any]) -> None:
+    if not isinstance(value, dict) or "usage" not in value:
+        raise ValueError("shared manifest v2 usage missing")
+    base = dict(value)
+    base.pop("usage")
+    base["schema_version"] = 1
+    base["field_status"] = dict(base.get("field_status", {}))
+    base["field_status"].pop("usage", None)
+    validate_shared_manifest(base)
+    usage = value["usage"]
+    if usage is not None and not _is_observed_zero_usage(usage):
+        raise ValueError("usage invalid")
+    if value["schema_version"] != 2:
+        raise ValueError("manifest v2 identity invalid")
+    state = value["field_status"].get("usage")
+    if state != ("recorded" if usage is not None else "not_recorded"):
+        raise ValueError("usage field status mismatch")

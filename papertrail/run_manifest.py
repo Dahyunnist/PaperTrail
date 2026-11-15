@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import Any
 
 EVENT_NAMES = {"retrieval.completed", "rerank.completed", "generation.completed",
-               "citation.validated", "access.checked", "human.reviewed", "evaluation.failed"}
+               "citation.validated", "access.checked", "human.reviewed", "evaluation.failed",
+               "evaluation.usage"}
 FORBIDDEN_KEYS = {"prompt", "raw_prompt", "full_text", "document_text", "api_key", "secret", "token", "path", "absolute_path"}
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -87,4 +88,12 @@ def validate_trace_event(row: dict[str, Any]) -> list[str]:
         from .trace import _ALLOWED
         allowed = {"run_id", "trace_id", "span_id", "event_name", "timestamp"} | _ALLOWED[row["event_name"]]
         issues.extend(f"unsupported_field:{key}" for key in sorted(row.keys() - allowed))
+        if row["event_name"] == "evaluation.usage":
+            if (type(row.get("request_count")) is not int or row["request_count"] != 0
+                    or type(row.get("response_count")) is not int or row["response_count"] != 0
+                    or not isinstance(row.get("cost_usd_estimate"), (int, float))
+                    or isinstance(row.get("cost_usd_estimate"), bool)
+                    or row["cost_usd_estimate"] != 0
+                    or row.get("usage_status") != "observed_zero_requests"):
+                issues.append("invalid:evaluation_usage")
     return issues + _privacy_issues(row)

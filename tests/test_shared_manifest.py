@@ -2,7 +2,9 @@ import pytest
 import json
 from pathlib import Path
 
-from papertrail.shared_manifest import to_shared_manifest, to_shared_manifest_v1, validate_shared_manifest
+from papertrail.shared_manifest import (to_shared_manifest, to_shared_manifest_v1,
+                                        to_shared_manifest_v2, validate_shared_manifest,
+                                        validate_shared_manifest_v2)
 
 
 def _pt_manifest():
@@ -86,6 +88,48 @@ def test_shared_manifest_rejects_null_without_state_and_bad_state():
     shared["field_status"]["max_steps"] = "available"
     with pytest.raises(ValueError, match="field status invalid"):
         validate_shared_manifest(shared)
+
+
+def test_shared_manifest_v2_records_observed_zero_usage_and_preserves_unknowns():
+    source = _pt_manifest()
+    source["usage"] = {"request_count": 0, "response_count": 0,
+                       "cost_usd_estimate": 0,
+                       "status": "observed_zero_requests"}
+    observed = to_shared_manifest_v2(source)
+    assert observed["schema_version"] == 2
+    assert observed["usage"] == source["usage"]
+    assert observed["field_status"]["usage"] == "recorded"
+    assert observed["cost_usd_estimate"] == 0
+    validate_shared_manifest_v2(observed)
+
+    source.pop("usage")
+    source["model_id"] = "historical-model"
+    source.pop("cost_usd")
+    unknown = to_shared_manifest_v2(source)
+    assert unknown["usage"] is None
+    assert unknown["field_status"]["usage"] == "not_recorded"
+    assert unknown["cost_usd_estimate"] is None
+    assert unknown["field_status"]["cost_usd_estimate"] == "not_recorded"
+    validate_shared_manifest_v2(unknown)
+
+
+def test_shared_manifest_v2_rejects_unproven_zero_usage():
+    source = _pt_manifest()
+    source["usage"] = {"request_count": 0, "response_count": 0,
+                       "cost_usd_estimate": 0, "status": "estimated"}
+    with pytest.raises(ValueError, match="observed_zero_requests"):
+        to_shared_manifest_v2(source)
+
+
+def test_shared_manifest_v2_schema_matches_projection():
+    schema = json.loads((Path(__file__).resolve().parents[1] / "evals/run-manifest-v2.schema.json").read_text(encoding="utf-8"))
+    source = _pt_manifest()
+    source["usage"] = {"request_count": 0, "response_count": 0,
+                       "cost_usd_estimate": 0,
+                       "status": "observed_zero_requests"}
+    projected = to_shared_manifest_v2(source)
+    assert set(schema["required"]) == set(projected)
+    assert schema["properties"]["usage"]["anyOf"][1]["properties"]["status"]["const"] == "observed_zero_requests"
 
 
 @pytest.mark.parametrize("field, value, message", [

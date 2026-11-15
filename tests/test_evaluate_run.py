@@ -70,6 +70,12 @@ def test_manifest_bound_evaluation_separates_runtime(tmp_path):
     assert run_manifest["model_id"] == "none"
     assert run_manifest["gold_source"] == "synthetic_fixture"
     assert run_manifest["cost_usd_estimate"] == 0
+    assert run_manifest["usage"] == {
+        "request_count": 0, "response_count": 0, "cost_usd_estimate": 0,
+        "status": "observed_zero_requests",
+    }
+    assert report["shared_manifest_v2"]["usage"] == run_manifest["usage"]
+    assert report["shared_manifest_v2"]["field_status"]["usage"] == "recorded"
     assert run_manifest["scorer_sha"] == _sha(
         evaluate_run_module.Path(__file__).resolve().parents[1] / "papertrail" / "evaluate.py"
     )
@@ -194,6 +200,7 @@ def test_evaluation_report_and_failure_trace_are_safe_and_correlated(tmp_path, m
     report = json.loads(report_text)
     assert report["run_manifest"]["status"] == "failed"
     assert report["shared_manifest"]["status"] == "failed"
+    assert report["shared_manifest_v2"]["usage"]["status"] == "observed_zero_requests"
     assert report["failure"] == {"stage": "compare_modes", "error_type": "RuntimeError"}
     assert report["run_manifest"]["git_sha"]
     assert report["run_manifest"]["dataset_sha256"]
@@ -204,11 +211,19 @@ def test_evaluation_report_and_failure_trace_are_safe_and_correlated(tmp_path, m
         "QUESTION_SENTINEL_PRIVATE", "ANSWER_SENTINEL_PRIVATE",
         "LIMITS_SENTINEL_PRIVATE", "FAILURE_SENTINEL_PRIVATE"))
     events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
-    assert [event["event_name"] for event in events] == ["retrieval.completed", "evaluation.failed"]
+    assert [event["event_name"] for event in events] == [
+        "retrieval.completed", "evaluation.usage", "evaluation.failed"]
+    usage = events[1]
+    assert {key: usage[key] for key in (
+        "request_count", "response_count", "cost_usd_estimate", "usage_status"
+    )} == {
+        "request_count": 0, "response_count": 0, "cost_usd_estimate": 0,
+        "usage_status": "observed_zero_requests",
+    }
     assert all(validate_trace_event(event) == [] for event in events)
     assert all(event["run_id"] == report["run_manifest"]["run_id"] for event in events)
     assert all(event["trace_id"] == report["run_manifest"]["trace_id"] for event in events)
-    assert len({event["span_id"] for event in events}) == 2
+    assert len({event["span_id"] for event in events}) == 3
     assert "FAILURE_SENTINEL_PRIVATE" not in trace_path.read_text(encoding="utf-8")
 
 

@@ -15,14 +15,15 @@ from typing import Any
 
 from .evaluate import compare_modes
 from .gold import load_gold
-from .shared_manifest import to_shared_manifest_v1
+from .shared_manifest import (_is_observed_zero_usage, to_shared_manifest_v1,
+                              to_shared_manifest_v2)
 from .trace import bind_trace, emit, reset_trace
 
 RUN_FIELDS = ("schema_version", "project", "git_sha", "dataset_id", "dataset_sha256", "split",
               "model_id", "prompt_sha", "tool_schema_sha", "runtime_digest", "max_steps",
               "max_tokens", "scorer_sha", "gold_source", "cost_usd_estimate", "run_id",
               "trace_id", "span_id", "budget", "started_at", "ended_at", "status", "source_type",
-              "source_manifest_sha256", "gold_sha256", "retrieval_modes", "k",
+              "source_manifest_sha256", "gold_sha256", "retrieval_modes", "k", "usage",
               "question_count", "report_fingerprint")
 SENSITIVE_FIELD = re.compile(r"(api.?key|secret|password|token|private.?key|chain.?of.?thought|raw.?prompt)", re.I)
 
@@ -37,6 +38,8 @@ def build_run_manifest(*, git_sha: str, dataset_id: str, dataset_sha256: str, sp
             "runtime_digest": None, "max_steps": max_steps, "max_tokens": None,
             "scorer_sha": scorer_sha, "gold_source": gold_source,
             "cost_usd_estimate": 0, "run_id": run_id, "trace_id": trace_id,
+            "usage": {"request_count": 0, "response_count": 0,
+                      "cost_usd_estimate": 0, "status": "observed_zero_requests"},
             "span_id": None,
             "budget": {"cap_usd": 0, "spent_usd": 0, "status": "not_applicable"},
             "started_at": started_at, "ended_at": ended_at, "status": status}
@@ -54,6 +57,8 @@ def validate_run_manifest(value: Any) -> None:
         raise ValueError("run manifest contains a sensitive field")
     if set(value) - set(RUN_FIELDS):
         raise ValueError("run manifest has unsupported fields")
+    if not _is_observed_zero_usage(value["usage"]):
+        raise ValueError("run manifest usage invalid")
     for key in ("git_sha",):
         if not isinstance(value[key], str) or not re.fullmatch(r"[0-9a-f]{40}", value[key], re.I):
             raise ValueError(f"run manifest {key} invalid")
@@ -118,6 +123,7 @@ def _attach_run_manifest(report: dict[str, Any], run_manifest: dict[str, Any]) -
     validate_run_manifest(run_manifest)
     report["run_manifest"] = run_manifest
     report["shared_manifest"] = to_shared_manifest_v1(run_manifest)
+    report["shared_manifest_v2"] = to_shared_manifest_v2(run_manifest)
     fingerprint_body = json.dumps(report, ensure_ascii=False, sort_keys=True).encode()
     run_manifest["report_fingerprint"] = hashlib.sha256(fingerprint_body).hexdigest()
     validate_run_manifest(run_manifest)
@@ -187,6 +193,8 @@ def run_evaluation(
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - started) * 1000
         ended_at = datetime.now(timezone.utc).isoformat()
+        emit("evaluation.usage", request_count=0, response_count=0,
+             cost_usd_estimate=0, usage_status="observed_zero_requests")
         emit("evaluation.failed", stage="compare_modes", error_type=type(exc).__name__)
         failure_report = {
             "schema_version": 1,
@@ -217,6 +225,8 @@ def run_evaluation(
     finally:
         reset_trace(trace_token)
     elapsed_ms = (time.perf_counter() - started) * 1000
+    emit("evaluation.usage", request_count=0, response_count=0,
+         cost_usd_estimate=0, usage_status="observed_zero_requests")
 
     runtime_by_mode: dict[str, dict[str, float]] = {}
     clean_modes: dict[str, Any] = {}
