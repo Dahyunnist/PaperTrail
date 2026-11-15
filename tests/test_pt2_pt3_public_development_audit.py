@@ -23,6 +23,12 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert sum(row["complete_questions_at_depth"]["20"] for row in cross_paper) == 1
     assert sum(row["complete_questions_at_depth"]["80"] for row in cross_paper) == 3
     assert sum(row["citation_contains_gold_phrase_slots"] for row in cross_paper) == 0
+    assert sum(row["gold_quotes_on_registered_pdf_pages"] for row in cross_paper) == 6
+    assert sum(row["gold_quotes_in_indexed_chunks"] for row in cross_paper) == 6
+    assert sum(row["retrieved_gold_phrase_chunks_at_depth"]["80"] for row in cross_paper) == 4
+    assert sum(row["citation_chunk_metadata_valid"] for row in cross_paper) == 13
+    assert sum(row["citation_quote_in_indexed_chunk"] for row in cross_paper) == 13
+    assert sum(row["citation_source_validation_failures"] for row in cross_paper) == 0
     unanswerable = [group["by_question_type"]["unanswerable"] for group in report["groups"]
                     if "unanswerable" in group["by_question_type"]]
     assert len(unanswerable) == 2

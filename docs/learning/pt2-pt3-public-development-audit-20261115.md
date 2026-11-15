@@ -22,10 +22,12 @@
 | multi_hop | 1 / 2 | 1 / 1 / 1 | 0 / 2；0 / 2 | 候选页全有，但 `ask(generate=False)` 没选中 gold 引文，损失在摘录选择。 |
 | unanswerable | 2 / 0 | 不适用 | 不适用 | 两题都有 extractive 候选；这不是错误拒答证据。生成关闭，拒答质量不可测。 |
 
-事实定位数据的候选完整度支持把深度 40 作为后续开发实验起点，但当前引用短语只命中 5/12，且没有独立数据验证，故不改默认参数。跨论文深度 80 的候选完整覆盖虽升至 3/3，引用短语仍为 0/6；不做只增加候选数的产品改动。PT-3 的真实拒答、语义支持与答案正确性需要人工复核或获准模型实验，本轮不能推断。
+事实定位数据的候选完整度支持把深度 40 作为后续开发实验起点，但当前引用短语只命中 5/12，且没有独立数据验证，故不改默认参数。跨论文深度 80 的候选完整覆盖为 3/3；源 PDF 页和索引 chunk 都含全部 6/6 gold 引文，最终摘录的 chunk SHA、页码、路径、chunk span 与原 PDF 校验 13/13 一致，来源校验失败 0。深度 80 的候选 chunk 中有 4/6 含 gold 短语，但最终摘录引用仍为 0/6 含 gold 短语。问题分成两段：2 个证据槽未进入 top-80 的含目标短语 chunk；另 4 个槽虽已进入候选，extractive 摘录选择仍未选中目标短语。未发现页码、SHA 或引用映射错误，不用 gold 调检索参数。
+
+PT-3 的真实拒答、语义支持与答案正确性需要人工复核或获准模型实验，本轮不能推断。代码增加防御性约束：extractive 引文必须同时是当前索引 chunk 和绑定 PDF 页的原文子串。合成回归验证错误 chunk 文本、页码、SHA 与 OCR 来源均被拒绝；可核验摘录带回对应 chunk 元数据；精确序列号无证据时返回 `status=abstained`、`completion_state=no_evidence` 和空 claims。
 
 ## 评测边界与回归
 
-报告分开记录完整候选覆盖、最终摘录页命中和 gold 短语包含；页级命中不冒充语义支持。对不可答题只报告“有无 extractive 候选”，`refusal_quality.status=not_assessed_without_generation`。现有 `tests/test_evaluate_qa.py` 和 `tests/test_pt3_adversarial_synthetic.py` 锁定 `budget_blocked` 不计正确拒答；本轮不重新生成回答。
+报告分开记录完整候选覆盖、候选 chunk 中 gold 短语、最终摘录页命中、chunk/SHA/页码来源对应和 gold 短语包含；页级命中不冒充语义支持。对不可答题只报告“有无 extractive 候选”，`refusal_quality.status=not_assessed_without_generation`。现有 `tests/test_evaluate_qa.py` 和 `tests/test_pt3_adversarial_synthetic.py` 锁定 `budget_blocked` 不计正确拒答；本轮不重新生成回答。
 
 新增审计脚本的测试确认来源组限于四个开发组、来源哈希通过、模型调用守卫生效，且候选深度与拒答指标口径不混淆。此开发集已见，报告不是盲测或泛化结论。PT-1 继续暂停，仍为 0/40。

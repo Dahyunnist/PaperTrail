@@ -108,6 +108,22 @@ def _validate_quote(path: str, sha256: str, page_number: int, quote: str,
     return _normalize_excerpt(quote) in page_cache[key]
 
 
+def _validate_chunk_quote(row: dict[str, Any], quote: str,
+                          page_cache: dict[tuple[str, int, str], str]) -> bool:
+    """Require extractive citation span to belong to its indexed chunk and source page."""
+    text = row.get("text")
+    path = row.get("path")
+    sha256 = row.get("sha256")
+    page_number = row.get("pdf_page")
+    if (row.get("text_origin", "native_text") != "native_text" or
+            not isinstance(text, str) or not isinstance(path, str) or
+            not isinstance(sha256, str) or not isinstance(page_number, int) or
+            not quote.strip() or
+            _normalize_excerpt(quote) not in _normalize_excerpt(text)):
+        return False
+    return _validate_quote(path, sha256, page_number, quote, page_cache)
+
+
 def _sentences(text: str) -> list[str]:
     source_lines = text.splitlines()
     flattened = " ".join(text.split())
@@ -674,7 +690,7 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         paper_key = (row["paper_id"], row["sha256"])
         if key in seen or paper_counts.get(paper_key, 0) >= max_quotes_per_paper:
             continue
-        quote_valid = _validate_quote(row["path"], row["sha256"], row["pdf_page"], quote, page_cache)
+        quote_valid = _validate_chunk_quote(row, quote, page_cache)
         from .trace import emit
         emit("citation.validated", source_sha256=row["sha256"], page=row["pdf_page"], valid=quote_valid)
         if not quote_valid:

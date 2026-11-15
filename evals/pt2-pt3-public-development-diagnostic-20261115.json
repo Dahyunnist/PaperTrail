@@ -35,9 +35,19 @@
             "40": 3,
             "80": 3
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 2,
+            "40": 3,
+            "80": 3
+          },
+          "gold_quotes_on_registered_pdf_pages": 3,
+          "gold_quotes_in_indexed_chunks": 3,
           "cited_gold_page_slots": 2,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 13,
+          "citation_quote_in_indexed_chunk": 13,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -55,9 +65,19 @@
             "40": 1,
             "80": 2
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 4,
+          "citation_quote_in_indexed_chunk": 4,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -75,9 +95,19 @@
             "40": 2,
             "80": 2
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 2
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 3,
+          "citation_quote_in_indexed_chunk": 3,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -95,9 +125,19 @@
             "40": 0,
             "80": 0
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "gold_quotes_on_registered_pdf_pages": 0,
+          "gold_quotes_in_indexed_chunks": 0,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 0,
+          "citation_quote_in_indexed_chunk": 0,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 1,
           "unanswerable_with_extractive_candidates": 1
         }
@@ -124,9 +164,19 @@
             "40": 3,
             "80": 3
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 2,
+            "40": 2,
+            "80": 3
+          },
+          "gold_quotes_on_registered_pdf_pages": 3,
+          "gold_quotes_in_indexed_chunks": 3,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 12,
+          "citation_quote_in_indexed_chunk": 12,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -144,9 +194,19 @@
             "40": 0,
             "80": 0
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "gold_quotes_on_registered_pdf_pages": 0,
+          "gold_quotes_in_indexed_chunks": 0,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 0,
+          "citation_quote_in_indexed_chunk": 0,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 1,
           "unanswerable_with_extractive_candidates": 1
         }
@@ -173,9 +233,19 @@
             "40": 3,
             "80": 3
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "gold_quotes_on_registered_pdf_pages": 3,
+          "gold_quotes_in_indexed_chunks": 3,
           "cited_gold_page_slots": 2,
           "citation_contains_gold_phrase_slots": 2,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 13,
+          "citation_quote_in_indexed_chunk": 13,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -193,9 +263,19 @@
             "40": 1,
             "80": 2
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 4,
+          "citation_quote_in_indexed_chunk": 4,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         }
@@ -222,9 +302,19 @@
             "40": 3,
             "80": 3
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "gold_quotes_on_registered_pdf_pages": 3,
+          "gold_quotes_in_indexed_chunks": 3,
           "cited_gold_page_slots": 3,
           "citation_contains_gold_phrase_slots": 2,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 13,
+          "citation_quote_in_indexed_chunk": 13,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         },
@@ -242,9 +332,19 @@
             "40": 2,
             "80": 2
           },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 2
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
+          "citation_chunk_metadata_valid": 5,
+          "citation_quote_in_indexed_chunk": 5,
+          "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         }
