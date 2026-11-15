@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-15",
+  "dataset_role": "synthetic_acl_regression",
+  "scope": {
+    "documents": "runtime-generated synthetic PDFs only",
+    "principals": ["local-dev", "workspace-b-user", "no-access"],
+    "model_calls": 0,
+    "gold_modified": false,
+    "holdout_accessed": false,
+    "private_pdf_accessed": false
+  },
+  "pre_ranking_authorization": {
+    "bm25": {
+      "filter_location": "SQL EXISTS on collection owner before ORDER BY and LIMIT",
+      "negative": "five higher-scoring foreign PDFs compete with one authorized PDF at top-1",
+      "result": "authorized PDF returned; foreign documents do not crowd the authorized result"
+    },
+    "vector": {
+      "filter_location": "authorized version IDs selected before similarity scores and top-k",
+      "negative": "foreign synthetic vector has higher score than authorized vector",
+      "result": "only authorized vector returned"
+    },
+    "web_api": {
+      "principal_source": "server-injected Principal",
+      "result": "spoofable client identity is ignored; no-access principal receives empty search results"
+    }
+  },
+  "version_lifecycle": {
+    "replacement": "old SHA/version removed; new version inherits collection ACL",
+    "deletion": "version, chunks, FTS visibility, authorization, and evidence reads removed",
+    "index_revision": "reconcile increments revision to invalidate derived retrieval artifacts"
+  },
+  "regression": {
+    "command": ".venv/Scripts/python.exe -m pytest -p no:cacheprovider tests/test_pt4_acl_retrieval_regressions.py tests/test_access_control.py tests/test_s5_web.py tests/test_pt2_hybrid_version_lifecycle.py tests/test_s1.py::test_reconcile_updates_changed_paths_and_removes_deleted_sources",
+    "passed": 31
+  },
+  "limitations": [
+    "Synthetic/local tests do not validate production identity-provider or deployment-gateway integration.",
+    "Controlled vector scores validate authorization order, not vector quality or model behavior.",
+    "No evidence for cross-process cache consistency or production multi-tenant storage isolation."
+  ]
+}

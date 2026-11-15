@@ -1,0 +1,172 @@
+import hashlib
+import json
+from pathlib import Path
+
+import fitz
+import numpy as np
+import yaml
+
+from papertrail.access import (Principal, assign_version_to_collection, authorized_version_ids,
+                               create_collection, read_evidence)
+from papertrail.retrieval import vector_search
+from papertrail.s1_index import index_selection, open_database, search
+from papertrail.web import create_app
+
+
+def _write_pdf(path: Path, title: str, text: str) -> str:
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((40, 50), title, fontsize=16)
+    page.insert_textbox(fitz.Rect(40, 80, 550, 740), text, fontsize=9)
+    doc.save(path)
+    doc.close()
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _index_docs(tmp_path: Path, docs: list[tuple[str, str]]) -> tuple[Path, Path, list[dict]]:
+    root = tmp_path / "papers"
+    root.mkdir()
+    rows = []
+    for filename, text in docs:
+        digest = _write_pdf(root / filename, filename, text)
+        rows.append({"root_id": "fixture", "file_name": filename, "relative_path": filename,
+                     "sha256": digest, "kind": "pdf", "source_type": "original_pdf"})
+    config = tmp_path / "sources.yaml"
+    config.write_text(yaml.safe_dump({"roots": [{"id": "fixture", "path": str(root)}]}),
+                      encoding="utf-8")
+    selection = tmp_path / "selection.jsonl"
+    selection.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    database = tmp_path / "library.sqlite3"
+    assert index_selection(database, config, selection)["added"] == len(rows)
+    return database, root, rows
+
+
+def test_acl_filters_before_fts_limit_and_web_search(tmp_path):
+    strong = " ".join(["workspacecandidate evidence marker."] * 35)
+    database, _root, rows = _index_docs(tmp_path, [
+        *((f"foreign-{index}.pdf", strong) for index in range(5)),
+        ("owned.pdf", "workspacecandidate evidence marker. "
+         "A local-only source remains available after workspace filtering. " * 12),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        foreign_versions = conn.execute(
+            "SELECT version_id,sha256 FROM paper_versions WHERE file_name LIKE 'foreign-%'"
+        ).fetchall()
+    finally:
+        conn.close()
+    for version in foreign_versions:
+        assign_version_to_collection(database, version["version_id"], "workspace-b")
+    owned_sha = next(row["sha256"] for row in rows if row["file_name"] == "owned.pdf")
+
+    local_rows = search(database, "workspacecandidate", limit=1, source_type="original_pdf",
+                        principal_id="local-dev")
+    assert [row["sha256"] for row in local_rows] == [owned_sha]
+    foreign_rows = search(database, "workspacecandidate", limit=1, source_type="original_pdf",
+                           principal_id="workspace-b-user")
+    assert foreign_rows and foreign_rows[0]["rank_score"] > local_rows[0]["rank_score"]
+    assert search(database, "workspacecandidate", limit=1, source_type="original_pdf",
+                  principal_id="no-access") == []
+
+    local_client = create_app(database, principal_provider=lambda: Principal("local-dev")).test_client()
+    denied_client = create_app(database, principal_provider=lambda: Principal("no-access")).test_client()
+    local_response = local_client.get("/api/search?q=workspacecandidate&limit=1")
+    denied_response = denied_client.get("/api/search?q=workspacecandidate&limit=1")
+    assert local_response.status_code == 200
+    assert [row["sha256"] for row in local_response.json["results"]] == [owned_sha]
+    assert denied_response.status_code == 200 and denied_response.json["results"] == []
+
+
+def test_vector_candidates_are_filtered_before_scoring_and_top_k(tmp_path, monkeypatch):
+    foreign_text = " ".join(["vectorworkspace marker foreign candidate."] * 20)
+    database, _root, rows = _index_docs(tmp_path, [
+        ("foreign.pdf", foreign_text),
+        ("owned.pdf", "vectorworkspace marker owned candidate with enough text for indexing. " * 12),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        versions = {row["sha256"]: row["version_id"] for row in conn.execute(
+            "SELECT version_id,sha256 FROM paper_versions")}
+    finally:
+        conn.close()
+    assign_version_to_collection(database, versions[rows[0]["sha256"]], "workspace-b")
+
+    def vector_row(source: dict) -> dict:
+        return {"version_id": versions[source["sha256"]], "paper_id": "paper",
+                "sha256": source["sha256"], "source_type": "original_pdf", "title": source["file_name"],
+                "section_title": "Results", "page_number": 1,
+                "absolute_path": str((_root / source["file_name"]).resolve()),
+                "parse_status": "parsed", "text_origin": "native_text", "body": "candidate",
+                "chunk_id": source["file_name"]}
+
+    foreign_vector_row = vector_row(rows[0])
+    owned_vector_row = vector_row(rows[1])
+    bundle = {"rows": [foreign_vector_row, owned_vector_row],
+              "vectors": np.asarray([[1.0, 0.0], [0.8, 0.6]], dtype=np.float32),
+              "vectorizer": type("Vectorizer", (), {"transform": lambda _self, _query: np.asarray([[1.0, 0.0]])})(),
+              "reducer": type("Reducer", (), {"transform": lambda _self, value: value})()}
+
+    def normalize(values):
+        return values / np.linalg.norm(values, axis=1, keepdims=True)
+
+    import papertrail.retrieval as retrieval
+    monkeypatch.setattr(retrieval, "_vector_dependencies", lambda: (None, np, None, None, normalize))
+    monkeypatch.setattr(retrieval, "_load_index", lambda _database, _artifact: bundle)
+
+    local_result = vector_search(database, "vectorworkspace", limit=1, principal_id="local-dev")
+    assert [row["sha256"] for row in local_result] == [rows[1]["sha256"]]
+    assert vector_search(database, "vectorworkspace", limit=1, principal_id="no-access") == []
+
+
+def test_reconcile_update_and_delete_clean_versions_and_acl_visibility(tmp_path):
+    database, root, rows = _index_docs(tmp_path, [
+        ("owned.pdf", "oldworkspaceversion marker and enough synthetic source text. " * 12),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        old_version = conn.execute("SELECT version_id FROM paper_versions").fetchone()["version_id"]
+    finally:
+        conn.close()
+    assign_version_to_collection(database, old_version, "workspace-b")
+    assert authorized_version_ids(database, "workspace-b-user") == {old_version}
+    assert authorized_version_ids(database, "local-dev") == set()
+
+    source = root / "owned.pdf"
+    new_sha = _write_pdf(source, "owned revised", "newworkspaceversion marker with revised synthetic evidence. " * 12)
+    selection = tmp_path / "selection.jsonl"
+    updated = {**rows[0], "sha256": new_sha}
+    selection.write_text(json.dumps(updated) + "\n", encoding="utf-8")
+    assert index_selection(database, tmp_path / "sources.yaml", selection, reconcile=True)["added"] == 1
+    conn = open_database(database, readonly=True)
+    try:
+        current_version = conn.execute("SELECT version_id FROM paper_versions WHERE sha256=?",
+                                       (new_sha,)).fetchone()["version_id"]
+        assert conn.execute("SELECT count(*) FROM paper_versions WHERE sha256=?",
+                            (rows[0]["sha256"],)).fetchone()[0] == 0
+    finally:
+        conn.close()
+    assert authorized_version_ids(database, "workspace-b-user") == {current_version}
+    assert authorized_version_ids(database, "local-dev") == set()
+    assert search(database, "newworkspaceversion", principal_id="workspace-b-user")
+    assert search(database, "oldworkspaceversion", principal_id="workspace-b-user") == []
+    try:
+        read_evidence(database, rows[0]["sha256"], 1, Principal("workspace-b-user"))
+    except ValueError as exc:
+        assert str(exc) == "original paper not found"
+    else:
+        raise AssertionError("replaced version remained readable")
+
+    source.unlink()
+    selection.write_text("", encoding="utf-8")
+    assert index_selection(database, tmp_path / "sources.yaml", selection, reconcile=True)["added"] == 0
+    assert authorized_version_ids(database, "workspace-b-user") == set()
+    assert search(database, "newworkspaceversion", principal_id="workspace-b-user") == []
+    try:
+        read_evidence(database, new_sha, 1, Principal("workspace-b-user"))
+    except ValueError as exc:
+        assert str(exc) == "original paper not found"
+    else:
+        raise AssertionError("deleted version remained readable")
