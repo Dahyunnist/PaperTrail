@@ -9,6 +9,7 @@ import yaml
 from papertrail.access import (Principal, assign_version_to_collection, authorized_version_ids,
                                create_collection, read_evidence)
 from papertrail.retrieval import vector_search
+from papertrail.semantic import bge_search
 from papertrail.s1_index import index_selection, open_database, search
 from papertrail.web import create_app
 
@@ -118,6 +119,39 @@ def test_vector_candidates_are_filtered_before_scoring_and_top_k(tmp_path, monke
     local_result = vector_search(database, "vectorworkspace", limit=1, principal_id="local-dev")
     assert [row["sha256"] for row in local_result] == [rows[1]["sha256"]]
     assert vector_search(database, "vectorworkspace", limit=1, principal_id="no-access") == []
+
+
+def test_bge_candidates_are_filtered_before_scoring_and_top_k(tmp_path, monkeypatch):
+    database, root, rows = _index_docs(tmp_path, [
+        ("foreign.pdf", "bgeworkspace foreign semantic candidate."),
+        ("owned.pdf", "bgeworkspace owned semantic candidate."),
+    ])
+    create_collection(database, "workspace-b", "workspace-b-user")
+    conn = open_database(database)
+    try:
+        versions = {row["sha256"]: row["version_id"] for row in conn.execute(
+            "SELECT version_id,sha256 FROM paper_versions")}
+    finally:
+        conn.close()
+    assign_version_to_collection(database, versions[rows[0]["sha256"]], "workspace-b")
+
+    def bge_row(source: dict) -> dict:
+        return {"version_id": versions[source["sha256"]], "paper_id": "paper",
+                "sha256": source["sha256"], "source_type": "original_pdf", "title": source["file_name"],
+                "section_title": "Results", "page_number": 1,
+                "absolute_path": str((root / source["file_name"]).resolve()),
+                "parse_status": "parsed", "text_origin": "native_text", "body": "candidate",
+                "chunk_id": source["file_name"]}
+
+    bundle = {"rows": [bge_row(rows[0]), bge_row(rows[1])],
+              "vectors": np.asarray([[1.0, 0.0], [0.8, 0.6]], dtype=np.float32)}
+    import papertrail.semantic as semantic
+    monkeypatch.setattr(semantic, "_load", lambda _database, _artifact: bundle)
+    monkeypatch.setattr(semantic, "_encode", lambda _texts: np.asarray([[1.0, 0.0]], dtype=np.float32))
+
+    local_result = bge_search(database, "bgeworkspace", limit=1, principal_id="local-dev")
+    assert [row["sha256"] for row in local_result] == [rows[1]["sha256"]]
+    assert bge_search(database, "bgeworkspace", limit=1, principal_id="no-access") == []
 
 
 def test_reconcile_update_and_delete_clean_versions_and_acl_visibility(tmp_path):
