@@ -14,6 +14,8 @@ PT3 合成验收集已冻结，含 2 篇人工构造 PDF 和 6 道新题。冻�
 
 PT4 补齐配置来源版本对账、过期索引清理和证据覆盖显示；本机 Web 与 MCP 仍是单用户。PT5/PT6 收录 6 篇 CC BY 4.0 官方出版者 PDF，两个按论文隔离的 6 题诊断组均有 manifest 与页级哈希。PT6 首轮结果显示，找到目标页不等于检索到完整引文。详情见 [PT4](docs/learning/stage-PT4.md)、[PT5](docs/learning/stage-PT5.md)和 [PT6](docs/learning/stage-PT6.md)。
 
+PT-4 的合成一键演示和离线回归命令见 [PT-4 离线复现与演示](docs/learning/pt4-offline-demo-20261115.md)。它只验证索引生命周期、ACL、引用页和导出边界，不代表 PT-1–PT-3 验收。
+
 ## 源资料
 
 默认只读扫描 `configs/sources.example.yaml` 指定的目录。扫描只计算哈希与 PDF 页级文本统计，不复制或改写源文件。请先检查并按本机路径调整配置，再运行：
