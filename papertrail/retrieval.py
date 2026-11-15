@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from .access import authorized_version_ids
+from .access import _source_matches_sha, authorized_version_ids
 from .s1_index import open_database, search as bm25_search, search_or as bm25_or_search
 
 VECTOR_INDEX_FORMAT = 2
@@ -210,6 +210,22 @@ def retrieve(database: Path, query: str, limit: int = 5,
         rows = fn(database, query, limit, source_type, artifact, principal_id)
     else:
         raise ValueError(f"未知检索模式：{mode}")
+    source_status: dict[tuple[str, str], bool] = {}
+    current_rows = []
+    for row in rows:
+        path, digest = row.get("path"), row.get("sha256")
+        if path is None and digest is None:
+            current_rows.append(row)
+            continue
+        if not isinstance(path, str) or not isinstance(digest, str):
+            continue
+        key = (path, digest)
+        if key not in source_status:
+            source_status[key] = _source_matches_sha(Path(path), digest)
+        if source_status[key]:
+            current_rows.append(row)
+    if len(current_rows) != len(rows):
+        rows = current_rows
     from .trace import emit
     emit("retrieval.completed", mode=mode, result_count=len(rows), status="passed")
     if mode in {"hybrid_bge_dense_rerank", "hybrid_bge_rerank"}:

@@ -13,6 +13,7 @@ from papertrail.retrieval import vector_search
 from papertrail.semantic import bge_search
 from papertrail.mcp_server import _call, _resource_list, handle
 from papertrail.qa import _validate_quote, ask
+from papertrail.retrieval import retrieve
 from papertrail.s1_index import index_selection, open_database, search
 from papertrail.web import create_app
 
@@ -283,6 +284,8 @@ def test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers(
                                old_citation["quote"], {})
     assert old_sha not in {row["sha256"] for row in search_papers(
         database, "Versionoldmarker", Principal("local-dev"))}
+    assert old_sha not in {row["sha256"] for row in retrieve(
+        database, "Versionoldmarker", source_type="original_pdf", mode="bm25")}
     stale_qa = ask(database, "What does Versionoldmarker establish?", mode="bm25", generate=False)
     assert stale_qa["status"] == "abstained" and stale_qa["claims"] == []
     with pytest.raises(ValueError, match="source file changed or is unavailable"):
@@ -313,6 +316,8 @@ def test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers(
     assert deleted_qa["status"] == "abstained" and deleted_qa["claims"] == []
     assert revised_bytes_hash not in {row["sha256"] for row in search_papers(
         database, "Versionnewmarker", Principal("local-dev"))}
+    assert revised_bytes_hash not in {row["sha256"] for row in retrieve(
+        database, "Versionnewmarker", source_type="original_pdf", mode="bm25")}
     selection.write_text("", encoding="utf-8")
     assert index_selection(database, config, selection, reconcile=True)["added"] == 0
     assert not _validate_quote(new_citation["path"], revised_bytes_hash, new_citation["pdf_page"],
