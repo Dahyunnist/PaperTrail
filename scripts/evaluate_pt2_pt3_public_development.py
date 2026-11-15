@@ -58,7 +58,7 @@ def _empty_type() -> dict[str, Any]:
     }
 
 
-def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
+def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]:
     source_manifest_path = ROOT / "evals" / f"{group}-public-source-manifest-{DATE}.json"
     source_manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
     if (source_manifest.get("dataset_role") != "development"
@@ -109,7 +109,7 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
         question_type = item["question_type"]
         stats = by_type.setdefault(question_type, _empty_type())
         stats["questions"] += 1
-        result = ask(database, item["question"], limit=5, mode="bm25", generate=False)
+        result = ask(database, item["question"], limit=5, mode=qa_mode, generate=False)
         question_stats: dict[str, Any] = {
             "question_index": question_index,
             "question_type": question_type,
@@ -218,7 +218,9 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
     }
 
 
-def run(output: Path | None = None) -> dict[str, Any]:
+def run(output: Path | None = None, qa_mode: str = "bm25") -> dict[str, Any]:
+    if qa_mode not in {"bm25", "bm25_expanded"}:
+        raise ValueError("public development audit supports only offline BM25 modes")
     def reject_model_call(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
         raise AssertionError("public development diagnostic must not call a model")
 
@@ -226,7 +228,7 @@ def run(output: Path | None = None) -> dict[str, Any]:
     qa.chat_json = reject_model_call
     try:
         with tempfile.TemporaryDirectory(prefix="papertrail-pt2-pt3-public-dev-") as temporary:
-            groups = [_evaluate_group(group, Path(temporary)) for group in GROUPS]
+            groups = [_evaluate_group(group, Path(temporary), qa_mode) for group in GROUPS]
     finally:
         qa.chat_json = original_chat_json
 
@@ -239,6 +241,7 @@ def run(output: Path | None = None) -> dict[str, Any]:
             "fresh_temporary_indexes": True,
             "model_calls": 0,
             "cost_usd_estimate": 0,
+            "extractive_qa_mode": qa_mode,
         },
         "groups": groups,
         "refusal_quality": {
@@ -266,9 +269,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path(
         "evals/pt2-pt3-public-development-diagnostic-20261115.json"))
+    parser.add_argument("--qa-mode", choices=("bm25", "bm25_expanded"), default="bm25")
     args = parser.parse_args()
     output = args.output if args.output.is_absolute() else ROOT / args.output
-    report = run(output)
+    report = run(output, args.qa_mode)
     print(json.dumps({"output": str(output), "scope": report["scope"],
                       "groups": [{"group_id": group["group_id"],
                                   "by_question_type": group["by_question_type"]}

@@ -18,6 +18,7 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert report["schema_version"] == 2
     assert report["refusal_quality"]["status"] == "not_assessed_without_generation"
     assert all("heldout" not in group["group_id"] for group in report["groups"])
+    assert report["scope"]["extractive_qa_mode"] == "bm25"
     groups = {group["group_id"].split("-")[0]: group for group in report["groups"]}
     cross_paper = [groups[group]["by_question_type"]["cross_paper"]
                    for group in ("pt7", "pt10", "pt11")]
@@ -40,6 +41,12 @@ def test_public_development_audit_scope_and_no_model_guard():
             range(1, group["question_count"] + 1))
         assert all("question" not in row and "quote" not in row and "evidence" not in row
                    for row in group["by_question"])
+
+
+def test_public_development_audit_labels_only_offline_bm25_modes():
+    import pytest
+    with pytest.raises(ValueError, match="only offline BM25 modes"):
+        audit.run(qa_mode="model")
 
 
 def test_public_development_audit_rejects_network_and_model_imports():
