@@ -42,11 +42,9 @@ def emit(event_name: str, **attributes: Any) -> None:
     if not path or event_name not in _ALLOWED:
         return
     run_id, trace_id = trace_context()
-    unsupported = attributes.keys() - _ALLOWED[event_name]
-    if unsupported:
-        raise ValueError(f"unsupported trace attributes: {sorted(unsupported)}")
     safe = {key: value for key, value in attributes.items()
-            if isinstance(value, (str, int, float, bool, type(None)))}
+            if key in _ALLOWED[event_name]
+            and isinstance(value, (str, int, float, bool, type(None)))}
     row = {"run_id": run_id, "trace_id": trace_id, "span_id": str(uuid.uuid4()),
            "event_name": event_name, "timestamp": datetime.now(timezone.utc).isoformat(), **safe}
     target = Path(path)

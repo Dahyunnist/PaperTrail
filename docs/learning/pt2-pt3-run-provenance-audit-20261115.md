@@ -34,3 +34,13 @@ v2 投影没有显式 usage 依据时保留 `usage=null`；若费用也未记录
 结果：**47 passed**。覆盖 v2 schema/投影、未知费用保持 null、trace 零调用字段及合成 CSV→确定性报告链路。
 
 用户提供的历史账单汇总仅作人民币历史用量旁证：PaperTrail 别名 245 次、¥0.30348732；全量导出 4,402 次、¥10.91277486，导出成本合计一致。它与美元评测预算分开，不代表当前余额。别名 0815 的 1,471 次不可分配；未将其归入 PaperTrail，也未复制原始账单、用户标识或密钥字段。
+
+## Trace 白名单稳健性补充（2026-11-15）
+
+Trace emitter 现只投影事件白名单内的标量字段；未知字段和非标量值静默丢弃。`query`、`path` 不写入 trace，也不会因遥测参数导致业务调用抛错。`evaluation.usage` 零调用字段仍在显式白名单内。
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider tests/test_runtime_trace.py tests/test_shared_manifest.py tests/test_evaluate_run.py tests/test_run_manifest.py tests/test_pt1_human_csv_import.py tests/test_pt2_synthetic_retrieval.py tests/test_pt3_citation_failure_paths.py tests/test_pt3_adversarial_synthetic.py
+```
+
+结果：**57 passed**。新回归验证白名单外的 `query`/`path` 与非标量 `mode` 不落盘，trace 调用正常返回。
