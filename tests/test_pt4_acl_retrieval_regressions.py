@@ -8,10 +8,11 @@ import pytest
 import yaml
 
 from papertrail.access import (Principal, assign_version_to_collection, authorized_version_ids,
-                               create_collection, document_metadata, read_evidence)
+                               create_collection, document_metadata, read_evidence, search_papers)
 from papertrail.retrieval import vector_search
 from papertrail.semantic import bge_search
 from papertrail.mcp_server import _call, _resource_list, handle
+from papertrail.qa import _validate_quote, ask
 from papertrail.s1_index import index_selection, open_database, search
 from papertrail.web import create_app
 
@@ -256,3 +257,90 @@ def test_reconcile_update_and_delete_clean_versions_and_acl_visibility(tmp_path)
         assert str(exc) == "original paper not found"
     else:
         raise AssertionError("deleted version remained readable")
+
+
+def test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers(tmp_path):
+    database, root, rows = _index_docs(tmp_path, [
+        ("versioned.pdf", "Versionoldmarker establishes the original synthetic calibration baseline."),
+    ])
+    source = root / "versioned.pdf"
+    selection = tmp_path / "selection.jsonl"
+    config = tmp_path / "sources.yaml"
+    old_sha = rows[0]["sha256"]
+    old_result = ask(database, "What does Versionoldmarker establish?", mode="bm25", generate=False)
+    assert old_result["status"] == "verified_excerpts"
+    old_citation = old_result["claims"][0]["evidence"]
+    assert old_citation["sha256"] == old_sha
+    assert _validate_quote(old_citation["path"], old_sha, old_citation["pdf_page"],
+                           old_citation["quote"], {})
+
+    revised_bytes_hash = _write_pdf(
+        source, "versioned revised", "Versionnewmarker establishes the revised synthetic recovery baseline.")
+    revised_bytes = source.read_bytes()
+    revised_row = {**rows[0], "sha256": revised_bytes_hash}
+    selection.write_text(json.dumps(revised_row) + "\n", encoding="utf-8")
+    assert not _validate_quote(old_citation["path"], old_sha, old_citation["pdf_page"],
+                               old_citation["quote"], {})
+    assert old_sha not in {row["sha256"] for row in search_papers(
+        database, "Versionoldmarker", Principal("local-dev"))}
+    stale_qa = ask(database, "What does Versionoldmarker establish?", mode="bm25", generate=False)
+    assert stale_qa["status"] == "abstained" and stale_qa["claims"] == []
+    with pytest.raises(ValueError, match="source file changed or is unavailable"):
+        read_evidence(database, old_sha, old_citation["pdf_page"], Principal("local-dev"))
+
+    assert index_selection(database, config, selection, reconcile=True)["added"] == 1
+    conn = open_database(database, readonly=True)
+    try:
+        assert conn.execute("SELECT count(*) FROM paper_versions WHERE sha256=?", (old_sha,)).fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM chunks c JOIN paper_versions v USING(version_id) "
+                            "WHERE v.sha256=?", (old_sha,)).fetchone()[0] == 0
+    finally:
+        conn.close()
+    assert search(database, "Versionoldmarker", source_type="original_pdf") == []
+    with pytest.raises(ValueError, match="original paper not found"):
+        read_evidence(database, old_sha, old_citation["pdf_page"], Principal("local-dev"))
+
+    new_result = ask(database, "What does Versionnewmarker establish?", mode="bm25", generate=False)
+    assert new_result["status"] == "verified_excerpts"
+    new_citation = new_result["claims"][0]["evidence"]
+    assert new_citation["sha256"] == revised_bytes_hash
+    assert _validate_quote(new_citation["path"], revised_bytes_hash, new_citation["pdf_page"],
+                           new_citation["quote"], {})
+    assert index_selection(database, config, selection, reconcile=True)["added"] == 0
+
+    source.unlink()
+    deleted_qa = ask(database, "What does Versionnewmarker establish?", mode="bm25", generate=False)
+    assert deleted_qa["status"] == "abstained" and deleted_qa["claims"] == []
+    assert revised_bytes_hash not in {row["sha256"] for row in search_papers(
+        database, "Versionnewmarker", Principal("local-dev"))}
+    selection.write_text("", encoding="utf-8")
+    assert index_selection(database, config, selection, reconcile=True)["added"] == 0
+    assert not _validate_quote(new_citation["path"], revised_bytes_hash, new_citation["pdf_page"],
+                               new_citation["quote"], {})
+    assert search(database, "Versionnewmarker", source_type="original_pdf") == []
+    conn = open_database(database, readonly=True)
+    try:
+        assert conn.execute("SELECT count(*) FROM paper_versions WHERE sha256=?",
+                            (revised_bytes_hash,)).fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM chunks c JOIN paper_versions v USING(version_id) "
+                            "WHERE v.sha256=?", (revised_bytes_hash,)).fetchone()[0] == 0
+    finally:
+        conn.close()
+    with pytest.raises(ValueError, match="original paper not found"):
+        read_evidence(database, revised_bytes_hash, new_citation["pdf_page"], Principal("local-dev"))
+
+    source.write_bytes(revised_bytes)
+    selection.write_text(json.dumps(revised_row) + "\n", encoding="utf-8")
+    assert index_selection(database, config, selection, reconcile=True)["added"] == 1
+    restored = ask(database, "What does Versionnewmarker establish?", mode="bm25", generate=False)
+    assert restored["status"] == "verified_excerpts"
+    restored_citation = restored["claims"][0]["evidence"]
+    assert restored_citation["sha256"] == revised_bytes_hash
+    assert _validate_quote(restored_citation["path"], revised_bytes_hash,
+                           restored_citation["pdf_page"], restored_citation["quote"], {})
+    conn = open_database(database, readonly=True)
+    try:
+        assert conn.execute("SELECT count(*) FROM paper_versions").fetchone()[0] == 1
+        assert conn.execute("SELECT count(*) FROM chunks").fetchone()[0] > 0
+    finally:
+        conn.close()
