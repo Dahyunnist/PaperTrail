@@ -1,0 +1,41 @@
+import ast
+import importlib.util
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "evaluate_pt2_pt3_public_development.py"
+SPEC = importlib.util.spec_from_file_location("evaluate_pt2_pt3_public_development", SCRIPT)
+audit = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(audit)
+
+
+def test_public_development_audit_scope_and_no_model_guard():
+    report = audit.run()
+    assert report["scope"]["groups"] == ["pt7", "pt8", "pt10", "pt11"]
+    assert report["scope"]["fresh_temporary_indexes"] is True
+    assert report["scope"]["model_calls"] == 0
+    assert all(group["indexed_public_pdfs"] == 3 for group in report["groups"])
+    assert report["refusal_quality"]["status"] == "not_assessed_without_generation"
+    assert all("heldout" not in group["group_id"] for group in report["groups"])
+    groups = {group["group_id"].split("-")[0]: group for group in report["groups"]}
+    cross_paper = [groups[group]["by_question_type"]["cross_paper"]
+                   for group in ("pt7", "pt10", "pt11")]
+    assert sum(row["complete_questions_at_depth"]["20"] for row in cross_paper) == 1
+    assert sum(row["complete_questions_at_depth"]["80"] for row in cross_paper) == 3
+    assert sum(row["citation_contains_gold_phrase_slots"] for row in cross_paper) == 0
+    unanswerable = [group["by_question_type"]["unanswerable"] for group in report["groups"]
+                    if "unanswerable" in group["by_question_type"]]
+    assert len(unanswerable) == 2
+    assert all(row["unanswerable_with_extractive_candidates"] == 1 for row in unanswerable)
+
+
+def test_public_development_audit_rejects_network_and_model_imports():
+    tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
+    forbidden = {"requests", "httpx", "urllib", "socket", "aiohttp", "websocket"}
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imports.add(node.module.split(".")[0])
+    assert not imports.intersection(forbidden)

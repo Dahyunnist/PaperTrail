@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "dataset_role": "development_diagnostic",
+  "scope": {
+    "groups": [
+      "pt7",
+      "pt8",
+      "pt10",
+      "pt11"
+    ],
+    "source_license": "CC BY 4.0",
+    "fresh_temporary_indexes": true,
+    "model_calls": 0,
+    "cost_usd_estimate": 0
+  },
+  "groups": [
+    {
+      "group_id": "pt7-public-development-20261023",
+      "source_manifest_sha256": "8850a682195d2860c4a4026fc8e24bf1358dae3c89789ed9ea220ca55ba8ef3d",
+      "gold_sha256": "1988b33fafe7817277fa54ab1bbf240b159dd7d856f0ee1efa76f2216ee2463d",
+      "question_count": 6,
+      "indexed_public_pdfs": 3,
+      "by_question_type": {
+        "fact_location": {
+          "questions": 3,
+          "answerable_questions": 3,
+          "gold_evidence_slots": 3,
+          "complete_questions_at_depth": {
+            "20": 2,
+            "40": 3,
+            "80": 3
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 3,
+            "80": 3
+          },
+          "cited_gold_page_slots": 2,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "cross_paper": {
+          "questions": 1,
+          "answerable_questions": 1,
+          "gold_evidence_slots": 2,
+          "complete_questions_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 1
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 2
+          },
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "multi_hop": {
+          "questions": 1,
+          "answerable_questions": 1,
+          "gold_evidence_slots": 2,
+          "complete_questions_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 2,
+            "80": 2
+          },
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "unanswerable": {
+          "questions": 1,
+          "answerable_questions": 0,
+          "gold_evidence_slots": 0,
+          "complete_questions_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 1,
+          "unanswerable_with_extractive_candidates": 1
+        }
+      }
+    },
+    {
+      "group_id": "pt8-public-development-20261023",
+      "source_manifest_sha256": "caf7f4987381357d6d4ce118e712949e0008179546cbe7a3f18932482201527d",
+      "gold_sha256": "9a4aa48523bf01f9fb12b9a514ebeffc41f69f49cf583c768f59f695834c30dd",
+      "question_count": 4,
+      "indexed_public_pdfs": 3,
+      "by_question_type": {
+        "fact_location": {
+          "questions": 3,
+          "answerable_questions": 3,
+          "gold_evidence_slots": 3,
+          "complete_questions_at_depth": {
+            "20": 2,
+            "40": 3,
+            "80": 3
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 3,
+            "80": 3
+          },
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "unanswerable": {
+          "questions": 1,
+          "answerable_questions": 0,
+          "gold_evidence_slots": 0,
+          "complete_questions_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 1,
+          "unanswerable_with_extractive_candidates": 1
+        }
+      }
+    },
+    {
+      "group_id": "pt10-public-development-20261023",
+      "source_manifest_sha256": "0aa00e77319684fa2136b3fd32bff82cfd08553c248364608a09b117494ad3fa",
+      "gold_sha256": "a5fa387dc80a977241c7e05fc697d7154134c608058368389a0f565c7b3d5a3f",
+      "question_count": 4,
+      "indexed_public_pdfs": 3,
+      "by_question_type": {
+        "fact_location": {
+          "questions": 3,
+          "answerable_questions": 3,
+          "gold_evidence_slots": 3,
+          "complete_questions_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "cited_gold_page_slots": 2,
+          "citation_contains_gold_phrase_slots": 2,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "cross_paper": {
+          "questions": 1,
+          "answerable_questions": 1,
+          "gold_evidence_slots": 2,
+          "complete_questions_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 1
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 2
+          },
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        }
+      }
+    },
+    {
+      "group_id": "pt11-public-development-20261023",
+      "source_manifest_sha256": "739c675fc3ae80635540a2a1951985ad05d74e04774890290c44f16b11e4c50a",
+      "gold_sha256": "6a5808b12a021d8ee382a9d035fe846ed9ab5f99451281985919222cd06d49b7",
+      "question_count": 4,
+      "indexed_public_pdfs": 3,
+      "by_question_type": {
+        "fact_location": {
+          "questions": 3,
+          "answerable_questions": 3,
+          "gold_evidence_slots": 3,
+          "complete_questions_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 3,
+            "40": 3,
+            "80": 3
+          },
+          "cited_gold_page_slots": 3,
+          "citation_contains_gold_phrase_slots": 2,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        },
+        "cross_paper": {
+          "questions": 1,
+          "answerable_questions": 1,
+          "gold_evidence_slots": 2,
+          "complete_questions_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 2,
+            "80": 2
+          },
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "unanswerable_questions": 0,
+          "unanswerable_with_extractive_candidates": 0
+        }
+      }
+    }
+  ],
+  "refusal_quality": {
+    "status": "not_assessed_without_generation",
+    "unanswerable_candidate_metric": "candidate presence only; not a wrong-refusal or correct-refusal score"
+  },
+  "citation_quality": {
+    "gold_phrase_containment": "page and normalized gold phrase checked against extractive citation",
+    "semantic_support": "not assessed without generation or human review"
+  },
+  "limitations": [
+    "只读取 PT7/PT8/PT10/PT11 已登记的 CC BY 4.0 开发集；不触碰其他数据组。",
+    "候选完整覆盖是页级检索指标，不等于答案正确或引用支持。",
+    "不可答题候选不等于错误拒答；无模型运行不能评估真实拒答质量。",
+    "开发集已见，不是盲测；未修改冻结 gold。"
+  ]
+}
