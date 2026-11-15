@@ -41,3 +41,9 @@
 核查顺序：`_authorized_document` 的 SQL 同时约束 SHA、`original_pdf` 类型和 collection owner；无匹配时返回通用 not-found。只有授权后才读取路径并校验文件 SHA，再打开 PDF 页。MCP `get_evidence`、`resources/list`、`resources/read` 都要求服务端注入 `Principal`；请求内容里的 user id 不作为身份来源。`resources/list` 限定 owner 的原始 PDF，并按需校验文件 SHA；两个资源读取 URI 都回到授权文档查询。
 
 新增合成集成回归，在两位 owner 间交叉调用直接页读取、文档 metadata、MCP evidence tool、资源列表和资源读取；确认只可读取各自 PDF，伪造 user id 参数无权扩权。测试不读取真实或私有 PDF。MCP stdio 服务本身仍是本地单用户进程，不提供调用者认证；多租户部署仍需可信身份注入层。
+
+## 增量索引与任务恢复
+
+现有索引回归已覆盖同一清单再次运行的 no-op、版本更新与删除、失败批次事务回滚，以及重试后发布新索引；旧版本和旧引用不可再读。新增队列恢复回归后发现上传任务缺陷：运行中的任务恢复排队后，第一次临时失败会先删除重试输入文件，导致后续尝试无法读取清单。现已仅在任务进入终态后清理输入文件。
+
+新测试从 `running` 状态模拟进程恢复，注入第一次失败、第二次成功；验证两次均能读取输入、任务结束为 `succeeded`，终态才清理文件。只用合成配置和文件，不读 PDF、不调用模型。该回归验证单进程队列恢复路径，不构成多进程 worker 或崩溃注入的系统级保证。

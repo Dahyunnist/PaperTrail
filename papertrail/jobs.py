@@ -129,7 +129,7 @@ def _run(database: Path, event: threading.Event) -> None:
                          (state, error, _now(), job_id))
         if state == "queued":
             event.set()
-        if payload.get("upload_id"):
+        if payload.get("upload_id") and state != "queued":
             Path(payload["sources"]).unlink(missing_ok=True)
             Path(payload["selection"]).unlink(missing_ok=True)
 
