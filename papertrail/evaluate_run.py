@@ -29,7 +29,7 @@ SENSITIVE_FIELD = re.compile(r"(api.?key|secret|password|token|private.?key|chai
 
 def build_run_manifest(*, git_sha: str, dataset_id: str, dataset_sha256: str, split: str,
                        scorer_sha: str, gold_source: str | None, started_at: str, ended_at: str,
-                       run_id: str, trace_id: str, max_steps: int = 1,
+                       run_id: str, trace_id: str, max_steps: int | None = None,
                        status: str = "passed") -> dict[str, Any]:
     return {"schema_version": 1, "project": "PaperTrail", "git_sha": git_sha,
             "dataset_id": dataset_id, "dataset_sha256": dataset_sha256, "split": split,
@@ -64,8 +64,9 @@ def validate_run_manifest(value: Any) -> None:
     if value["model_id"] != "none" or any(value[k] is not None for k in
             ("prompt_sha", "tool_schema_sha", "runtime_digest", "max_tokens")):
         raise ValueError("run manifest violates no-model boundary")
-    if (not isinstance(value["max_steps"], int) or isinstance(value["max_steps"], bool)
-            or value["max_steps"] < 1):
+    if (value["max_steps"] is not None and
+            (not isinstance(value["max_steps"], int) or isinstance(value["max_steps"], bool)
+             or value["max_steps"] < 1)):
         raise ValueError("run manifest max_steps invalid")
     if (not isinstance(value["cost_usd_estimate"], (int, float))
             or isinstance(value["cost_usd_estimate"], bool)
@@ -204,9 +205,9 @@ def run_evaluation(
                 "source_manifest_sha256": source_manifest_sha,
                 "gold_sha256": actual_gold_hash,
             }, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
-            split=split, scorer_sha=sha256(Path(__file__)), gold_source=gold_source,
+            split=split, scorer_sha=sha256(Path(__file__).with_name("evaluate.py")), gold_source=gold_source,
             started_at=started_at, ended_at=ended_at, run_id=run_id, trace_id=trace_id,
-            max_steps=1, status="failed")
+            status="failed")
         run_manifest.update({"source_type": source_type,
             "source_manifest_sha256": source_manifest_sha, "gold_sha256": actual_gold_hash,
             "retrieval_modes": list(modes), "k": k, "question_count": len(items)})
@@ -259,11 +260,11 @@ def run_evaluation(
         "source_manifest_sha256": source_manifest_sha, "gold_sha256": actual_gold_hash,
         }, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
         split=split,
-        scorer_sha=sha256(Path(__file__)), gold_source=gold_source,
+        scorer_sha=sha256(Path(__file__).with_name("evaluate.py")), gold_source=gold_source,
         started_at=started_at, ended_at=ended_at,
         run_id=run_id,
         trace_id=trace_id,
-        max_steps=1)
+        )
     report["run_manifest"].update({"source_type": source_type,
         "source_manifest_sha256": source_manifest_sha,
         "gold_sha256": actual_gold_hash, "retrieval_modes": list(modes), "k": k,

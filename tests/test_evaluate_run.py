@@ -70,6 +70,11 @@ def test_manifest_bound_evaluation_separates_runtime(tmp_path):
     assert run_manifest["model_id"] == "none"
     assert run_manifest["gold_source"] == "synthetic_fixture"
     assert run_manifest["cost_usd_estimate"] == 0
+    assert run_manifest["scorer_sha"] == _sha(
+        evaluate_run_module.Path(__file__).resolve().parents[1] / "papertrail" / "evaluate.py"
+    )
+    assert run_manifest["max_steps"] is None
+    assert report["shared_manifest"]["field_status"]["max_steps"] == "not_applicable"
     assert run_manifest["question_count"] == 2
     assert run_manifest["report_fingerprint"]
     assert report["shared_manifest"]["status"] == "passed"
