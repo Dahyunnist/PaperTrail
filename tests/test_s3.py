@@ -55,6 +55,12 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     assert citation["chunk_id"] in trace["candidate_chunk_ids"]
     assert set(trace["extractive_candidate_chunk_ids"]).issubset(trace["candidate_chunk_ids"])
     assert set(trace["quote_validated_chunk_ids"]).issubset(trace["extractive_candidate_chunk_ids"])
+    assert set(trace["citation_chunk_ids"]).issubset(trace["quote_validated_chunk_ids"])
+    candidate_quotes = {(item["chunk_id"], item["quote_sha256"])
+                        for item in trace["extractive_candidate_quotes"]}
+    validated_quotes = {(item["chunk_id"], item["quote_sha256"])
+                        for item in trace["quote_validated_quotes"]}
+    assert validated_quotes.issubset(candidate_quotes)
     assert trace["citation_chunk_ids"] == [citation["chunk_id"]]
     conn = open_database(db, readonly=True)
     try:

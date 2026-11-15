@@ -29,9 +29,10 @@
           "qa_candidate_page_slots": 3,
           "qa_candidate_gold_phrase_chunks": 3,
           "extractive_candidate_gold_phrase_slots": 3,
-          "quote_validated_gold_phrase_slots": 2,
+          "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 3,
+          "paper_quote_limit_skipped_gold_phrase_slots": 2,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 3,
           "gold_quotes_in_indexed_chunks": 3,
@@ -54,6 +55,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
@@ -72,10 +74,11 @@
           "gold_evidence_slots": 2,
           "qa_candidate_page_slots": 2,
           "qa_candidate_gold_phrase_chunks": 1,
-          "extractive_candidate_gold_phrase_slots": 1,
+          "extractive_candidate_gold_phrase_slots": 0,
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
@@ -98,6 +101,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 0,
           "gold_quotes_in_indexed_chunks": 0,
@@ -207,13 +211,17 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            55
+          ]
         },
         {
           "question_index": 2,
@@ -299,16 +307,20 @@
           "qa_candidate_page_slots": 1,
           "qa_candidate_gold_phrase_chunks": 1,
           "extractive_candidate_gold_phrase_slots": 1,
-          "quote_validated_gold_phrase_slots": 1,
+          "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            20
+          ]
         },
         {
           "question_index": 3,
@@ -400,14 +412,18 @@
           "extractive_candidate_gold_phrase_slots": 1,
           "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            2
+          ]
         },
         {
           "question_index": 4,
@@ -504,13 +520,18 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null,
+            52
+          ]
         },
         {
           "question_index": 5,
@@ -602,17 +623,22 @@
           ],
           "qa_candidate_page_slots": 2,
           "qa_candidate_gold_phrase_chunks": 1,
-          "extractive_candidate_gold_phrase_slots": 1,
+          "extractive_candidate_gold_phrase_slots": 0,
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null,
+            null
+          ]
         },
         {
           "question_index": 6,
@@ -703,6 +729,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 0,
           "gold_quotes_in_indexed_chunks": 0,
@@ -727,9 +754,10 @@
           "qa_candidate_page_slots": 2,
           "qa_candidate_gold_phrase_chunks": 2,
           "extractive_candidate_gold_phrase_slots": 2,
-          "quote_validated_gold_phrase_slots": 1,
+          "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 2,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 3,
           "gold_quotes_in_indexed_chunks": 3,
@@ -752,6 +780,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 0,
           "gold_quotes_in_indexed_chunks": 0,
@@ -854,13 +883,17 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            14
+          ]
         },
         {
           "question_index": 2,
@@ -954,16 +987,20 @@
           "qa_candidate_page_slots": 1,
           "qa_candidate_gold_phrase_chunks": 1,
           "extractive_candidate_gold_phrase_slots": 1,
-          "quote_validated_gold_phrase_slots": 1,
+          "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            49
+          ]
         },
         {
           "question_index": 3,
@@ -1046,13 +1083,17 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null
+          ]
         },
         {
           "question_index": 4,
@@ -1147,6 +1188,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 0,
           "gold_quotes_in_indexed_chunks": 0,
@@ -1173,8 +1215,9 @@
           "extractive_candidate_gold_phrase_slots": 2,
           "quote_validated_gold_phrase_slots": 2,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 2,
-          "citation_limit_truncated_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
+          "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 3,
           "gold_quotes_in_indexed_chunks": 3,
           "cited_gold_page_slots": 2,
@@ -1196,6 +1239,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
@@ -1300,13 +1344,17 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null
+          ]
         },
         {
           "question_index": 2,
@@ -1405,14 +1453,18 @@
           "extractive_candidate_gold_phrase_slots": 1,
           "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
-          "citation_limit_truncated_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
+          "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            2
+          ]
         },
         {
           "question_index": 3,
@@ -1507,14 +1559,18 @@
           "extractive_candidate_gold_phrase_slots": 1,
           "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            1
+          ]
         },
         {
           "question_index": 4,
@@ -1607,13 +1663,18 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null,
+            null
+          ]
         }
       ]
     },
@@ -1633,7 +1694,8 @@
           "extractive_candidate_gold_phrase_slots": 2,
           "quote_validated_gold_phrase_slots": 2,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 2,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 3,
           "gold_quotes_in_indexed_chunks": 3,
@@ -1656,6 +1718,7 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
@@ -1766,14 +1829,18 @@
           "extractive_candidate_gold_phrase_slots": 1,
           "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            1
+          ]
         },
         {
           "question_index": 2,
@@ -1872,14 +1939,18 @@
           "extractive_candidate_gold_phrase_slots": 1,
           "quote_validated_gold_phrase_slots": 1,
           "quote_validation_rejected_gold_phrase_slots": 0,
-          "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 1,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            1
+          ]
         },
         {
           "question_index": 3,
@@ -1971,13 +2042,17 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 0,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 1,
           "gold_quotes_in_indexed_chunks": 1,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null
+          ]
         },
         {
           "question_index": 4,
@@ -2073,13 +2148,18 @@
           "quote_validated_gold_phrase_slots": 0,
           "quote_validation_rejected_gold_phrase_slots": 0,
           "paper_quote_limit_skipped_gold_phrase_slots": 1,
+          "duplicate_quote_skipped_gold_phrase_slots": 0,
           "citation_limit_truncated_gold_phrase_slots": 0,
           "gold_quotes_on_registered_pdf_pages": 2,
           "gold_quotes_in_indexed_chunks": 2,
           "cited_gold_page_slots": 1,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_source_validation_failures": 0
+          "citation_source_validation_failures": 0,
+          "gold_phrase_sentence_candidate_ranks": [
+            null,
+            30
+          ]
         }
       ]
     }

@@ -33,6 +33,7 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert sum(row["quote_validated_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["quote_validation_rejected_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["paper_quote_limit_skipped_gold_phrase_slots"] for row in cross_paper) == 2
+    assert sum(row["duplicate_quote_skipped_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["citation_limit_truncated_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["citation_chunk_metadata_valid"] for row in cross_paper) == 13
     assert sum(row["citation_quote_in_indexed_chunk"] for row in cross_paper) == 13
@@ -55,6 +56,13 @@ def test_public_development_audit_scope_and_no_model_guard():
             assert set(row["citation_chunk_ids"]).issubset(row["candidate_chunk_ids"])
             assert set(row["extractive_candidate_chunk_ids"]).issubset(row["candidate_chunk_ids"])
             assert set(row["quote_validated_chunk_ids"]).issubset(row["extractive_candidate_chunk_ids"])
+            assert set(row["citation_chunk_ids"]).issubset(row["quote_validated_chunk_ids"])
+            assert "extractive_candidate_quotes" not in row
+    cross_rows = [row for group in report["groups"] for row in group["by_question"]
+                  if row["question_type"] == "cross_paper"]
+    sentence_ranks = [rank for row in cross_rows
+                      for rank in row["gold_phrase_sentence_candidate_ranks"] if rank is not None]
+    assert sentence_ranks == [52, 30]
 
 
 def test_public_development_audit_labels_only_offline_bm25_modes():
