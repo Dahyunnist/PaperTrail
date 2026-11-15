@@ -64,11 +64,16 @@ def _gold_quote_coverage(expected: list[dict[str, Any]], citations: list[dict[st
 
 
 def _outcome_class(row: dict[str, Any], expected_abstain: bool) -> str:
+    completion_state = row.get("completion_state")
+    if completion_state == "budget_blocked":
+        return "budget_blocked"
+    if completion_state == "failed":
+        return "failed"
     if row.get("unsupported_claim"):
         return "unsupported_claim"
     if expected_abstain:
-        return "correct_abstention" if not row["answered"] and row.get("completion_state") in {"refused", "no_evidence"} else "false_answer"
-    if not row["answered"] and row.get("completion_state") in {"refused", "no_evidence"}:
+        return "correct_abstention" if not row["answered"] and completion_state in {"refused", "no_evidence"} else "false_answer"
+    if not row["answered"] and completion_state in {"refused", "no_evidence"}:
         return "false_refusal"
     return "answered"
 

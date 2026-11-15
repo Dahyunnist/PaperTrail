@@ -37,6 +37,10 @@ def test_qa_evaluation_compares_extractive_and_reviewed_modes(tmp_path, monkeypa
     monkeypatch.setattr(qa, "_synthesize_local", lambda _question, _evidence, _model: {
         "claims": [{"text": "The result is measured.", "evidence_ids": [0],
                     "support": "supported", "support_method": "local_llm_judge"}], "usage": {"eval_count": 5}})
+    monkeypatch.setattr(qa, "_screen_evidence", lambda _question, rows, _model: {
+        "relevant_ids": list(range(len(rows))), "targeted_query": "",
+        "sufficient": True, "usage": {},
+    })
     result = compare_qa(db, tmp_path / "gold.jsonl", tmp_path / "result.json", "bm25")
     assert result["extractive"]["questions"] == 1
     assert result["model_reviewed"]["by_question_type"]["fact_location"]["total"] == 1
@@ -61,12 +65,17 @@ def test_expected_page_metrics_require_all_pages_for_multi_source_answers():
 
 
 def test_budget_block_is_not_scored_as_correct_abstention():
-    from papertrail.evaluate_qa import _correct_abstention
+    from papertrail.evaluate_qa import _correct_abstention, _outcome_class
 
     assert _correct_abstention({"answered": False, "completion_state": "refused"})
     assert _correct_abstention({"answered": False, "completion_state": "no_evidence"})
     assert not _correct_abstention({"answered": False, "completion_state": "budget_blocked"})
     assert not _correct_abstention({"answered": True, "completion_state": "refused"})
+    assert _outcome_class({"answered": False, "completion_state": "budget_blocked"}, True) == "budget_blocked"
+    assert _outcome_class({"answered": False, "completion_state": "budget_blocked"}, False) == "budget_blocked"
+    assert _outcome_class({"answered": False, "completion_state": "failed"}, True) == "failed"
+    assert _outcome_class({"answered": False, "completion_state": "refused"}, True) == "correct_abstention"
+    assert _outcome_class({"answered": True, "completion_state": "complete"}, True) == "false_answer"
 
 
 def test_same_page_with_wrong_quote_does_not_count_as_exact_evidence():
