@@ -27,7 +27,13 @@ def _connect(database: Path) -> sqlite3.Connection:
     conn.execute("""CREATE TABLE IF NOT EXISTS index_jobs (
         job_id TEXT PRIMARY KEY, state TEXT NOT NULL, payload_json TEXT NOT NULL,
         progress_json TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
-        error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)""")
+        error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+        owner_id TEXT NOT NULL DEFAULT 'local-dev')""")
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(index_jobs)")}
+    if "owner_id" not in columns:
+        conn.execute("ALTER TABLE index_jobs ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'local-dev'")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_index_jobs_owner_created "
+                 "ON index_jobs(owner_id,created_at DESC)")
     return conn
 
 
@@ -38,20 +44,27 @@ def recover_jobs(database: Path) -> int:
 
 
 def enqueue_index(database: Path, sources: Path, selection: Path,
-                  upload_id: str | None = None, reconcile: bool = False) -> str:
+                  upload_id: str | None = None, reconcile: bool = False, *,
+                  owner_id: str = "local-dev") -> str:
+    if not isinstance(owner_id, str) or not owner_id.strip():
+        raise ValueError("job owner_id must be non-empty")
     job_id = str(uuid.uuid4())
     payload = {"sources": str(sources.resolve()), "selection": str(selection.resolve()),
                "upload_id": upload_id, "reconcile": reconcile}
     with _connect(database) as conn:
-        conn.execute("INSERT INTO index_jobs VALUES(?,?,?,?,0,NULL,?,?)",
-                     (job_id, "queued", json.dumps(payload), json.dumps({"completed": 0, "total": 0}), _now(), _now()))
+        conn.execute("INSERT INTO index_jobs "
+                     "(job_id,state,payload_json,progress_json,attempts,error,created_at,updated_at,owner_id) "
+                     "VALUES(?,?,?,?,0,NULL,?,?,?)",
+                     (job_id, "queued", json.dumps(payload), json.dumps({"completed": 0, "total": 0}),
+                      _now(), _now(), owner_id))
     _wake(database)
     return job_id
 
 
-def get_job(database: Path, job_id: str) -> dict[str, Any] | None:
+def get_job(database: Path, job_id: str, owner_id: str = "local-dev") -> dict[str, Any] | None:
     with _connect(database) as conn:
-        row = conn.execute("SELECT * FROM index_jobs WHERE job_id=?", (job_id,)).fetchone()
+        row = conn.execute("SELECT * FROM index_jobs WHERE job_id=? AND owner_id=?",
+                           (job_id, owner_id)).fetchone()
     if not row:
         return None
     item = dict(row)
@@ -60,10 +73,12 @@ def get_job(database: Path, job_id: str) -> dict[str, Any] | None:
     return item
 
 
-def recent_jobs(database: Path, limit: int = 10) -> list[dict[str, Any]]:
+def recent_jobs(database: Path, limit: int = 10, owner_id: str = "local-dev") -> list[dict[str, Any]]:
     with _connect(database) as conn:
-        ids = [row[0] for row in conn.execute("SELECT job_id FROM index_jobs ORDER BY created_at DESC LIMIT ?", (limit,))]
-    return [job for job_id in ids if (job := get_job(database, job_id))]
+        ids = [row[0] for row in conn.execute(
+            "SELECT job_id FROM index_jobs WHERE owner_id=? ORDER BY created_at DESC LIMIT ?",
+            (owner_id, limit))]
+    return [job for job_id in ids if (job := get_job(database, job_id, owner_id))]
 
 
 def _wake(database: Path) -> None:

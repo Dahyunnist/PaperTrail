@@ -95,7 +95,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
         comparison_id = request.args.get("comparison_id", "")
         return render_template(
             "index.html", csrf_token=session["_csrf"], stats=dashboard_stats(app.config["DATABASE"]),
-            documents=library_documents(app.config["DATABASE"]), uploads=list_uploads(app.config["DATABASE"]),
+            documents=library_documents(app.config["DATABASE"]),
+            uploads=list_uploads(app.config["DATABASE"], g.principal.user_id),
             notes=search_notes(app.config["DATABASE"], request.args.get("note_q", "")),
             note_query=request.args.get("note_q", ""), recent_conversations=recent,
             conversation_id=conversation_id,
@@ -110,7 +111,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             flash("没有找到已配置的来源清单。", "warning")
             return redirect(url_for("home") + "#library")
         try:
-            job_id = enqueue_index(app.config["DATABASE"], sources_config, selection_manifest, reconcile=True)
+            job_id = enqueue_index(app.config["DATABASE"], sources_config, selection_manifest,
+                                   reconcile=True, owner_id=g.principal.user_id)
             flash(f"索引任务已排队：{job_id}。可通过 /jobs/{job_id} 查看进度。", "success")
         except (ValueError, OSError) as exc:
             flash(f"读取配置文献失败：{exc}", "warning")
@@ -118,7 +120,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
 
     @app.get("/jobs/<job_id>")
     def index_job(job_id: str) -> Any:
-        job = get_job(app.config["DATABASE"], job_id)
+        job = get_job(app.config["DATABASE"], job_id, g.principal.user_id)
         return (jsonify(job), 200) if job else (jsonify({"error": "job_not_found"}), 404)
 
     @app.get("/api/search")
@@ -277,7 +279,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                 flash("文件内容不像有效 PDF，未加入索引。", "warning")
                 return redirect(url_for("home") + "#library")
         sha256 = _hash(stored_path)
-        register_upload(app.config["DATABASE"], upload_id, sha256, original_name, stored_path)
+        register_upload(app.config["DATABASE"], upload_id, sha256, original_name, stored_path,
+                        owner_id=g.principal.user_id)
         root_config = upload_root.parent / f"upload-sources-{upload_id}.yaml"
         root_config.write_text(yaml.safe_dump({"roots": [{"id": "user_uploads", "path": str(upload_root)}]},
                                                allow_unicode=True), encoding="utf-8")
@@ -287,7 +290,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             "source_type": "original_pdf"}, ensure_ascii=False) + "\n", encoding="utf-8")
         try:
             update_upload(app.config["DATABASE"], upload_id, "queued", "")
-            job_id = enqueue_index(app.config["DATABASE"], root_config, manifest, upload_id)
+            job_id = enqueue_index(app.config["DATABASE"], root_config, manifest, upload_id,
+                                   owner_id=g.principal.user_id)
             flash(f"PDF 已安全保存，后台索引任务已排队：{job_id}。", "success")
         except Exception as exc:
             update_upload(app.config["DATABASE"], upload_id, "failed", f"{type(exc).__name__}: {exc}")
@@ -297,7 +301,8 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
     @app.post("/uploads/<upload_id>/delete")
     def delete_uploaded_pdf(upload_id: str) -> Any:
         try:
-            removed = remove_upload(app.config["DATABASE"], upload_id, app.config["UPLOAD_ROOT"])
+            removed = remove_upload(app.config["DATABASE"], upload_id, app.config["UPLOAD_ROOT"],
+                                    owner_id=g.principal.user_id)
             flash("个人上传 PDF 已删除。" if removed else "没有找到该上传文件。", "success" if removed else "warning")
         except (ValueError, OSError) as exc:
             flash(f"无法删除上传文件：{exc}", "warning")

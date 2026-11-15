@@ -59,3 +59,28 @@ def test_recovered_upload_job_keeps_retry_inputs_until_terminal_state(tmp_path, 
     assert upload_updates and upload_updates[-1][0] == "indexed"
     assert not sources.exists()
     assert not selection.exists()
+
+
+def test_index_job_status_is_scoped_to_owner(tmp_path, monkeypatch):
+    database = tmp_path / "jobs.sqlite3"
+    monkeypatch.setattr(jobs, "_wake", lambda _database: None)
+    job_id = jobs.enqueue_index(database, tmp_path / "sources.yaml", tmp_path / "selection.jsonl",
+                                owner_id="user-a")
+    assert jobs.get_job(database, job_id, "user-a")["owner_id"] == "user-a"
+    assert jobs.get_job(database, job_id, "user-b") is None
+
+
+def test_legacy_index_jobs_migrate_to_local_dev_owner(tmp_path):
+    import sqlite3
+
+    database = tmp_path / "legacy-jobs.sqlite3"
+    with sqlite3.connect(database) as conn:
+        conn.execute("CREATE TABLE index_jobs (job_id TEXT PRIMARY KEY, state TEXT NOT NULL, "
+                     "payload_json TEXT NOT NULL, progress_json TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, "
+                     "error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)")
+        conn.execute("INSERT INTO index_jobs VALUES(?,?,?,?,?,?,?,?)",
+                     ("legacy-job", "succeeded", "{}", "{}", 1, None,
+                      "2026-11-15T00:00:00+00:00", "2026-11-15T00:00:00+00:00"))
+    job = jobs.get_job(database, "legacy-job", "local-dev")
+    assert job["owner_id"] == "local-dev"
+    assert jobs.get_job(database, "legacy-job", "user-a") is None

@@ -18,7 +18,7 @@ def ensure_workspace_schema(conn: sqlite3.Connection) -> None:
         upload_id TEXT PRIMARY KEY, version_id TEXT, sha256 TEXT NOT NULL,
         original_name TEXT NOT NULL, stored_path TEXT NOT NULL,
         state TEXT NOT NULL, issue TEXT NOT NULL DEFAULT '',
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL, owner_id TEXT NOT NULL DEFAULT 'local-dev'
     );
     CREATE TABLE IF NOT EXISTS personal_notes (
         note_id TEXT PRIMARY KEY, concept TEXT NOT NULL, body TEXT NOT NULL,
@@ -26,6 +26,11 @@ def ensure_workspace_schema(conn: sqlite3.Connection) -> None:
     );
     CREATE INDEX IF NOT EXISTS idx_notes_updated ON personal_notes(updated_at DESC);
     """)
+    upload_columns = {row[1] for row in conn.execute("PRAGMA table_info(user_uploads)")}
+    if "owner_id" not in upload_columns:
+        conn.execute("ALTER TABLE user_uploads ADD COLUMN owner_id TEXT NOT NULL DEFAULT 'local-dev'")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_user_uploads_owner_created "
+                 "ON user_uploads(owner_id,created_at DESC)")
     from .qa import _ensure_qa_schema
     from .compare import _ensure_schema as ensure_comparison_schema
     _ensure_qa_schema(conn)
@@ -96,13 +101,17 @@ def library_documents(database: Path) -> list[dict[str, Any]]:
 
 def register_upload(database: Path, upload_id: str, sha256: str, original_name: str,
                     stored_path: Path, state: str = "processing", issue: str = "",
-                    version_id: str | None = None) -> None:
+                    version_id: str | None = None, *, owner_id: str = "local-dev") -> None:
+    if not isinstance(owner_id, str) or not owner_id.strip():
+        raise ValueError("upload owner_id must be non-empty")
     conn = open_database(database)
     try:
         ensure_workspace_schema(conn)
-        conn.execute("INSERT INTO user_uploads VALUES(?,?,?,?,?,?,?,?)",
+        conn.execute("INSERT INTO user_uploads "
+                     "(upload_id,version_id,sha256,original_name,stored_path,state,issue,created_at,owner_id) "
+                     "VALUES(?,?,?,?,?,?,?,?,?)",
                      (upload_id, version_id, sha256, original_name, str(stored_path), state,
-                      issue, datetime.now(timezone.utc).isoformat()))
+                      issue, datetime.now(timezone.utc).isoformat(), owner_id))
         conn.commit()
     finally:
         conn.close()
@@ -120,22 +129,25 @@ def update_upload(database: Path, upload_id: str, state: str, issue: str = "",
         conn.close()
 
 
-def list_uploads(database: Path) -> list[dict[str, Any]]:
+def list_uploads(database: Path, owner_id: str = "local-dev") -> list[dict[str, Any]]:
     conn = open_database(database)
     try:
         ensure_workspace_schema(conn)
-        return [dict(row) for row in conn.execute("SELECT * FROM user_uploads ORDER BY created_at DESC")]
+        return [dict(row) for row in conn.execute(
+            "SELECT * FROM user_uploads WHERE owner_id=? ORDER BY created_at DESC", (owner_id,))]
     finally:
         conn.close()
 
 
-def remove_upload(database: Path, upload_id: str, upload_root: Path) -> bool:
+def remove_upload(database: Path, upload_id: str, upload_root: Path,
+                  owner_id: str = "local-dev") -> bool:
     root = upload_root.resolve()
     conn = open_database(database)
     source_to_remove: Path | None = None
     try:
         ensure_workspace_schema(conn)
-        upload = conn.execute("SELECT * FROM user_uploads WHERE upload_id=?", (upload_id,)).fetchone()
+        upload = conn.execute("SELECT * FROM user_uploads WHERE upload_id=? AND owner_id=?",
+                              (upload_id, owner_id)).fetchone()
         if upload is None:
             return False
         source_to_remove = Path(upload["stored_path"]).resolve()

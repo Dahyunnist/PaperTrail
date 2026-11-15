@@ -1,6 +1,7 @@
 import io
 import json
 import re
+import sqlite3
 import time
 from pathlib import Path
 
@@ -10,7 +11,7 @@ import yaml
 from papertrail.audit import _hash
 from papertrail.s1_index import search
 from papertrail.web import create_app
-from papertrail.workspace import library_documents, list_uploads
+from papertrail.workspace import library_documents, list_uploads, register_upload
 
 
 def _local_demo_app(*args, **kwargs):
@@ -177,6 +178,92 @@ def test_web_can_index_explicit_authorized_selection(tmp_path):
     assert response.status_code == 200
     assert len(library_documents(tmp_path / "workspace.sqlite3")) == 1
     assert search(tmp_path / "workspace.sqlite3", "configured paper", source_type="original_pdf")
+
+
+def test_personal_uploads_are_scoped_to_trusted_principal(tmp_path):
+    from papertrail.access import Principal
+
+    database = tmp_path / "workspace.sqlite3"
+    upload_root = tmp_path / "uploads"
+    upload_root.mkdir()
+    path_a, path_b = upload_root / "a.pdf", upload_root / "b.pdf"
+    path_a.write_bytes(b"synthetic A")
+    path_b.write_bytes(b"synthetic B")
+    register_upload(database, "upload-a", "a" * 64, "owned-a.pdf", path_a,
+                    owner_id="user-a")
+    register_upload(database, "upload-b", "b" * 64, "owned-b.pdf", path_b,
+                    owner_id="user-b")
+
+    identity = {"user_id": "user-a"}
+    app = create_app(database, upload_root,
+                     principal_provider=lambda: Principal(identity["user_id"]))
+    client = app.test_client()
+    page = client.get("/")
+    page_text = page.get_data(as_text=True)
+    assert "owned-a.pdf" in page_text and "owned-b.pdf" not in page_text
+    response = client.post("/uploads/upload-b/delete", data={"_csrf": _csrf(page)})
+    assert response.status_code == 302
+    assert path_b.is_file()
+    assert [row["upload_id"] for row in list_uploads(database, "user-b")] == ["upload-b"]
+
+    identity["user_id"] = "user-b"
+    page = client.get("/")
+    page_text = page.get_data(as_text=True)
+    assert "owned-b.pdf" in page_text and "owned-a.pdf" not in page_text
+    response = client.post("/uploads/upload-b/delete", data={"_csrf": _csrf(page)})
+    assert response.status_code == 302
+    assert not path_b.exists()
+    assert [row["upload_id"] for row in list_uploads(database, "user-a")] == ["upload-a"]
+
+
+def test_web_cannot_list_or_delete_another_principals_upload(tmp_path, monkeypatch):
+    from papertrail.access import Principal
+    import papertrail.jobs as jobs
+
+    identity = {"user_id": "user-a"}
+    database = tmp_path / "workspace.sqlite3"
+    upload_root = tmp_path / "uploads"
+    app = create_app(database, upload_root,
+                     principal_provider=lambda: Principal(identity["user_id"]))
+    app.config.update(TESTING=True)
+    monkeypatch.setattr(jobs, "_wake", lambda _database: None)
+    client = app.test_client()
+    page = client.get("/")
+    response = client.post("/uploads", data={
+        "_csrf": _csrf(page),
+        "pdf": (io.BytesIO(_pdf("Synthetic owner A", [
+            "Synthetic PDF upload content for owner isolation regression."])), "owner-a.pdf"),
+    }, content_type="multipart/form-data", follow_redirects=True)
+    assert response.status_code == 200
+    upload = list_uploads(database, "user-a")[0]
+    stored_path = Path(upload["stored_path"])
+    with sqlite3.connect(database) as conn:
+        job_id = conn.execute("SELECT job_id FROM index_jobs").fetchone()[0]
+    assert client.get(f"/jobs/{job_id}").status_code == 200
+
+    identity["user_id"] = "user-b"
+    page = client.get("/")
+    assert "owner-a.pdf" not in page.get_data(as_text=True)
+    assert client.get(f"/jobs/{job_id}").status_code == 404
+    response = client.post(f"/uploads/{upload['upload_id']}/delete",
+                           data={"_csrf": _csrf(page)})
+    assert response.status_code == 302
+    assert stored_path.is_file()
+    assert list_uploads(database, "user-a")
+
+
+def test_legacy_upload_rows_migrate_to_local_dev_owner(tmp_path):
+    database = tmp_path / "legacy.sqlite3"
+    with sqlite3.connect(database) as conn:
+        conn.execute("CREATE TABLE user_uploads (upload_id TEXT PRIMARY KEY, version_id TEXT, "
+                     "sha256 TEXT NOT NULL, original_name TEXT NOT NULL, stored_path TEXT NOT NULL, "
+                     "state TEXT NOT NULL, issue TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL)")
+        conn.execute("INSERT INTO user_uploads VALUES(?,?,?,?,?,?,?,?)",
+                     ("legacy-upload", None, "c" * 64, "legacy.pdf", "legacy.pdf",
+                      "indexed", "", "2026-11-15T00:00:00+00:00"))
+    rows = list_uploads(database, "local-dev")
+    assert len(rows) == 1 and rows[0]["owner_id"] == "local-dev"
+    assert list_uploads(database, "user-a") == []
 
 
 def test_web_uses_configured_retrieval_mode_and_evidence_limit(tmp_path, monkeypatch):
