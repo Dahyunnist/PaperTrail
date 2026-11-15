@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "dataset_role": "development_diagnostic",
   "scope": {
     "groups": [
@@ -26,17 +26,17 @@
           "answerable_questions": 3,
           "gold_evidence_slots": 3,
           "complete_questions_at_depth": {
-            "20": 2,
+            "20": 3,
             "40": 3,
             "80": 3
           },
           "retrieved_evidence_slots_at_depth": {
-            "20": 2,
+            "20": 3,
             "40": 3,
             "80": 3
           },
           "retrieved_gold_phrase_chunks_at_depth": {
-            "20": 2,
+            "20": 3,
             "40": 3,
             "80": 3
           },
@@ -96,8 +96,8 @@
             "80": 2
           },
           "retrieved_gold_phrase_chunks_at_depth": {
-            "20": 0,
-            "40": 1,
+            "20": 1,
+            "40": 2,
             "80": 2
           },
           "gold_quotes_on_registered_pdf_pages": 2,
@@ -105,8 +105,8 @@
           "cited_gold_page_slots": 0,
           "citation_contains_gold_phrase_slots": 0,
           "exact_gold_quote_slots": 0,
-          "citation_chunk_metadata_valid": 3,
-          "citation_quote_in_indexed_chunk": 3,
+          "citation_chunk_metadata_valid": 4,
+          "citation_quote_in_indexed_chunk": 4,
           "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
@@ -141,7 +141,177 @@
           "unanswerable_questions": 1,
           "unanswerable_with_extractive_candidates": 1
         }
-      }
+      },
+      "by_question": [
+        {
+          "question_index": 1,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 2,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 3,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 4,
+          "question_type": "cross_paper",
+          "answerable": true,
+          "gold_evidence_slots": 2,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": false,
+            "40": false,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 2
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 5,
+          "question_type": "multi_hop",
+          "answerable": true,
+          "gold_evidence_slots": 2,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 2,
+            "80": 2
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 2,
+            "80": 2
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 6,
+          "question_type": "unanswerable",
+          "answerable": false,
+          "gold_evidence_slots": 0,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": false,
+            "40": false,
+            "80": false
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "gold_quotes_on_registered_pdf_pages": 0,
+          "gold_quotes_in_indexed_chunks": 0,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        }
+      ]
     },
     {
       "group_id": "pt8-public-development-20261023",
@@ -155,18 +325,18 @@
           "answerable_questions": 3,
           "gold_evidence_slots": 3,
           "complete_questions_at_depth": {
-            "20": 2,
+            "20": 3,
             "40": 3,
             "80": 3
           },
           "retrieved_evidence_slots_at_depth": {
-            "20": 2,
+            "20": 3,
             "40": 3,
             "80": 3
           },
           "retrieved_gold_phrase_chunks_at_depth": {
-            "20": 2,
-            "40": 2,
+            "20": 3,
+            "40": 3,
             "80": 3
           },
           "gold_quotes_on_registered_pdf_pages": 3,
@@ -210,7 +380,121 @@
           "unanswerable_questions": 1,
           "unanswerable_with_extractive_candidates": 1
         }
-      }
+      },
+      "by_question": [
+        {
+          "question_index": 1,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 2,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 3,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 3,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 4,
+          "question_type": "unanswerable",
+          "answerable": false,
+          "gold_evidence_slots": 0,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": false,
+            "40": false,
+            "80": false
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 0,
+            "80": 0
+          },
+          "gold_quotes_on_registered_pdf_pages": 0,
+          "gold_quotes_in_indexed_chunks": 0,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        }
+      ]
     },
     {
       "group_id": "pt10-public-development-20261023",
@@ -224,17 +508,17 @@
           "answerable_questions": 3,
           "gold_evidence_slots": 3,
           "complete_questions_at_depth": {
-            "20": 3,
+            "20": 2,
             "40": 3,
             "80": 3
           },
           "retrieved_evidence_slots_at_depth": {
-            "20": 3,
+            "20": 2,
             "40": 3,
             "80": 3
           },
           "retrieved_gold_phrase_chunks_at_depth": {
-            "20": 3,
+            "20": 2,
             "40": 3,
             "80": 3
           },
@@ -279,7 +563,121 @@
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         }
-      }
+      },
+      "by_question": [
+        {
+          "question_index": 1,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": false,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 2,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 3,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 4,
+          "question_type": "cross_paper",
+          "answerable": true,
+          "gold_evidence_slots": 2,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": false,
+            "40": false,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 2
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 0,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
+          "cited_gold_page_slots": 0,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        }
+      ]
     },
     {
       "group_id": "pt11-public-development-20261023",
@@ -312,8 +710,8 @@
           "cited_gold_page_slots": 3,
           "citation_contains_gold_phrase_slots": 2,
           "exact_gold_quote_slots": 0,
-          "citation_chunk_metadata_valid": 13,
-          "citation_quote_in_indexed_chunk": 13,
+          "citation_chunk_metadata_valid": 14,
+          "citation_quote_in_indexed_chunk": 14,
           "citation_source_validation_failures": 0,
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
@@ -333,7 +731,7 @@
             "80": 2
           },
           "retrieved_gold_phrase_chunks_at_depth": {
-            "20": 0,
+            "20": 1,
             "40": 1,
             "80": 2
           },
@@ -348,7 +746,121 @@
           "unanswerable_questions": 0,
           "unanswerable_with_extractive_candidates": 0
         }
-      }
+      },
+      "by_question": [
+        {
+          "question_index": 1,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 4,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 2,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 1,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 3,
+          "question_type": "fact_location",
+          "answerable": true,
+          "gold_evidence_slots": 1,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 1
+          },
+          "gold_quotes_on_registered_pdf_pages": 1,
+          "gold_quotes_in_indexed_chunks": 1,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        },
+        {
+          "question_index": 4,
+          "question_type": "cross_paper",
+          "answerable": true,
+          "gold_evidence_slots": 2,
+          "extractive_citation_count": 5,
+          "complete_questions_at_depth": {
+            "20": true,
+            "40": true,
+            "80": true
+          },
+          "retrieved_evidence_slots_at_depth": {
+            "20": 2,
+            "40": 2,
+            "80": 2
+          },
+          "retrieved_gold_phrase_chunks_at_depth": {
+            "20": 1,
+            "40": 1,
+            "80": 2
+          },
+          "gold_quotes_on_registered_pdf_pages": 2,
+          "gold_quotes_in_indexed_chunks": 2,
+          "cited_gold_page_slots": 1,
+          "citation_contains_gold_phrase_slots": 0,
+          "exact_gold_quote_slots": 0,
+          "citation_source_validation_failures": 0
+        }
+      ]
     }
   ],
   "refusal_quality": {

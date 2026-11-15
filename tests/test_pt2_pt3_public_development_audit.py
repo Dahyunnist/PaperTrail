@@ -15,6 +15,7 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert report["scope"]["fresh_temporary_indexes"] is True
     assert report["scope"]["model_calls"] == 0
     assert all(group["indexed_public_pdfs"] == 3 for group in report["groups"])
+    assert report["schema_version"] == 2
     assert report["refusal_quality"]["status"] == "not_assessed_without_generation"
     assert all("heldout" not in group["group_id"] for group in report["groups"])
     groups = {group["group_id"].split("-")[0]: group for group in report["groups"]}
@@ -33,6 +34,12 @@ def test_public_development_audit_scope_and_no_model_guard():
                     if "unanswerable" in group["by_question_type"]]
     assert len(unanswerable) == 2
     assert all(row["unanswerable_with_extractive_candidates"] == 1 for row in unanswerable)
+    for group in report["groups"]:
+        assert len(group["by_question"]) == group["question_count"]
+        assert [row["question_index"] for row in group["by_question"]] == list(
+            range(1, group["question_count"] + 1))
+        assert all("question" not in row and "quote" not in row and "evidence" not in row
+                   for row in group["by_question"])
 
 
 def test_public_development_audit_rejects_network_and_model_imports():

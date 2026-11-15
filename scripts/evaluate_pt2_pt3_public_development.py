@@ -103,12 +103,30 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
         raise ValueError(f"{group}: fresh public-only index did not include every registered PDF")
 
     by_type: dict[str, dict[str, Any]] = {}
+    by_question: list[dict[str, Any]] = []
     conn = open_database(database, readonly=True)
-    for item in rows:
+    for question_index, item in enumerate(rows, start=1):
         question_type = item["question_type"]
         stats = by_type.setdefault(question_type, _empty_type())
         stats["questions"] += 1
         result = ask(database, item["question"], limit=5, mode="bm25", generate=False)
+        question_stats: dict[str, Any] = {
+            "question_index": question_index,
+            "question_type": question_type,
+            "answerable": not item["abstain"],
+            "gold_evidence_slots": len(item["evidence"]),
+            "extractive_citation_count": len(result["claims"]),
+            "complete_questions_at_depth": {str(depth): False for depth in DEPTHS},
+            "retrieved_evidence_slots_at_depth": {str(depth): 0 for depth in DEPTHS},
+            "retrieved_gold_phrase_chunks_at_depth": {str(depth): 0 for depth in DEPTHS},
+            "gold_quotes_on_registered_pdf_pages": 0,
+            "gold_quotes_in_indexed_chunks": 0,
+            "cited_gold_page_slots": 0,
+            "citation_contains_gold_phrase_slots": 0,
+            "exact_gold_quote_slots": 0,
+            "citation_source_validation_failures": 0,
+        }
+        by_question.append(question_stats)
         if item["abstain"]:
             stats["unanswerable_questions"] += 1
             stats["unanswerable_with_extractive_candidates"] += int(bool(result["claims"]))
@@ -122,36 +140,52 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
                                   source_type="original_pdf", mode="bm25_expanded")
             pages = {(candidate["sha256"], candidate["pdf_page"]) for candidate in candidates}
             target_pages = {(slot["sha256"], slot["pdf_page"]) for slot in evidence}
-            stats["complete_questions_at_depth"][str(depth)] += int(target_pages <= pages)
-            stats["retrieved_evidence_slots_at_depth"][str(depth)] += sum(
+            complete = target_pages <= pages
+            retrieved_slots = sum(
                 (slot["sha256"], slot["pdf_page"]) in pages for slot in evidence)
-            stats["retrieved_gold_phrase_chunks_at_depth"][str(depth)] += sum(
+            phrase_chunks = sum(
                 any(candidate["sha256"] == slot["sha256"]
                     and candidate["pdf_page"] == slot["pdf_page"]
                     and _normalize(slot["quote"]) in _normalize(candidate["text"])
                     for candidate in candidates) for slot in evidence)
+            stats["complete_questions_at_depth"][str(depth)] += int(complete)
+            stats["retrieved_evidence_slots_at_depth"][str(depth)] += retrieved_slots
+            stats["retrieved_gold_phrase_chunks_at_depth"][str(depth)] += phrase_chunks
+            question_stats["complete_questions_at_depth"][str(depth)] = complete
+            question_stats["retrieved_evidence_slots_at_depth"][str(depth)] = retrieved_slots
+            question_stats["retrieved_gold_phrase_chunks_at_depth"][str(depth)] = phrase_chunks
 
         citations = [claim["evidence"] for claim in result["claims"]]
         for slot in evidence:
             source_pdf = source_by_sha[slot["sha256"]]
-            stats["gold_quotes_on_registered_pdf_pages"] += int(_validate_quote(
+            valid_page_quote = int(_validate_quote(
                 str(source_pdf), slot["sha256"], slot["pdf_page"], slot["quote"], {}))
+            stats["gold_quotes_on_registered_pdf_pages"] += valid_page_quote
+            question_stats["gold_quotes_on_registered_pdf_pages"] += valid_page_quote
             indexed_chunks = conn.execute(
                 "SELECT c.body FROM chunks c JOIN paper_versions v USING(version_id) "
                 "WHERE v.sha256=? AND c.page_number=?",
                 (slot["sha256"], slot["pdf_page"])).fetchall()
-            stats["gold_quotes_in_indexed_chunks"] += int(any(
+            indexed_quote = int(any(
                 _normalize(slot["quote"]) in _normalize(chunk["body"])
                 for chunk in indexed_chunks))
+            stats["gold_quotes_in_indexed_chunks"] += indexed_quote
+            question_stats["gold_quotes_in_indexed_chunks"] += indexed_quote
             matching = [citation for citation in citations
                         if citation.get("sha256") == slot["sha256"]
                         and citation.get("pdf_page") == slot["pdf_page"]]
-            stats["cited_gold_page_slots"] += int(bool(matching))
+            cited_page = int(bool(matching))
+            stats["cited_gold_page_slots"] += cited_page
+            question_stats["cited_gold_page_slots"] += cited_page
             target_quote = _normalize(slot["quote"])
-            stats["citation_contains_gold_phrase_slots"] += int(any(
+            contains_phrase = int(any(
                 target_quote in _normalize(citation.get("quote", "")) for citation in matching))
-            stats["exact_gold_quote_slots"] += int(any(
+            exact_quote = int(any(
                 target_quote == _normalize(citation.get("quote", "")) for citation in matching))
+            stats["citation_contains_gold_phrase_slots"] += contains_phrase
+            question_stats["citation_contains_gold_phrase_slots"] += contains_phrase
+            stats["exact_gold_quote_slots"] += exact_quote
+            question_stats["exact_gold_quote_slots"] += exact_quote
 
         for citation in citations:
             citation_row = conn.execute(
@@ -169,6 +203,7 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
             stats["citation_chunk_metadata_valid"] += int(metadata_valid)
             stats["citation_quote_in_indexed_chunk"] += int(chunk_quote_valid)
             stats["citation_source_validation_failures"] += int(not source_valid)
+            question_stats["citation_source_validation_failures"] += int(not source_valid)
 
     conn.close()
 
@@ -179,6 +214,7 @@ def _evaluate_group(group: str, temp_root: Path) -> dict[str, Any]:
         "question_count": len(rows),
             "indexed_public_pdfs": index_result["added"],
         "by_question_type": by_type,
+        "by_question": by_question,
     }
 
 
@@ -195,7 +231,7 @@ def run(output: Path | None = None) -> dict[str, Any]:
         qa.chat_json = original_chat_json
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset_role": "development_diagnostic",
         "scope": {
             "groups": list(GROUPS),

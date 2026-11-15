@@ -168,12 +168,13 @@ def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path,
     assert index_selection(db, config, manifest)["added"] == 2
 
     monkeypatch.setenv("PAPERTRAIL_LLM_MODEL", "cross-paper-map-test")
-    monkeypatch.setattr(qa, "_plan_subquestions", lambda *_args: {
-        "subquestions": ["What method does Alpha use?", "What result does Beta report?"],
-        "usage": {},
-    })
+    planned = {"subquestions": ["What method does Alpha use?", "What result does Beta report?"],
+               "usage": {}}
+    monkeypatch.setattr(qa, "_plan_subquestions", lambda *_args: planned)
+    retrieval_queries = []
 
     def retrieve_for_subquestion(database, query, *args, **kwargs):
+        retrieval_queries.append(query)
         lookup = "Alpha wavelet" if "Alpha" in query else "Beta recovery"
         return real_retrieve(database, lookup, *args, **kwargs)
 
@@ -196,6 +197,8 @@ def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path,
     expected_hashes = {_hash(corpus / filename) for filename, _, _ in sources}
     citations = claim["support_evidence"]
     assert result["status"] == "generated_claims_reviewed"
+    assert retrieval_queries == planned["subquestions"]
+    assert claim["subquestion_ids"] == [0, 1]
     assert claim["evidence"]["sha256"] == citations[0]["sha256"]
     assert {citation["sha256"] for citation in citations} == expected_hashes
     assert {citation["pdf_page"] for citation in citations} == {1}
@@ -210,6 +213,9 @@ def test_cross_paper_claim_maps_each_citation_to_its_exact_source_span(tmp_path,
     saved = history[0]["claims"][0]["evidence"]
     assert saved["sha256"] == citations[0]["sha256"]
     assert {citation["sha256"] for citation in saved["support_evidence"]} == expected_hashes
+    citations_by_source = {citation["sha256"]: citation for citation in citations}
+    assert citations_by_source[_hash(corpus / "alpha.pdf")]["subquestion_ids"] == [0]
+    assert citations_by_source[_hash(corpus / "beta.pdf")]["subquestion_ids"] == [1]
 
 
 def test_qa_does_not_cite_ocr_derived_text(tmp_path, monkeypatch):
