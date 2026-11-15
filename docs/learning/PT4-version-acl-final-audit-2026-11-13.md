@@ -54,3 +54,12 @@ QA 会话 owner_id 迁移将旧记录归 local-dev，新会话绑定 principal�
 
 限制仍是身份来源：这些测试以可信 `Principal` 注入验证 ACL 决策，不证明生产 Web 身份中间件或 MCP transport 已建立认证。单用户本机部署仍是默认安全边界。
 
+## 2026-11-15 过期搜索与引用读取复查
+
+新增两条回归后，修复两个可复现缺口：
+
+- ACL 搜索原先只取 `limit * 4` 条排名候选，再剔除已删除或 SHA 过期来源。若有效来源排在过期项后，结果会少于请求数量。现在逐步扩大检索窗口，直到找到足够的当前来源或耗尽候选，并按 chunk ID 去重；每次查询仍在 SQL 层按 Principal 过滤。
+- 证据读取原先先对路径做 SHA 校验，再重新按路径打开 PDF。两步间替换文件会让旧 SHA 返回新文件页。现在先读入字节，对该快照校验 SHA，再从同一字节快照提取物理页。
+
+两条测试先在旧实现下复现失败，修复后通过：`tests/test_access_control.py tests/test_s1.py tests/test_mcp_server.py tests/test_s5_web.py tests/test_pt4_acl_retrieval_regressions.py` 共 **45 passed**；`tests/test_pt3_citation_failure_paths.py` **3 passed**。前者覆盖过期候选后继续填满结果、页面读取期间文件被替换；后者确认引用仍绑定 SHA、物理页和原文。未调用模型，未读取私人 PDF，未修改 PT-1/gold，未触碰 `.tmp/` 或 `.codex-test-tmp/`。
+

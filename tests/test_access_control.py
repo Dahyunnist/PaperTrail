@@ -71,6 +71,62 @@ def test_collection_acl_filters_search_and_direct_evidence_reads(tmp_path):
             raise AssertionError("cross-owner evidence read was allowed")
 
 
+def test_acl_search_scans_past_stale_ranked_rows_to_fill_limit(tmp_path, monkeypatch):
+    from papertrail import access
+
+    current = tmp_path / "current.pdf"
+    current.write_bytes(b"current synthetic source")
+    current_sha = hashlib.sha256(current.read_bytes()).hexdigest()
+    second_current = tmp_path / "current-second.pdf"
+    second_current.write_bytes(b"second current synthetic source")
+    second_sha = hashlib.sha256(second_current.read_bytes()).hexdigest()
+    ranked = [
+        {"path": str(tmp_path / f"deleted-{index}.pdf"), "sha256": f"{index:064x}",
+         "chunk_id": f"stale-{index}"}
+        for index in range(1, 8)
+    ] + [{"path": str(current), "sha256": current_sha, "chunk_id": "current-1"},
+         {"path": str(second_current), "sha256": second_sha, "chunk_id": "current-2"}]
+    requested_limits = []
+
+    def fake_search(_database, _query, limit, **_kwargs):
+        requested_limits.append(limit)
+        return ranked[:limit]
+
+    monkeypatch.setattr(access, "bm25_search", fake_search)
+
+    results = access.search_papers(tmp_path / "index.sqlite3", "synthetic needle",
+                                   Principal("user-a"), limit=2)
+
+    assert [row["chunk_id"] for row in results] == ["current-1", "current-2"]
+    assert requested_limits == [8, 16]
+
+
+def test_read_evidence_uses_same_bytes_for_sha_check_and_page_lookup(tmp_path, monkeypatch):
+    import pymupdf
+
+    database, rows = _indexed_library(tmp_path)
+    source = tmp_path / "papers" / "alpha.pdf"
+    old_sha = rows[0]["sha256"]
+    replacement = fitz.open()
+    page = replacement.new_page()
+    page.insert_text((40, 60), "replacement-only-marker")
+    replacement_bytes = replacement.tobytes()
+    replacement.close()
+    real_open = pymupdf.open
+
+    def replace_before_pdf_open(*args, **kwargs):
+        source.write_bytes(replacement_bytes)
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr(pymupdf, "open", replace_before_pdf_open)
+
+    evidence = read_evidence(database, old_sha, 1, Principal("local-dev"))
+
+    assert evidence["sha256"] == old_sha
+    assert "alpha-only-needle" in evidence["text"]
+    assert "replacement-only-marker" not in evidence["text"]
+
+
 def test_http_and_mcp_share_acl_and_http_ignores_body_user_id(tmp_path):
     database, rows = _indexed_library(tmp_path)
     app = _trusted_app(database, "user-b")

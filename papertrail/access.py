@@ -50,21 +50,33 @@ def assign_version_to_collection(database: Path, version_id: str, collection_id:
 def search_papers(database: Path, query: str, principal: Principal,
                   limit: int = 5) -> list[dict[str, Any]]:
     """Filter by collection owner inside SQL before ranked results are returned."""
-    rows = bm25_search(database, query, limit=max(limit, limit * 4), source_type="original_pdf",
-                       readonly=True, principal_id=principal.user_id)
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
+        raise ValueError("limit must be a positive integer")
     current: list[dict[str, Any]] = []
+    seen_current_chunks: set[str] = set()
     source_status: dict[tuple[str, str], bool] = {}
-    for row in rows:
-        path = row.get("path")
-        digest = row.get("sha256")
-        key = (str(path), str(digest))
-        if key not in source_status:
-            source_status[key] = (isinstance(path, str) and isinstance(digest, str)
-                                  and _source_matches_sha(Path(path), digest))
-        if source_status[key]:
-            current.append(row)
-            if len(current) >= limit:
-                break
+    fetch_limit = max(limit, limit * 4)
+    while True:
+        rows = bm25_search(database, query, limit=fetch_limit, source_type="original_pdf",
+                           readonly=True, principal_id=principal.user_id)
+        for row in rows:
+            path = row.get("path")
+            digest = row.get("sha256")
+            key = (str(path), str(digest))
+            if key not in source_status:
+                source_status[key] = (isinstance(path, str) and isinstance(digest, str)
+                                      and _source_matches_sha(Path(path), digest))
+            if source_status[key]:
+                chunk_id = row["chunk_id"]
+                if chunk_id in seen_current_chunks:
+                    continue
+                seen_current_chunks.add(chunk_id)
+                current.append(row)
+                if len(current) >= limit:
+                    break
+        if len(current) >= limit or len(rows) < fetch_limit:
+            break
+        fetch_limit *= 2
     from .trace import emit
     emit("access.checked", operation="search_papers", allowed=True,
          principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
@@ -129,10 +141,14 @@ def read_evidence(database: Path, sha256: str, page_number: int,
     emit("access.checked", operation="read_evidence", allowed=True,
          principal_hash=hashlib.sha256(principal.user_id.encode()).hexdigest())
     metadata, path = match
-    if not _source_matches_sha(path, sha256.lower()):
+    try:
+        pdf_bytes = path.read_bytes()
+    except OSError:
+        raise ValueError("source file changed or is unavailable") from None
+    if hashlib.sha256(pdf_bytes).hexdigest() != sha256.lower():
         raise ValueError("source file changed or is unavailable")
     import pymupdf
-    with pymupdf.open(path) as doc:
+    with pymupdf.open(stream=pdf_bytes, filetype="pdf") as doc:
         if page_number > doc.page_count:
             raise ValueError("page is outside source document")
         text = doc[page_number - 1].get_text("text")
