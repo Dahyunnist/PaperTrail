@@ -53,6 +53,8 @@ def test_qa_claims_are_exact_validated_and_persisted(tmp_path):
     assert trace["index_revision_consistent"] is True
     assert len(trace["query_hash"]) == 64
     assert citation["chunk_id"] in trace["candidate_chunk_ids"]
+    assert set(trace["extractive_candidate_chunk_ids"]).issubset(trace["candidate_chunk_ids"])
+    assert set(trace["quote_validated_chunk_ids"]).issubset(trace["extractive_candidate_chunk_ids"])
     assert trace["citation_chunk_ids"] == [citation["chunk_id"]]
     conn = open_database(db, readonly=True)
     try:

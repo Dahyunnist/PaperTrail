@@ -15,8 +15,9 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert report["scope"]["fresh_temporary_indexes"] is True
     assert report["scope"]["model_calls"] == 0
     assert all(group["indexed_public_pdfs"] == 3 for group in report["groups"])
-    assert report["schema_version"] == 3
+    assert report["schema_version"] == 4
     assert report["refusal_quality"]["status"] == "not_assessed_without_generation"
+    assert report["answer_correctness"]["status"] == "not_assessed_without_generation_or_human_review"
     assert all("heldout" not in group["group_id"] for group in report["groups"])
     assert report["scope"]["extractive_qa_mode"] == "bm25"
     groups = {group["group_id"].split("-")[0]: group for group in report["groups"]}
@@ -28,6 +29,11 @@ def test_public_development_audit_scope_and_no_model_guard():
     assert sum(row["gold_quotes_on_registered_pdf_pages"] for row in cross_paper) == 6
     assert sum(row["gold_quotes_in_indexed_chunks"] for row in cross_paper) == 6
     assert sum(row["qa_candidate_gold_phrase_chunks"] for row in cross_paper) == 2
+    assert sum(row["extractive_candidate_gold_phrase_slots"] for row in cross_paper) == 2
+    assert sum(row["quote_validated_gold_phrase_slots"] for row in cross_paper) == 0
+    assert sum(row["quote_validation_rejected_gold_phrase_slots"] for row in cross_paper) == 0
+    assert sum(row["paper_quote_limit_skipped_gold_phrase_slots"] for row in cross_paper) == 2
+    assert sum(row["citation_limit_truncated_gold_phrase_slots"] for row in cross_paper) == 0
     assert sum(row["citation_chunk_metadata_valid"] for row in cross_paper) == 13
     assert sum(row["citation_quote_in_indexed_chunk"] for row in cross_paper) == 13
     assert sum(row["citation_source_validation_failures"] for row in cross_paper) == 0
@@ -47,6 +53,8 @@ def test_public_development_audit_scope_and_no_model_guard():
             assert len(row["query_hash"]) == 64
             assert row["candidate_chunk_ids"]
             assert set(row["citation_chunk_ids"]).issubset(row["candidate_chunk_ids"])
+            assert set(row["extractive_candidate_chunk_ids"]).issubset(row["candidate_chunk_ids"])
+            assert set(row["quote_validated_chunk_ids"]).issubset(row["extractive_candidate_chunk_ids"])
 
 
 def test_public_development_audit_labels_only_offline_bm25_modes():

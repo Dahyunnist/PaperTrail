@@ -42,6 +42,11 @@ def _empty_type() -> dict[str, Any]:
         "gold_evidence_slots": 0,
         "qa_candidate_page_slots": 0,
         "qa_candidate_gold_phrase_chunks": 0,
+        "extractive_candidate_gold_phrase_slots": 0,
+        "quote_validated_gold_phrase_slots": 0,
+        "quote_validation_rejected_gold_phrase_slots": 0,
+        "paper_quote_limit_skipped_gold_phrase_slots": 0,
+        "citation_limit_truncated_gold_phrase_slots": 0,
         "gold_quotes_on_registered_pdf_pages": 0,
         "gold_quotes_in_indexed_chunks": 0,
         "cited_gold_page_slots": 0,
@@ -131,6 +136,19 @@ def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]
                              f"reported citations={len(trace['citation_chunk_ids'])}")
         candidate_rows = []
         candidate_ids = trace["candidate_chunk_ids"]
+        stage_ids = {
+            "extractive_candidate_chunk_ids": trace["extractive_candidate_chunk_ids"],
+            "quote_validated_chunk_ids": trace["quote_validated_chunk_ids"],
+            "quote_validation_rejected_chunk_ids": trace["quote_validation_rejected_chunk_ids"],
+            "paper_quote_limit_skipped_chunk_ids": trace["paper_quote_limit_skipped_chunk_ids"],
+            "duplicate_quote_skipped_chunk_ids": trace["duplicate_quote_skipped_chunk_ids"],
+            "citation_limit_truncated_chunk_ids": trace["citation_limit_truncated_chunk_ids"],
+        }
+        sentence_candidate_ids = set(stage_ids["extractive_candidate_chunk_ids"])
+        if any(not set(ids).issubset(candidate_ids) for ids in stage_ids.values()) or any(
+                not set(ids).issubset(sentence_candidate_ids)
+                for name, ids in stage_ids.items() if name != "extractive_candidate_chunk_ids"):
+            raise ValueError(f"{group} question {question_index}: QA citation stage escaped candidate pool")
         if candidate_ids:
             marks = ",".join("?" for _ in candidate_ids)
             candidate_rows = conn.execute(
@@ -148,9 +166,15 @@ def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]
             "index_revision_consistent": trace["index_revision_consistent"],
             "query_hash": trace["query_hash"],
             "candidate_chunk_ids": candidate_ids,
+            **stage_ids,
             "citation_chunk_ids": trace["citation_chunk_ids"],
             "qa_candidate_page_slots": 0,
             "qa_candidate_gold_phrase_chunks": 0,
+            "extractive_candidate_gold_phrase_slots": 0,
+            "quote_validated_gold_phrase_slots": 0,
+            "quote_validation_rejected_gold_phrase_slots": 0,
+            "paper_quote_limit_skipped_gold_phrase_slots": 0,
+            "citation_limit_truncated_gold_phrase_slots": 0,
             "gold_quotes_on_registered_pdf_pages": 0,
             "gold_quotes_in_indexed_chunks": 0,
             "cited_gold_page_slots": 0,
@@ -170,14 +194,41 @@ def _evaluate_group(group: str, temp_root: Path, qa_mode: str) -> dict[str, Any]
         candidate_pages = {(row["sha256"], row["page_number"]) for row in candidate_rows}
         candidate_page_slots = sum((slot["sha256"], slot["pdf_page"]) in candidate_pages
                                    for slot in evidence)
-        candidate_phrase_chunks = sum(any(
-            row["sha256"] == slot["sha256"] and row["page_number"] == slot["pdf_page"]
-            and _normalize(slot["quote"]) in _normalize(row["body"])
-            for row in candidate_rows) for slot in evidence)
+        candidate_phrase_rows = [
+            [row for row in candidate_rows
+             if row["sha256"] == slot["sha256"] and row["page_number"] == slot["pdf_page"]
+             and _normalize(slot["quote"]) in _normalize(row["body"])]
+            for slot in evidence]
+        candidate_phrase_chunks = sum(bool(rows) for rows in candidate_phrase_rows)
+        extractive_phrase_slots = sum(any(
+            row["chunk_id"] in set(stage_ids["extractive_candidate_chunk_ids"])
+            for row in rows) for rows in candidate_phrase_rows)
+        validated_phrase_slots = sum(any(
+            row["chunk_id"] in set(stage_ids["quote_validated_chunk_ids"])
+            for row in rows) for rows in candidate_phrase_rows)
+        rejected_phrase_slots = sum(any(
+            row["chunk_id"] in set(stage_ids["quote_validation_rejected_chunk_ids"])
+            for row in rows) for rows in candidate_phrase_rows)
+        paper_limit_phrase_slots = sum(any(
+            row["chunk_id"] in set(stage_ids["paper_quote_limit_skipped_chunk_ids"])
+            for row in rows) for rows in candidate_phrase_rows)
+        citation_limit_phrase_slots = sum(any(
+            row["chunk_id"] in set(stage_ids["citation_limit_truncated_chunk_ids"])
+            for row in rows) for rows in candidate_phrase_rows)
         stats["qa_candidate_page_slots"] += candidate_page_slots
         stats["qa_candidate_gold_phrase_chunks"] += candidate_phrase_chunks
+        stats["extractive_candidate_gold_phrase_slots"] += extractive_phrase_slots
+        stats["quote_validated_gold_phrase_slots"] += validated_phrase_slots
+        stats["quote_validation_rejected_gold_phrase_slots"] += rejected_phrase_slots
+        stats["paper_quote_limit_skipped_gold_phrase_slots"] += paper_limit_phrase_slots
+        stats["citation_limit_truncated_gold_phrase_slots"] += citation_limit_phrase_slots
         question_stats["qa_candidate_page_slots"] = candidate_page_slots
         question_stats["qa_candidate_gold_phrase_chunks"] = candidate_phrase_chunks
+        question_stats["extractive_candidate_gold_phrase_slots"] = extractive_phrase_slots
+        question_stats["quote_validated_gold_phrase_slots"] = validated_phrase_slots
+        question_stats["quote_validation_rejected_gold_phrase_slots"] = rejected_phrase_slots
+        question_stats["paper_quote_limit_skipped_gold_phrase_slots"] = paper_limit_phrase_slots
+        question_stats["citation_limit_truncated_gold_phrase_slots"] = citation_limit_phrase_slots
 
         citations = [claim["evidence"] for claim in result["claims"]]
         for slot in evidence:
@@ -257,7 +308,7 @@ def run(output: Path | None = None, qa_mode: str = "bm25") -> dict[str, Any]:
         qa.chat_json = original_chat_json
 
     report = {
-        "schema_version": 3,
+        "schema_version": 4,
         "dataset_role": "development_diagnostic",
         "scope": {
             "groups": list(GROUPS),
@@ -275,6 +326,9 @@ def run(output: Path | None = None, qa_mode: str = "bm25") -> dict[str, Any]:
         "citation_quality": {
             "gold_phrase_containment": "page and normalized gold phrase checked against extractive citation",
             "semantic_support": "not assessed without generation or human review",
+        },
+        "answer_correctness": {
+            "status": "not_assessed_without_generation_or_human_review",
         },
         "limitations": [
             "只读取 PT7/PT8/PT10/PT11 已登记的 CC BY 4.0 开发集；不触碰其他数据组。",

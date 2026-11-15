@@ -690,17 +690,27 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
                 used.add((candidate[2]["sha256"], candidate[2]["pdf_page"], candidate[3]))
         candidates = balanced + [item for item in candidates
                                  if (item[2]["sha256"], item[2]["pdf_page"], item[3]) not in used]
+    extractive_candidate_chunk_ids = list(dict.fromkeys(
+        item[2]["chunk_id"] for item in candidates))
     paper_counts: dict[tuple[str, str], int] = {}
     max_quotes_per_paper = max(2, len(subquestions))
-    for _, _, row, quote, evidence_subquestions in candidates:
+    quote_validation_rejected_chunk_ids: list[str] = []
+    paper_quote_limit_skipped_chunk_ids: list[str] = []
+    duplicate_quote_skipped_chunk_ids: list[str] = []
+    citation_limit_truncated_chunk_ids: list[str] = []
+    for candidate_index, (_, _, row, quote, evidence_subquestions) in enumerate(candidates):
         key = (row["sha256"], row["pdf_page"], quote)
         paper_key = (row["paper_id"], row["sha256"])
         if key in seen or paper_counts.get(paper_key, 0) >= max_quotes_per_paper:
+            target = (duplicate_quote_skipped_chunk_ids if key in seen
+                      else paper_quote_limit_skipped_chunk_ids)
+            target.append(row["chunk_id"])
             continue
         quote_valid = _validate_chunk_quote(row, quote, page_cache)
         from .trace import emit
         emit("citation.validated", source_sha256=row["sha256"], page=row["pdf_page"], valid=quote_valid)
         if not quote_valid:
+            quote_validation_rejected_chunk_ids.append(row["chunk_id"])
             continue
         seen.add(key)
         paper_counts[paper_key] = paper_counts.get(paper_key, 0) + 1
@@ -714,7 +724,10 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
             "subquestion_ids": evidence_subquestions,
         })
         if len(evidence) >= limit:
+            citation_limit_truncated_chunk_ids.extend(
+                item[2]["chunk_id"] for item in candidates[candidate_index + 1:])
             break
+    quote_validated_chunk_ids = list(dict.fromkeys(item["chunk_id"] for item in evidence))
     exact_serial_guard = _exact_serial_not_found(question, evidence)
     if exact_serial_guard:
         evidence = []
@@ -832,6 +845,12 @@ def _ask(database: Path, question: str, conversation_id: str | None = None,
         "index_revision_consistent": index_revision == final_index_revision,
         "query_hash": query_hash,
         "candidate_chunk_ids": candidate_chunk_ids,
+        "extractive_candidate_chunk_ids": extractive_candidate_chunk_ids,
+        "quote_validated_chunk_ids": quote_validated_chunk_ids,
+        "quote_validation_rejected_chunk_ids": list(dict.fromkeys(quote_validation_rejected_chunk_ids)),
+        "paper_quote_limit_skipped_chunk_ids": list(dict.fromkeys(paper_quote_limit_skipped_chunk_ids)),
+        "duplicate_quote_skipped_chunk_ids": list(dict.fromkeys(duplicate_quote_skipped_chunk_ids)),
+        "citation_limit_truncated_chunk_ids": list(dict.fromkeys(citation_limit_truncated_chunk_ids)),
         "citation_chunk_ids": citation_chunk_ids,
     }
 
