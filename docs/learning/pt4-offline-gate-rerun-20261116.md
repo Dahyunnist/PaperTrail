@@ -23,6 +23,18 @@ PT4 本地应用层 ACL、版本失效/重建及 Web/MCP 共享授权门禁已�
 
 没有读私人 PDF 或 gold，没有调用模型，没有清理 `.tmp/`、`.codex-test-tmp/`，没有推送。
 
+## MCP stdio JSON-RPC 集成补充
+
+新增真实子进程 stdio 测试 `tests/test_mcp_stdio_auth_boundary.py`，使用合成双用户与两份合成 PDF。匿名进程和 JSON-RPC 中伪造 `user_id` 对 search、resource list/read 均失败关闭；由受信启动代码注入 `Principal` 的 owner-a、owner-b 进程分别可读本方证据，跨 owner 直读被拒。它验证真实换行 JSON-RPC 输入/输出与 ACL 路径，不伪造 MCP 身份认证协议。
+
+命令：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -p no:cacheprovider -q tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py
+```
+
+结果：**22 passed**。
+
 ## 未完成门槛
 
-生产认证与跨进程边界未验证。需要部署方提供可信 Principal 注入契约、目标 Web 身份中间件和实际 MCP transport，再验证匿名/伪造身份拒绝与跨用户拒绝。现有 MCP CLI 的本地开发身份选项不等于 transport 调用者认证。本轮离线结果不证明生产多租户认证。
+MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务端启动层可信注入；匿名启动保持 `principal=None` 并拒绝受保护操作。生产认证仍需部署方提供注入契约和目标认证层联测。跨进程/共享存储隔离也未测试；本地结果不证明生产多租户认证。

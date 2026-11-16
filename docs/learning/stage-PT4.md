@@ -42,4 +42,6 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 
 离线门槛已覆盖：匿名/缺 Principal 失败关闭、请求字段不能伪造身份、跨 owner 搜索/直读/资源/导出/上传/job 拒绝、排序前 ACL、换版/删除后旧引用立即失效、reconcile 后 ACL 继承与版本清理、重建失败回滚并可重试。审计记录见 [PT4 离线门禁复核（2026-11-16）](pt4-offline-gate-rerun-20261116.md)。
 
-仍阻塞部署级验收：没有目标认证中间件和实际 MCP transport 的可信身份联测，也没有跨进程/共享存储测试。需要部署方提供身份注入契约和目标环境；在此之前不宣称生产多租户认证已通过。
+追加真实 stdio JSON-RPC 子进程回归：匿名和 JSON-RPC 伪造身份对搜索、资源列表/读取均失败关闭；可信启动层注入的 owner-a、owner-b 各自可读本方证据，不能读取对方证据。命令 `tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py`：**22 passed**。身份由服务端启动层注入；stdio transport 本身不认证调用者。
+
+仍阻塞部署级验收：需部署方提供实际认证层与 Principal 注入契约，并联测目标 MCP host/transport；跨进程/共享存储隔离也未覆盖。在此之前不宣称生产多租户认证已通过。
