@@ -102,7 +102,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
         comparison_id = request.args.get("comparison_id", "")
         return render_template(
             "index.html", csrf_token=session["_csrf"], stats=dashboard_stats(app.config["DATABASE"]),
-            documents=library_documents(app.config["DATABASE"]),
+            documents=library_documents(app.config["DATABASE"], g.principal.user_id),
             uploads=list_uploads(app.config["DATABASE"], g.principal.user_id),
             notes=search_notes(app.config["DATABASE"], request.args.get("note_q", "")),
             note_query=request.args.get("note_q", ""), recent_conversations=recent,

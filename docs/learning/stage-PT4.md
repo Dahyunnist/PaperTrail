@@ -64,6 +64,14 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 
 `tests/test_access_control.py tests/test_s5_web.py`：**33 passed**。均为临时 SQLite 和合成问答，无私人 PDF/gold、模型调用或远端写入。
 
+## PT4 验收矩阵补充（2026-11-16）
+
+逐项核对 reconcile 版本生命周期与原子恢复、BM25/vector/BGE 检索前 ACL、HTTP/MCP direct resources、旧引用失效、引用来源定位、上传/job/conversation/review owner 和首页文献元数据。发现文献列表缺少 collection owner 过滤，先由双 Principal 合成负例复现，再修复 `library_documents` 与 Web 调用，避免跨用户标题、文件名和 SHA 泄露。
+
+全 PT4 离线组：`tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_jobs.py tests/test_s5_web.py tests/test_pt2_hybrid_version_lifecycle.py tests/test_pt3_citation_failure_paths.py tests/test_s1.py`：**61 passed**。逐项测试名和复现步骤见 [PT4 验收证据矩阵](pt4-offline-gate-rerun-20261116.md)。
+
+已覆盖计划内本地门槛。生产身份/MCP host 与跨进程存储等待部署方；PT1 双标与真实 PT2/PT3 质量等待人工输入。全局仪表盘、笔记和比较数据是否按 Principal 隔离，现有计划未定义，需先定产品边界。
+
 ## MCP 资源 stdio 与版本生命周期（2026-11-16）
 
 扩展真实子进程 stdio JSON-RPC 回归，验证双用户 resources/list/read 隔离及源换版：reconcile 前旧 URI 失败并从列表消失；reconcile 后新 SHA 可读、旧 SHA 仍拒绝。此前相同 ACL/版本规则已有内存 handle 和 HTTP 覆盖，本次补实际 stdio transport 链路，无运行时代码变化。

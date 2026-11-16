@@ -70,3 +70,34 @@ MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务�
 定向命令 `tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_pt3_citation_failure_paths.py tests/test_pt2_hybrid_version_lifecycle.py`：**36 passed**。仅临时合成 PDF/SQLite 与可信测试 Principal；未读私人 PDF/gold，未调用模型。
 
 剩余边界：stdio 调用者认证依赖服务端外部 Principal 注入；生产身份集成及跨进程共享存储仍待部署环境。PT1 双人标注继续暂停。
+
+## PT4 验收项证据矩阵（2026-11-16）
+
+首页文献清单测试先在旧实现下失败：owner A 页面包含 owner B 的 `beta.pdf` 和 SHA。`library_documents` 现在通过 `paper_versions.collection_id → collections.owner_id` 过滤；Web 按可信 Principal 调用。兼容默认仍为 `local-dev`。
+
+| 计划门槛 | 当前证据 | 结果 |
+|---|---|---|
+| 源替换/删除、索引修订与增量恢复 | `tests/test_s1.py::test_reconcile_updates_changed_paths_and_removes_deleted_sources`；`tests/test_pt2_hybrid_version_lifecycle.py::test_hybrid_retrieval_tracks_synthetic_version_update_and_delete` | 通过 |
+| reconcile 解析/写入事务失败后可重试 | `tests/test_s1.py::test_reconcile_parse_failure_keeps_published_index_then_retry_succeeds`；`test_reconcile_write_failure_rolls_back_entire_batch_then_retry_succeeds` | 通过 |
+| ACL 在 BM25、向量、BGE 排序和 top-k 前生效 | `tests/test_pt4_acl_retrieval_regressions.py::test_acl_filters_before_fts_limit_and_web_search`；`test_vector_candidates_are_filtered_before_scoring_and_top_k`；`test_bge_candidates_are_filtered_before_scoring_and_top_k` | 通过 |
+| HTTP/MCP direct evidence、resources list/read 双用户隔离 | `tests/test_pt4_acl_retrieval_regressions.py::test_direct_reads_and_mcp_tools_resources_share_collection_acl`；`tests/test_mcp_stdio_auth_boundary.py::test_stdio_transport_fails_closed_without_trusted_principal_and_scopes_injected_users` | 通过 |
+| 源变更后旧 SHA/引用失效，新版 ACL 保留 | `tests/test_pt4_acl_retrieval_regressions.py::test_replaced_and_deleted_citations_expire_and_incremental_rebuild_recovers`；`tests/test_access_control.py::test_replaced_version_hides_stale_search_and_preserves_acl_across_web_mcp_resources` | 通过 |
+| 引文绑定 SHA、物理页、chunk 原文；过期来源拒绝 | `tests/test_pt3_citation_failure_paths.py`；`tests/test_access_control.py::test_read_evidence_uses_same_bytes_for_sha_check_and_page_lookup`；answer-eval export expired-source regression | 通过 |
+| 上传、索引 job、conversation 和答案评分 owner 隔离 | `tests/test_s5_web.py::test_personal_uploads_are_scoped_to_trusted_principal`；`tests/test_jobs.py::test_index_job_status_is_scoped_to_owner`；`tests/test_access_control.py::test_qa_conversation_owner_is_bound_and_checked_on_reuse_and_history`、`test_web_answer_review_is_owner_scoped_and_included_in_jsonl` | 通过 |
+| Web 文献元数据不跨 owner 泄漏 | `tests/test_access_control.py::test_web_library_document_metadata_is_scoped_to_collection_owner` | 通过；旧实现曾失败 |
+
+全量 PT4 离线组复现命令：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -p no:cacheprovider -q tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_jobs.py tests/test_s5_web.py tests/test_pt2_hybrid_version_lifecycle.py tests/test_pt3_citation_failure_paths.py tests/test_s1.py
+```
+
+结果：**61 passed**。仅测试生成的 PDF、SQLite 和身份；无私人 PDF/gold、模型或外部服务。
+
+## 尚需外部决策/环境
+
+- 生产 Web 身份中间件、实际 MCP host 的可信 Principal 注入、跨进程/共享存储：需部署方环境和认证契约，当前不可离线验证。
+- PT1 双标 gold 与 PT2/PT3 真实质量指标：PT1 仍暂停；需两位人工标注者独立核验可回答性、最小证据 span、claim 支持/冲突，再仲裁分歧。未生成 gold。
+- `dashboard_stats`、个人笔记和比较记录仍是共享工作区数据；现有 PT4 验收清单未定义它们是否按 Principal 隔离。若要多租户隔离，先定产品边界再扩展 owner schema。
+
+起始 `HEAD` 与 `origin/master` 同为 `872e9c7d4be6abe8bba2e29af57e039fcf5efd3e`；本次变更提交后不推送，保留供主控快进处理。

@@ -508,6 +508,17 @@ def test_web_recent_conversations_and_direct_view_are_owner_scoped(tmp_path, mon
     assert client.get(f"/?conversation_id={foreign['conversation_id']}").status_code == 404
 
 
+def test_web_library_document_metadata_is_scoped_to_collection_owner(tmp_path):
+    database, rows = _indexed_library(tmp_path)
+
+    owner_a = _trusted_app(database, "local-dev").test_client().get("/").get_data(as_text=True)
+    owner_b = _trusted_app(database, "user-b").test_client().get("/").get_data(as_text=True)
+    assert "alpha.pdf" in owner_a and rows[0]["sha256"][:16] in owner_a
+    assert "beta.pdf" not in owner_a and rows[1]["sha256"][:16] not in owner_a
+    assert "beta.pdf" in owner_b and rows[1]["sha256"][:16] in owner_b
+    assert "alpha.pdf" not in owner_b and rows[0]["sha256"][:16] not in owner_b
+
+
 def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp(tmp_path):
     database, rows = _indexed_library(tmp_path)
     root = tmp_path / "papers"

@@ -81,7 +81,7 @@ def delete_note(database: Path, note_id: str) -> bool:
         conn.close()
 
 
-def library_documents(database: Path) -> list[dict[str, Any]]:
+def library_documents(database: Path, owner_id: str = "local-dev") -> list[dict[str, Any]]:
     conn = open_database(database)
     try:
         ensure_workspace_schema(conn)
@@ -90,8 +90,10 @@ def library_documents(database: Path) -> list[dict[str, Any]]:
             "v.low_text_pages_json,v.parse_status,v.parser_version,p.paper_id,p.title_candidate,"
             "GROUP_CONCAT(DISTINCT l.root_id) AS source_roots "
             "FROM paper_versions v JOIN papers p ON p.paper_id=v.paper_id "
+            "JOIN collections col ON col.collection_id=v.collection_id "
             "LEFT JOIN source_locations l ON l.version_id=v.version_id "
-            "GROUP BY v.version_id ORDER BY p.title_candidate,v.indexed_at DESC").fetchall()
+            "WHERE col.owner_id=? GROUP BY v.version_id "
+            "ORDER BY p.title_candidate,v.indexed_at DESC", (owner_id,)).fetchall()
         return [{**dict(row), "low_text_pages": json.loads(row["low_text_pages_json"]),
                  "source_roots": (row["source_roots"] or "").split(",")}
                 for row in rows]

@@ -11,3 +11,7 @@
 ## 下一具体缺口
 
 部署方尚未提供并联测可信 Principal provider。下一步应在目标认证中间件和实际 MCP transport 上验证匿名拒绝、身份伪造拒绝、跨用户读取拒绝，再做部署级审计。无需重复扩展本地合成 ACL 用例。本轮未读私人 PDF、未碰真实 gold、未调用模型。
+
+## 2026-11-16 后续验收
+
+真实 stdio 子进程现覆盖匿名/伪造身份拒绝、双用户 tools 与 resources 隔离、源换版前后旧 URI 失效。部署身份 provider 仍未联测。首页文献 metadata owner 过滤现由 `test_web_library_document_metadata_is_scoped_to_collection_owner` 覆盖；全量 PT4 当前离线回归 61 passed，见 [PT4 验收证据矩阵](pt4-offline-gate-rerun-20261116.md)。
