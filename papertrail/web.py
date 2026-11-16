@@ -19,6 +19,7 @@ from .access import LOCAL_PRINCIPAL, Principal, document_metadata, read_evidence
 from .audit import _hash
 from .compare import add_gap_candidate, compare_papers, comparison_report, label_evidence
 from .qa import ask, conversation_history
+from .reward import rate_trajectory
 from .s1_index import open_database
 from .jobs import enqueue_index, get_job
 from .workspace import (create_note, dashboard_stats, delete_note, ensure_workspace_schema,
@@ -213,13 +214,38 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                             "subquestions": turn.get("subquestions", []),
                             "claims": claims, "status": turn["status"],
                             "coverage_complete": bool(turn["coverage_complete"]) if turn["coverage_complete"] is not None else None,
-                            "human_score": None, "reviewer": None, "review_notes": None})
+                            "human_score": turn.get("user_rating"),
+                            "reviewer": turn.get("reviewer_id"),
+                            "review_notes": turn.get("user_note")})
         response = make_response("".join(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
                                                for row in records))
         response.headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
         response.headers["X-Export-Scope"] = "answer-evaluation"
         response.headers["Cache-Control"] = "no-store"
         return response
+
+    @app.post("/qa/<conversation_id>/<turn_id>/review")
+    def review_answer(conversation_id: str, turn_id: str) -> Any:
+        if "workspace_id" in request.form:
+            abort(403, "跨工作区审阅不受支持。")
+        conn = open_database(app.config["DATABASE"], readonly=True)
+        try:
+            owned_turn = conn.execute(
+                "SELECT t.turn_id FROM qa_turns t JOIN qa_conversations c "
+                "ON c.conversation_id=t.conversation_id "
+                "WHERE t.turn_id=? AND c.conversation_id=? AND c.owner_id=?",
+                (turn_id, conversation_id, g.principal.user_id)).fetchone()
+        finally:
+            conn.close()
+        if not owned_turn:
+            abort(404)
+        try:
+            rate_trajectory(app.config["DATABASE"], turn_id, request.form.get("rating", ""),
+                            request.form.get("note", ""), reviewer_id=g.principal.user_id)
+            flash("答案评分已保存。", "success")
+        except ValueError as exc:
+            flash(str(exc), "warning")
+        return redirect(url_for("home", conversation_id=conversation_id) + "#assistant")
 
     @app.get("/api/evidence/<sha256>/<int:page_number>")
     def evidence_api(sha256: str, page_number: int) -> Any:

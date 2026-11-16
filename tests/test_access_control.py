@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import sqlite3
 from pathlib import Path
 
@@ -353,6 +354,34 @@ def test_answer_eval_export_denies_foreign_principal_even_for_empty_claims(tmp_p
     response = _trusted_app(database, "user-b").test_client().get(
         f"/api/answer-eval/{result['conversation_id']}.jsonl")
     assert response.status_code == 404
+
+
+def test_web_answer_review_is_owner_scoped_and_included_in_jsonl(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    database, _rows = _indexed_library(tmp_path)
+    result = qa.ask(database, "alpha-only-needle", mode="bm25", generate=False)
+    client = _local_demo_app(database).test_client()
+    page = client.get(f"/?conversation_id={result['conversation_id']}")
+    token = re.search(rb'name="_csrf" value="([^"]+)"', page.data).group(1).decode()
+    response = client.post(
+        f"/qa/{result['conversation_id']}/{result['turn_id']}/review",
+        data={"_csrf": token, "rating": "partially_correct", "note": "synthetic reviewer note"})
+    assert response.status_code == 302
+
+    exported = client.get(f"/api/answer-eval/{result['conversation_id']}.jsonl")
+    record = json.loads(exported.data.decode().splitlines()[0])
+    assert record["human_score"] == "partially_correct"
+    assert record["reviewer"] == "local-dev"
+    assert record["review_notes"] == "synthetic reviewer note"
+
+    foreign = _trusted_app(database, "user-b").test_client()
+    foreign_page = foreign.get("/")
+    foreign_token = re.search(rb'name="_csrf" value="([^"]+)"', foreign_page.data).group(1).decode()
+    denied = foreign.post(
+        f"/qa/{result['conversation_id']}/{result['turn_id']}/review",
+        data={"_csrf": foreign_token, "rating": "correct", "note": "forged"})
+    assert denied.status_code == 404
 
 
 def _qa_claim_fixture(tmp_path, quote=None):

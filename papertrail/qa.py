@@ -1017,10 +1017,17 @@ def conversation_history(database: Path, conversation_id: str,
         for turn in turns:
             claims = conn.execute("SELECT ordinal,claim_text,evidence_json FROM qa_claims WHERE turn_id=? ORDER BY ordinal",
                                   (turn["turn_id"],)).fetchall()
+            rating = conn.execute(
+                "SELECT user_rating,user_note,reviewer_id,rated_at FROM qa_trajectories WHERE turn_id=?",
+                (turn["turn_id"],)).fetchone()
             result.append({**dict(turn), "claims": [{"ordinal": row["ordinal"],
                             "text": row["claim_text"], "evidence": json.loads(row["evidence_json"])}
                            for row in claims], "coverage_gaps": json.loads(turn["coverage_json"]),
-                           "subquestions": json.loads(turn["subquestions_json"])})
+                           "subquestions": json.loads(turn["subquestions_json"]),
+                           "user_rating": rating["user_rating"] if rating else None,
+                           "user_note": rating["user_note"] if rating else None,
+                           "reviewer_id": rating["reviewer_id"] if rating else None,
+                           "rated_at": rating["rated_at"] if rating else None})
         return result
     finally:
         conn.close()

@@ -51,3 +51,9 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 复杂问题拆解此前未存入 turn 历史，页面和答案评审导出无法复核。新增兼容迁移 `qa_turns.subquestions_json`，Web 对话显示拆解条目，并链接 owner-scoped answer-eval JSONL 下载。导出包含子问题、claims、已校验引用和可填写的人工评分字段；引用继续校验当前 owner、源 SHA、物理页和摘录原文。旧 turn 子问题为空列表。
 
 `tests/test_s5_web.py tests/test_access_control.py tests/test_s3.py`：**64 passed**。仅合成夹具与 mock；未读私人 PDF/gold，未调用模型。人工评分通过下载后填写 JSONL；本页未提供在线评分提交表单。
+
+## 在线答案评分（2026-11-16）
+
+新增对话内评分表单，支持正确、部分正确、错误、正确拒答、错误拒答及备注。保存时从服务端 Principal 取 reviewer 身份；先校验 turn 属于当前 Principal 的 conversation，跨 owner 统一 404。历史页面显示已保存评分，答案评审 JSONL 导出真实评分、reviewer 与备注；底层透明 reward 仍按已有评分公式计算。
+
+`tests/test_s5_web.py tests/test_access_control.py tests/test_reward.py`：**33 passed**。覆盖表单展示、有效评分写入、跨 owner 拒绝、JSONL 往返和 reward 记录；全部合成问答/数据库，无模型、私人 PDF 或 gold。

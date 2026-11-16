@@ -46,3 +46,9 @@ MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务�
 定向回归 `tests/test_s5_web.py tests/test_access_control.py tests/test_s3.py`：**64 passed**。覆盖页面拆解/导出链接、历史持久化、旧 schema 迁移、JSONL 子问题和评分字段、来源 ACL 与过期引文拒绝。用例使用临时合成 PDF/DB，并 mock 问题拆解/审查；没有调用模型或读取真实 gold/私人 PDF。
 
 人工答案评分通过下载 JSONL 后填 `human_score`、`reviewer`、`review_notes`。本页没有直接提交答案评分的表单；若要求在线录入评分，仍需单独实现有 owner 校验的保存流程。
+
+## 在线评分补充
+
+完成上述缺口：新增 Web QA 评分表单与 owner-scoped 保存路由。评审人始终取自 `g.principal.user_id`，不接受客户端指定；评分类型复用 `reward.RATING_BASE` 的五类，备注由现有 `rate_trajectory` 限长并保存。提交前按 conversation owner 校验 turn，跨 owner 404。历史页显示已保存评分；answer-eval JSONL 返回该评分、reviewer 和备注。
+
+定向运行 `tests/test_s5_web.py tests/test_access_control.py tests/test_reward.py`：**33 passed**。含跨 owner 拒绝和评分 JSONL 往返。没有真实人工评分样本；真实问答质量仍待 PT1 双标数据，PT1 保持暂停。

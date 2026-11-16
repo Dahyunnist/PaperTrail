@@ -61,6 +61,7 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
     duplicate = dict(primary)
     primary["support_evidence"] = [duplicate, secondary]
     monkeypatch.setattr(web, "conversation_history", lambda *_args: [{
+        "turn_id": "turn-fixture",
         "question": "Compare both papers.", "answer": "A supported comparison.",
         "subquestions": ["What method does Paper A use?", "What result does Paper B report?"],
         "claims": [{"text": "Shared claim.", "evidence": primary}],
@@ -82,6 +83,7 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
     assert "问题拆解：" in html
     assert "What method does Paper A use?" in html
     assert 'href="/api/answer-eval/example.jsonl"' in html
+    assert "保存人工评分" in html
 
 
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):
