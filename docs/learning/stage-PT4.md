@@ -33,3 +33,13 @@ Web 后台进度回调另开 SQLite 连接，若在整批事务内更新任务�
 ## API 与隐私
 
 PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排除的 `test_local_chat_client_uses_loopback_ollama_json_api`：1 passed。普通运行环境拒绝该测试的 loopback 连接，获准本机回环测试后通过。测试还覆盖旧数据库迁移和重建索引后保留集合 owner。PT4 不调用模型。未读取或提交本机论文路径、私有 PDF、题目、摘录或忽略目录内容。
+
+## 2026-11-16 PT4 离线门禁复核
+
+重新审查 Web/MCP 入口、Principal 注入、collection ACL、direct evidence/resource、上传与 job owner、来源换版/删除、reconcile 原子恢复及旧引用失效。未发现缺失的本地合成门禁，因此不重复改造。
+
+定向运行 `tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_jobs.py tests/test_s5_web.py tests/test_pt2_hybrid_version_lifecycle.py tests/test_pt3_citation_failure_paths.py tests/test_s1.py`：**56 passed**。全部为临时数据库、合成 PDF/身份和故障注入；没有读私人 PDF 或 gold，也未调用模型。
+
+离线门槛已覆盖：匿名/缺 Principal 失败关闭、请求字段不能伪造身份、跨 owner 搜索/直读/资源/导出/上传/job 拒绝、排序前 ACL、换版/删除后旧引用立即失效、reconcile 后 ACL 继承与版本清理、重建失败回滚并可重试。审计记录见 [PT4 离线门禁复核（2026-11-16）](pt4-offline-gate-rerun-20261116.md)。
+
+仍阻塞部署级验收：没有目标认证中间件和实际 MCP transport 的可信身份联测，也没有跨进程/共享存储测试。需要部署方提供身份注入契约和目标环境；在此之前不宣称生产多租户认证已通过。
