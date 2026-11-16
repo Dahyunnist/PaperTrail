@@ -7,7 +7,8 @@ from typing import Any
 
 EVENT_NAMES = {"retrieval.completed", "rerank.completed", "generation.completed",
                "citation.validated", "access.checked", "human.reviewed", "evaluation.failed",
-               "evaluation.usage", "timeout", "retry", "budget_exceeded", "checkpoint_resume"}
+               "evaluation.usage", "timeout", "retry", "budget_exceeded", "checkpoint_resume",
+               "tool.selected", "tool.executed"}
 FORBIDDEN_KEYS = {"prompt", "raw_prompt", "full_text", "document_text", "api_key", "secret", "token", "path", "absolute_path"}
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -93,13 +94,23 @@ def validate_trace_event(row: dict[str, Any]) -> list[str]:
             "retry": ("operation", "attempt"),
             "budget_exceeded": ("budget_type", "limit"),
             "checkpoint_resume": ("component", "resumed_count"),
+            "tool.selected": ("tool_name", None),
+            "tool.executed": ("tool_name", "status"),
         }
         if row["event_name"] in specs:
             first, second = specs[row["event_name"]]
             if not isinstance(row.get(first), str) or not row[first].strip():
                 issues.append(f"invalid:{first}")
-            value = row.get(second)
-            if row["event_name"] == "retry":
+            value = row.get(second) if second else None
+            if row["event_name"] == "tool.selected":
+                value = None
+            elif row["event_name"] == "tool.executed":
+                if value not in {"completed", "rejected"}:
+                    issues.append("invalid:status")
+                if value == "rejected" and (not isinstance(row.get("error_type"), str)
+                                              or not row["error_type"].strip()):
+                    issues.append("invalid:error_type")
+            elif row["event_name"] == "retry":
                 if type(value) is not int or value < 2:
                     issues.append("invalid:attempt")
             elif row["event_name"] == "budget_exceeded":

@@ -42,8 +42,15 @@ def test_new_lifecycle_events_match_manifest_schema(tmp_path, monkeypatch):
     trace.emit("retry", operation="claim_generation", attempt=2)
     trace.emit("budget_exceeded", budget_type="model_calls", limit=16)
     trace.emit("checkpoint_resume", component="index_jobs", resumed_count=1)
+    trace.emit("tool.selected", tool_name="search_papers")
+    trace.emit("tool.executed", tool_name="search_papers", status="completed")
+    trace.emit("tool.executed", tool_name="get_evidence", status="rejected",
+               error_type="ValueError")
     rows = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
     assert [row["event_name"] for row in rows] == [
-        "timeout", "retry", "budget_exceeded", "checkpoint_resume"]
+        "timeout", "retry", "budget_exceeded", "checkpoint_resume", "tool.selected",
+        "tool.executed", "tool.executed"]
     assert all(validate_trace_event(row) == [] for row in rows)
     assert all("path" not in row for row in rows)
+    invalid = dict(rows[-1], status="unknown", error_type="")
+    assert validate_trace_event(invalid) == ["invalid:status"]

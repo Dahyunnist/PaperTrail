@@ -28,7 +28,8 @@ def test_stdio_mcp_tools_and_resources_are_read_only(tmp_path):
     db = tmp_path / "library.sqlite3"
     index_selection(db, config, selection)
     before = hashlib.sha256(db.read_bytes()).hexdigest()
-    env = dict(os.environ, PAPERTRAIL_DB=str(db))
+    trace_path = tmp_path / "trace.jsonl"
+    env = dict(os.environ, PAPERTRAIL_DB=str(db), PAPERTRAIL_TRACE_JSONL=str(trace_path))
     proc = subprocess.Popen([sys.executable, "-m", "papertrail.mcp_server",
                              "--allow-local-dev-principal"], stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", env=env)
@@ -61,6 +62,16 @@ def test_stdio_mcp_tools_and_resources_are_read_only(tmp_path):
         outside = call(8, "tools/call", {"name": "get_evidence", "arguments": {
             "sha256": "0" * 64, "page": 1}})
         assert outside["result"]["isError"] is True
+        trace_rows = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
+        selected = [row for row in trace_rows if row["event_name"] == "tool.selected"]
+        executed = [row for row in trace_rows if row["event_name"] == "tool.executed"]
+        assert [row["tool_name"] for row in selected] == [
+            "search_papers", "get_evidence", "get_evidence", "get_evidence"]
+        assert [(row["tool_name"], row["status"]) for row in executed] == [
+            ("search_papers", "completed"), ("get_evidence", "completed"),
+            ("get_evidence", "rejected"), ("get_evidence", "rejected")]
+        assert all("error_type" in row for row in executed if row["status"] == "rejected")
+        assert "anchorword" not in trace_path.read_text(encoding="utf-8")
         unknown_resource = call(9, "resources/read", {"uri": f"papertrail://documents/{'0' * 64}"})
         assert unknown_resource["error"]["code"] == -32602
         assert hashlib.sha256(db.read_bytes()).hexdigest() == before

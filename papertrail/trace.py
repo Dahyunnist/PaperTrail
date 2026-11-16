@@ -25,6 +25,8 @@ _ALLOWED = {
     "retry": {"operation", "attempt"},
     "budget_exceeded": {"budget_type", "limit"},
     "checkpoint_resume": {"component", "resumed_count"},
+    "tool.selected": {"tool_name"},
+    "tool.executed": {"tool_name", "status", "error_type"},
 }
 
 

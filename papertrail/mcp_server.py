@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 from .access import (LOCAL_PRINCIPAL, Principal, _source_matches_sha, document_metadata,
                      read_evidence, search_papers)
 from .s1_index import open_database
+from .trace import emit
 
 SERVER_INFO = {"name": "papertrail", "version": "0.1.0"}
 TOOLS = [
@@ -144,10 +145,17 @@ def handle(database: Path, message: dict[str, Any],
             if not isinstance(principal, Principal):
                 return {"jsonrpc": "2.0", "id": request_id,
                         "error": {"code": -32001, "message": "trusted principal required"}}
+            requested_name = params.get("name")
+            tool_name = requested_name if requested_name in {tool["name"] for tool in TOOLS} else "unknown"
+            emit("tool.selected", tool_name=tool_name)
             try:
                 result = _call(database, params.get("name", ""), params.get("arguments", {}), principal)
             except (PermissionError, ValueError, OSError, sqlite3.Error) as exc:
+                emit("tool.executed", tool_name=tool_name, status="rejected",
+                     error_type=type(exc).__name__)
                 result = {"content": [{"type": "text", "text": str(exc)}], "isError": True}
+            else:
+                emit("tool.executed", tool_name=tool_name, status="completed")
         elif method == "resources/list":
             if not isinstance(principal, Principal):
                 return {"jsonrpc": "2.0", "id": request_id,
