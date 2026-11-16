@@ -48,6 +48,19 @@ def test_chunk_quote_requires_chunk_page_and_source_to_match(tmp_path):
     assert not _validate_chunk_quote({**row, "text_origin": "ocr"}, quote, {})
 
 
+def test_cached_quote_validation_rechecks_current_source_hash(tmp_path):
+    quote = "Synthetic cached citation remains valid only for matching source bytes."
+    source = tmp_path / "mutable-synthetic.pdf"
+    old_sha = _write_pdf(source, "Synthetic Original", quote, "Original source bytes.")
+    cache = {}
+
+    assert _validate_quote(str(source), old_sha, 1, quote, cache)
+    _write_pdf(source, "Synthetic Replacement", "Replacement source contains no original citation.",
+               "Replacement bytes differ.")
+
+    assert not _validate_quote(str(source), old_sha, 1, quote, cache)
+
+
 def test_extractive_qa_cites_its_indexed_chunk_or_explicitly_abstains(tmp_path):
     source_root = tmp_path / "papers"
     source_root.mkdir()

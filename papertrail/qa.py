@@ -102,11 +102,11 @@ def _validate_quote(path: str, sha256: str, page_number: int, quote: str,
     if (not isinstance(page_number, int) or isinstance(page_number, bool)
             or page_number < 1 or not isinstance(sha256, str) or not isinstance(quote, str)):
         return False
+    source = Path(path)
+    if not source.is_file() or _hash(source) != sha256:
+        return False
     key = (path, page_number, sha256)
     if key not in page_cache:
-        source = Path(path)
-        if not source.is_file() or _hash(source) != sha256:
-            return False
         with fitz.open(source) as doc:
             if page_number < 1 or page_number > doc.page_count:
                 return False
