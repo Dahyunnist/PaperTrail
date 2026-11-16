@@ -38,3 +38,11 @@ PT4 本地应用层 ACL、版本失效/重建及 Web/MCP 共享授权门禁已�
 ## 未完成门槛
 
 MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务端启动层可信注入；匿名启动保持 `principal=None` 并拒绝受保护操作。生产认证仍需部署方提供注入契约和目标认证层联测。跨进程/共享存储隔离也未测试；本地结果不证明生产多租户认证。
+
+## 问答评审页面与导出补充
+
+界面复查发现复杂问题拆解仅存在于当次 `ask()` 结果，未写入 `qa_turns`；历史页面和 answer-eval JSONL 因而缺少拆解上下文。新增兼容迁移字段 `subquestions_json`，保存实际多子问题拆解；单问题和旧记录默认空列表。Web 对话展示拆解条目，并提供“下载人工评审 JSONL”链接。评审导出增加 `subquestions`；原有 `human_score`、`reviewer`、`review_notes` 空字段供离线人工填写。覆盖状态、claim、原文摘录、PDF 页码、版本 SHA 展示逻辑保持现有校验。
+
+定向回归 `tests/test_s5_web.py tests/test_access_control.py tests/test_s3.py`：**64 passed**。覆盖页面拆解/导出链接、历史持久化、旧 schema 迁移、JSONL 子问题和评分字段、来源 ACL 与过期引文拒绝。用例使用临时合成 PDF/DB，并 mock 问题拆解/审查；没有调用模型或读取真实 gold/私人 PDF。
+
+人工答案评分通过下载 JSONL 后填 `human_score`、`reviewer`、`review_notes`。本页没有直接提交答案评分的表单；若要求在线录入评分，仍需单独实现有 owner 校验的保存流程。

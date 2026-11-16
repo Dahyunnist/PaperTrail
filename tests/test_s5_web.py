@@ -62,6 +62,7 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
     primary["support_evidence"] = [duplicate, secondary]
     monkeypatch.setattr(web, "conversation_history", lambda *_args: [{
         "question": "Compare both papers.", "answer": "A supported comparison.",
+        "subquestions": ["What method does Paper A use?", "What result does Paper B report?"],
         "claims": [{"text": "Shared claim.", "evidence": primary}],
         "coverage_complete": True, "coverage_gaps": [],
     }])
@@ -78,6 +79,9 @@ def test_web_renders_all_distinct_supporting_evidence(tmp_path, monkeypatch):
     assert "PDF 第 2 页" in html
     assert "PDF 第 7 页" in html
     assert "覆盖审查：完整" in html
+    assert "问题拆解：" in html
+    assert "What method does Paper A use?" in html
+    assert 'href="/api/answer-eval/example.jsonl"' in html
 
 
 def test_local_web_learning_loop_upload_qa_notes_comparison_report_and_delete(tmp_path):

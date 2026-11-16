@@ -369,9 +369,10 @@ def _qa_claim_fixture(tmp_path, quote=None):
         conn.execute("INSERT INTO qa_conversations(conversation_id,title,created_at,updated_at,owner_id) VALUES(?,?,?,?,?)",
                      ("answer-eval-fixture", "fixture", "2026-11-13T00:00:00+00:00",
                       "2026-11-13T00:00:00+00:00", "local-dev"))
-        conn.execute("INSERT INTO qa_turns(turn_id,conversation_id,question,answer,status,retrieval_mode,context_query,created_at,coverage_json,coverage_complete) VALUES(?,?,?,?,?,?,?,?,?,?)",
+        conn.execute("INSERT INTO qa_turns(turn_id,conversation_id,question,answer,status,retrieval_mode,context_query,created_at,coverage_json,coverage_complete,subquestions_json) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                      ("turn-fixture", "answer-eval-fixture", "Fixture question", "Fixture answer",
-                      "generated_claims_reviewed", "bm25", None, "2026-11-13T00:00:00+00:00", "[]", 1))
+                      "generated_claims_reviewed", "bm25", None, "2026-11-13T00:00:00+00:00", "[]", 1,
+                      json.dumps(["Fixture subquestion one", "Fixture subquestion two"])))
         evidence = {"sha256": digest, "pdf_page": 1, "quote": quote, "support_evidence": [
             {"sha256": digest, "pdf_page": 1, "quote": quote}]}
         conn.execute("INSERT INTO qa_claims VALUES(?,?,?,?,?)",
@@ -389,6 +390,7 @@ def test_answer_eval_jsonl_exports_claim_and_truncates_verified_evidence(tmp_pat
     assert response.status_code == 200
     record = json.loads(response.data.decode().splitlines()[0])
     assert record["question"] == "Fixture question" and record["answer"] == "Fixture answer"
+    assert record["subquestions"] == ["Fixture subquestion one", "Fixture subquestion two"]
     assert record["claims"][0]["text"] == "Fixture claim"
     assert record["claims"][0]["evidence"][0]["snippet"]
     assert record["claims"][0]["evidence"][0]["snippet_truncated"] is False

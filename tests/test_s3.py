@@ -1,4 +1,5 @@
 import json
+import sqlite3
 from pathlib import Path
 
 import fitz
@@ -561,6 +562,34 @@ def test_complex_ask_retrieves_each_subquestion_and_keeps_partial_answer(tmp_pat
     assert result["claims"][0]["subquestion_ids"] == [0]
     assert "Paper B evidence missing" in result["answer"]
     assert result["missing_subquestions"] == ["What result does Paper B report?"]
+    history = qa.conversation_history(db, result["conversation_id"])
+    assert history[0]["subquestions"] == [
+        "What method does Paper A use?", "What result does Paper B report?"]
+
+
+def test_qa_schema_migrates_legacy_turns_with_empty_subquestions(tmp_path):
+    import papertrail.qa as qa
+
+    database = tmp_path / "legacy.sqlite3"
+    conn = sqlite3.connect(database)
+    conn.executescript("""
+    CREATE TABLE qa_conversations (
+        conversation_id TEXT PRIMARY KEY, title TEXT NOT NULL,
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+    );
+    CREATE TABLE qa_turns (
+        turn_id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL,
+        question TEXT NOT NULL, answer TEXT NOT NULL, status TEXT NOT NULL,
+        retrieval_mode TEXT NOT NULL, context_query TEXT, created_at TEXT NOT NULL
+    );
+    INSERT INTO qa_conversations VALUES('legacy', 'Legacy', 'now', 'now');
+    INSERT INTO qa_turns VALUES('turn', 'legacy', 'question', 'answer', 'abstained', 'bm25', NULL, 'now');
+    """)
+    qa._ensure_qa_schema(conn)
+    conn.commit()
+    conn.close()
+
+    assert qa.conversation_history(database, "legacy")[0]["subquestions"] == []
 
 
 def test_cross_paper_missing_retrieval_slot_stays_partial_without_fabricated_citation(tmp_path, monkeypatch):

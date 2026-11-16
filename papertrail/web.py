@@ -210,6 +210,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
                 claims.append({"text": str(claim["text"])[:1000], "evidence": safe_evidence})
             records.append({"record_type": "answer_eval", "turn_id": turn["turn_id"],
                             "question": turn["question"][:500], "answer": turn["answer"][:3000],
+                            "subquestions": turn.get("subquestions", []),
                             "claims": claims, "status": turn["status"],
                             "coverage_complete": bool(turn["coverage_complete"]) if turn["coverage_complete"] is not None else None,
                             "human_score": None, "reviewer": None, "review_notes": None})

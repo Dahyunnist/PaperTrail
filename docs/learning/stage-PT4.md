@@ -45,3 +45,9 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 追加真实 stdio JSON-RPC 子进程回归：匿名和 JSON-RPC 伪造身份对搜索、资源列表/读取均失败关闭；可信启动层注入的 owner-a、owner-b 各自可读本方证据，不能读取对方证据。命令 `tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py`：**22 passed**。身份由服务端启动层注入；stdio transport 本身不认证调用者。
 
 仍阻塞部署级验收：需部署方提供实际认证层与 Principal 注入契约，并联测目标 MCP host/transport；跨进程/共享存储隔离也未覆盖。在此之前不宣称生产多租户认证已通过。
+
+## 问答评审页面与导出（2026-11-16）
+
+复杂问题拆解此前未存入 turn 历史，页面和答案评审导出无法复核。新增兼容迁移 `qa_turns.subquestions_json`，Web 对话显示拆解条目，并链接 owner-scoped answer-eval JSONL 下载。导出包含子问题、claims、已校验引用和可填写的人工评分字段；引用继续校验当前 owner、源 SHA、物理页和摘录原文。旧 turn 子问题为空列表。
+
+`tests/test_s5_web.py tests/test_access_control.py tests/test_s3.py`：**64 passed**。仅合成夹具与 mock；未读私人 PDF/gold，未调用模型。人工评分通过下载后填写 JSONL；本页未提供在线评分提交表单。
