@@ -11,3 +11,11 @@
 这些回归使用临时合成 PDF、stub generator 或纯分类输入；测试样本量为 5 个 adversarial 类别及合成路径用例。**没有新的真实 PT-3 正确率、拒答率或引用精度指标**，也未读取真实 gold。历史模型报告不是本轮结果。
 
 跨文献映射只能证明引用归属，不证明系统能正确解释相互矛盾的研究结论。下一具体缺口是经人工复核的冲突题及独立答案质量验收；需要 PT-1 双人标注和仲裁。PT-1 继续暂停。本轮未读私人 PDF、未碰真实 gold、未调用模型。
+
+## Citation 页码类型守恒补充（2026-11-16）
+
+端到端复核发现 `_validate_chunk_quote` 只用 `isinstance(page, int)`；Python 将 `True` 视为整数 1，因此错误类型页码能通过原文第一页校验。先加合成 PDF 回归，确认 `pdf_page: true` 被接受；再让 chunk 与底层 `_validate_quote` 都拒绝布尔及非正整数页码。SHA、物理页和 quote/span 的既有校验保持不变。
+
+定向验证覆盖 citation 失败、synthetic adversarial、错误页/quote 不计完整证据、跨论文 slot 引用、失败 claim 丢弃及过期引用导出拒绝：**10 passed**。夹具均由测试临时生成；没有访问真实 gold、私人 PDF 或模型。
+
+该结果证明引用归属和类型边界，不证明 claim 的语义蕴含或冲突解释正确。跨论文冲突的真实答案质量仍需人工标注和复核；PT-1 继续暂停。

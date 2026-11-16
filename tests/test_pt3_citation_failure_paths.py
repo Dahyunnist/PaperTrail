@@ -43,6 +43,7 @@ def test_chunk_quote_requires_chunk_page_and_source_to_match(tmp_path):
     assert _validate_chunk_quote(row, quote, {})
     assert not _validate_chunk_quote({**row, "text": "A different indexed chunk."}, quote, {})
     assert not _validate_chunk_quote({**row, "pdf_page": 2}, quote, {})
+    assert not _validate_chunk_quote({**row, "pdf_page": True}, quote, {})
     assert not _validate_chunk_quote({**row, "sha256": "0" * 64}, quote, {})
     assert not _validate_chunk_quote({**row, "text_origin": "ocr"}, quote, {})
 

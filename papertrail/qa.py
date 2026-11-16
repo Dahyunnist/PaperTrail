@@ -99,6 +99,9 @@ def _ensure_qa_schema(conn: sqlite3.Connection) -> None:
 
 def _validate_quote(path: str, sha256: str, page_number: int, quote: str,
                     page_cache: dict[tuple[str, int, str], str]) -> bool:
+    if (not isinstance(page_number, int) or isinstance(page_number, bool)
+            or page_number < 1 or not isinstance(sha256, str) or not isinstance(quote, str)):
+        return False
     key = (path, page_number, sha256)
     if key not in page_cache:
         source = Path(path)
@@ -120,7 +123,7 @@ def _validate_chunk_quote(row: dict[str, Any], quote: str,
     page_number = row.get("pdf_page")
     if (row.get("text_origin", "native_text") != "native_text" or
             not isinstance(text, str) or not isinstance(path, str) or
-            not isinstance(sha256, str) or not isinstance(page_number, int) or
+            not isinstance(sha256, str) or not isinstance(page_number, int) or isinstance(page_number, bool) or
             not quote.strip() or
             _normalize_excerpt(quote) not in _normalize_excerpt(text)):
         return False
