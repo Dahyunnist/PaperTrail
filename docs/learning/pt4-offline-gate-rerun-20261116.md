@@ -60,3 +60,13 @@ MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务�
 定向测试 `tests/test_access_control.py tests/test_s5_web.py`：**33 passed**。新负例先在旧实现下失败，明确重现标题泄露；修复后验证本人条目可见、他人条目隐藏、直接跨 owner 访问返回 404。仅临时合成 DB/QA 记录。
 
 本次只修复问答对话列表/查看边界。生产 IdP/MCP transport 仍待部署方；文献库列表与全局仪表盘计数目前仍按共享索引呈现，后续需明确共享库产品边界或补 owner 过滤，不在本次扩展。
+
+## MCP 资源与版本生命周期 stdio 复核
+
+起始 `HEAD` 与 `origin/master` 均为 `f97886845e231abd6f8c61a2b2e39f10ee388418`，无 ahead/behind。复核发现 ACL/direct-resource 与版本失效已有单元/HTTP/内存 handle 回归，但真实 stdio 测试尚未串起授权资源读取、跨 owner 资源拒绝及换版前后读取。
+
+扩展 `tests/test_mcp_stdio_auth_boundary.py`：owner-a/owner-b 子进程分别只能列出和读取本方资源；换版未 reconcile 前资源列表隐藏旧 SHA、旧 evidence URI 读取失败；reconcile 后新 URI 可读、旧 URI 仍失败。该扩展未发现实现缺陷，不改运行时代码。
+
+定向命令 `tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_pt3_citation_failure_paths.py tests/test_pt2_hybrid_version_lifecycle.py`：**36 passed**。仅临时合成 PDF/SQLite 与可信测试 Principal；未读私人 PDF/gold，未调用模型。
+
+剩余边界：stdio 调用者认证依赖服务端外部 Principal 注入；生产身份集成及跨进程共享存储仍待部署环境。PT1 双人标注继续暂停。

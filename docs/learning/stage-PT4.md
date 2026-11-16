@@ -63,3 +63,9 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 首页最近对话原按全库排序，泄露其他 Principal 的对话标题和 ID；直接打开他人对话还会抛未处理异常。最近列表现在按服务端 Principal 过滤，直接访问非本人对话返回 404。测试先复现标题泄露，再验证 owner A/B 隔离。
 
 `tests/test_access_control.py tests/test_s5_web.py`：**33 passed**。均为临时 SQLite 和合成问答，无私人 PDF/gold、模型调用或远端写入。
+
+## MCP 资源 stdio 与版本生命周期（2026-11-16）
+
+扩展真实子进程 stdio JSON-RPC 回归，验证双用户 resources/list/read 隔离及源换版：reconcile 前旧 URI 失败并从列表消失；reconcile 后新 SHA 可读、旧 SHA 仍拒绝。此前相同 ACL/版本规则已有内存 handle 和 HTTP 覆盖，本次补实际 stdio transport 链路，无运行时代码变化。
+
+`tests/test_mcp_stdio_auth_boundary.py tests/test_mcp_server.py tests/test_access_control.py tests/test_pt4_acl_retrieval_regressions.py tests/test_pt3_citation_failure_paths.py tests/test_pt2_hybrid_version_lifecycle.py`：**36 passed**。合成 fixture，无模型、私人 PDF 或 gold。生产认证继续依赖部署方身份注入。

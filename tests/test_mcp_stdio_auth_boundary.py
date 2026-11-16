@@ -100,6 +100,14 @@ def test_stdio_transport_fails_closed_without_trusted_principal_and_scopes_injec
             "sha256": owner_b_sha, "page": 1}, "user_id": "owner-b"})
         assert "OwnerAOnlyneedle" in own["result"]["structuredContent"]["text"]
         assert foreign["result"]["isError"] is True
+        resources = _call(owner_a, 3, "resources/list")["result"]["resources"]
+        assert {item["uri"] for item in resources} == {f"papertrail://documents/{owner_a_sha}"}
+        own_resource = _call(owner_a, 4, "resources/read", {
+            "uri": f"papertrail://evidence/{owner_a_sha}/1"})
+        foreign_resource = _call(owner_a, 5, "resources/read", {
+            "uri": f"papertrail://evidence/{owner_b_sha}/1"})
+        assert "OwnerAOnlyneedle" in own_resource["result"]["contents"][0]["text"]
+        assert foreign_resource["error"]["code"] == -32602
     finally:
         _stop(owner_a)
 
@@ -111,5 +119,45 @@ def test_stdio_transport_fails_closed_without_trusted_principal_and_scopes_injec
             "sha256": owner_a_sha, "page": 1}, "user_id": "owner-a"})
         assert "OwnerBOnlyneedle" in own["result"]["structuredContent"]["text"]
         assert foreign["result"]["isError"] is True
+        resources = _call(owner_b, 3, "resources/list")["result"]["resources"]
+        assert {item["uri"] for item in resources} == {f"papertrail://documents/{owner_b_sha}"}
+        own_resource = _call(owner_b, 4, "resources/read", {
+            "uri": f"papertrail://documents/{owner_b_sha}"})
+        foreign_resource = _call(owner_b, 5, "resources/read", {
+            "uri": f"papertrail://documents/{owner_a_sha}"})
+        assert owner_b_sha in own_resource["result"]["contents"][0]["text"]
+        assert foreign_resource["error"]["code"] == -32602
     finally:
         _stop(owner_b)
+
+    revised_pdf = root / "owner-a.pdf"
+    revised = fitz.open()
+    revised.new_page().insert_text((40, 60), "OwnerARevisedneedle replaces the original evidence.")
+    revised.save(revised_pdf)
+    revised.close()
+    revised_sha = hashlib.sha256(revised_pdf.read_bytes()).hexdigest()
+    stale = _stdio_process(database, "owner-a")
+    try:
+        resources = _call(stale, 1, "resources/list")["result"]["resources"]
+        assert all(owner_a_sha not in item["uri"] for item in resources)
+        expired = _call(stale, 2, "resources/read", {
+            "uri": f"papertrail://evidence/{owner_a_sha}/1"})
+        assert expired["error"]["code"] == -32602
+    finally:
+        _stop(stale)
+
+    selection_rows[0]["sha256"] = revised_sha
+    selection.write_text("".join(json.dumps(row) + "\n" for row in selection_rows), encoding="utf-8")
+    index_selection(database, config, selection, reconcile=True)
+    rebuilt = _stdio_process(database, "owner-a")
+    try:
+        resources = _call(rebuilt, 1, "resources/list")["result"]["resources"]
+        assert {item["uri"] for item in resources} == {f"papertrail://documents/{revised_sha}"}
+        revised_read = _call(rebuilt, 2, "resources/read", {
+            "uri": f"papertrail://evidence/{revised_sha}/1"})
+        old_read = _call(rebuilt, 3, "resources/read", {
+            "uri": f"papertrail://evidence/{owner_a_sha}/1"})
+        assert "OwnerARevisedneedle" in revised_read["result"]["contents"][0]["text"]
+        assert old_read["error"]["code"] == -32602
+    finally:
+        _stop(rebuilt)
