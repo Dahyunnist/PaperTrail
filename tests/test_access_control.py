@@ -489,6 +489,25 @@ def test_qa_conversation_owner_is_bound_and_checked_on_reuse_and_history(tmp_pat
                generate=False, principal_id="local-dev")
 
 
+def test_web_recent_conversations_and_direct_view_are_owner_scoped(tmp_path, monkeypatch):
+    import papertrail.qa as qa
+
+    database, _rows = _indexed_library(tmp_path)
+    monkeypatch.delenv("PAPERTRAIL_LLM_MODEL", raising=False)
+    own = qa.ask(database, "OWNER_A_PRIVATE_TITLE", mode="bm25", generate=False,
+                 principal_id="user-a")
+    foreign = qa.ask(database, "OWNER_B_PRIVATE_TITLE", mode="bm25", generate=False,
+                     principal_id="user-b")
+
+    client = _trusted_app(database, "user-a").test_client()
+    home = client.get("/")
+    html = home.get_data(as_text=True)
+    assert "OWNER_A_PRIVATE_TITLE" in html
+    assert "OWNER_B_PRIVATE_TITLE" not in html
+    assert client.get(f"/?conversation_id={own['conversation_id']}").status_code == 200
+    assert client.get(f"/?conversation_id={foreign['conversation_id']}").status_code == 404
+
+
 def test_updated_and_deleted_sources_invalidate_old_citations_across_http_and_mcp(tmp_path):
     database, rows = _indexed_library(tmp_path)
     root = tmp_path / "papers"

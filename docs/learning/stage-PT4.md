@@ -57,3 +57,9 @@ PT4 ACL 定向回归：42 passed。全仓回归：86 passed；单独运行被排
 新增对话内评分表单，支持正确、部分正确、错误、正确拒答、错误拒答及备注。保存时从服务端 Principal 取 reviewer 身份；先校验 turn 属于当前 Principal 的 conversation，跨 owner 统一 404。历史页面显示已保存评分，答案评审 JSONL 导出真实评分、reviewer 与备注；底层透明 reward 仍按已有评分公式计算。
 
 `tests/test_s5_web.py tests/test_access_control.py tests/test_reward.py`：**33 passed**。覆盖表单展示、有效评分写入、跨 owner 拒绝、JSONL 往返和 reward 记录；全部合成问答/数据库，无模型、私人 PDF 或 gold。
+
+## 对话列表 owner 隔离（2026-11-16）
+
+首页最近对话原按全库排序，泄露其他 Principal 的对话标题和 ID；直接打开他人对话还会抛未处理异常。最近列表现在按服务端 Principal 过滤，直接访问非本人对话返回 404。测试先复现标题泄露，再验证 owner A/B 隔离。
+
+`tests/test_access_control.py tests/test_s5_web.py`：**33 passed**。均为临时 SQLite 和合成问答，无私人 PDF/gold、模型调用或远端写入。

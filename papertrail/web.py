@@ -89,10 +89,16 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             recent = [dict(row) for row in conn.execute(
                 "SELECT c.conversation_id,c.title,c.updated_at,COUNT(t.turn_id) AS turns "
                 "FROM qa_conversations c LEFT JOIN qa_turns t ON t.conversation_id=c.conversation_id "
-                "GROUP BY c.conversation_id ORDER BY c.updated_at DESC LIMIT 8")]
+                "WHERE c.owner_id=? GROUP BY c.conversation_id "
+                "ORDER BY c.updated_at DESC LIMIT 8", (g.principal.user_id,))]
         finally:
             conn.close()
         conversation_id = request.args.get("conversation_id", "")
+        try:
+            turns = (conversation_history(app.config["DATABASE"], conversation_id, g.principal.user_id)
+                     if conversation_id else [])
+        except ValueError:
+            abort(404)
         comparison_id = request.args.get("comparison_id", "")
         return render_template(
             "index.html", csrf_token=session["_csrf"], stats=dashboard_stats(app.config["DATABASE"]),
@@ -101,7 +107,7 @@ def create_app(database: Path | str = Path(".local/papertrail.sqlite3"),
             notes=search_notes(app.config["DATABASE"], request.args.get("note_q", "")),
             note_query=request.args.get("note_q", ""), recent_conversations=recent,
             conversation_id=conversation_id,
-            turns=conversation_history(app.config["DATABASE"], conversation_id, g.principal.user_id) if conversation_id else [],
+            turns=turns,
             comparison=comparison_report(app.config["DATABASE"], comparison_id) if comparison_id else None,
             can_load_config=sources_config.is_file() and selection_manifest.is_file(),
         )

@@ -52,3 +52,11 @@ MCP stdio 本身没有调用者认证字段。测试中的授权身份由服务�
 完成上述缺口：新增 Web QA 评分表单与 owner-scoped 保存路由。评审人始终取自 `g.principal.user_id`，不接受客户端指定；评分类型复用 `reward.RATING_BASE` 的五类，备注由现有 `rate_trajectory` 限长并保存。提交前按 conversation owner 校验 turn，跨 owner 404。历史页显示已保存评分；answer-eval JSONL 返回该评分、reviewer 和备注。
 
 定向运行 `tests/test_s5_web.py tests/test_access_control.py tests/test_reward.py`：**33 passed**。含跨 owner 拒绝和评分 JSONL 往返。没有真实人工评分样本；真实问答质量仍待 PT1 双标数据，PT1 保持暂停。
+
+## 对话列表隔离补充
+
+代码审查发现首页“最近对话”SQL 未按 `owner_id` 限制，会显示其他 Principal 的标题与 conversation ID；query-string 直接打开外部 conversation 则未捕获 `conversation_history` 的 not-found 错误。现按可信 Principal 过滤列表，直接访问外部 conversation 返回 404。
+
+定向测试 `tests/test_access_control.py tests/test_s5_web.py`：**33 passed**。新负例先在旧实现下失败，明确重现标题泄露；修复后验证本人条目可见、他人条目隐藏、直接跨 owner 访问返回 404。仅临时合成 DB/QA 记录。
+
+本次只修复问答对话列表/查看边界。生产 IdP/MCP transport 仍待部署方；文献库列表与全局仪表盘计数目前仍按共享索引呈现，后续需明确共享库产品边界或补 owner 过滤，不在本次扩展。
