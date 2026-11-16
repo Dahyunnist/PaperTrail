@@ -41,3 +41,11 @@ py -3.12 -m pytest -q -p no:cacheprovider `
 ## 结果边界
 
 这是 PT-4 工程行为演示，不是 PT-1 人工 gold，也不代表 PT-1、PT-2 或 PT-3 验收完成。PT-1 继续暂停；PT-3 回答正确率不由这些 ACL/导出测试推断。
+
+## 离线切片复核（2026-11-16）
+
+代码与现有合成测试已覆盖 collection/document ACL、过期版本搜索/直接读取拒绝、删除后失效、reconcile 后旧版本清理和 owner 继承，以及 Web evidence/JSONL 与 MCP resource/tool 读取路径。本轮未发现可补的 PT-4 边界，因此不增加功能。
+
+复核定向回归：**9 passed**。包含 `test_collection_acl_filters_search_and_direct_evidence_reads`、HTTP/MCP 共享 ACL、MCP direct resources、跨入口换版/删除失效、reconcile ACL 可见性、增量重建恢复及 source reconcile 删除。数据由测试即时生成，未读 gold、私人 PDF 或既存临时目录；未调用模型。
+
+一键演示入口仍为 `scripts/demo_pt4_offline.py`，复现命令见上文。演示代码使用 `TemporaryDirectory` 和合成 PDF/SQLite；未在本轮运行演示，避免触碰临时目录。生产身份 provider 与实际部署身份验证仍未覆盖。
