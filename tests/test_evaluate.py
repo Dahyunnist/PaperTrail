@@ -71,6 +71,7 @@ def test_gold_evaluation_excludes_personal_notes_and_reports_abstention(tmp_path
     assert comparison["modes"]["bm25"]["gold_page_recall_at_k"] == 1.0
     assert comparison["modes"]["bm25"]["complete_evidence_at_k"] == 1.0
     assert comparison["modes"]["bm25"]["trace"][0]["complete_evidence"] is True
+    assert comparison["modes"]["bm25"]["trace"][0]["failure_class"] == "complete_evidence_retrieved"
     assert comparison["modes"]["bm25"]["trace"][0]["evidence_items_found"] == 1
     assert next(iter(comparison["modes"]["bm25"]["by_paper"].values()))["page_hits"] == 1
 
@@ -116,6 +117,10 @@ def test_multi_page_evidence_is_incomplete_when_only_one_gold_page_is_retrieved(
     assert trace["complete_evidence"] is False
     assert trace["evidence_items_found"] == 1
     assert trace["evidence_items_total"] == 2
+    assert trace["failure_class"] == "target_page_retrieved_incomplete_evidence"
+    evaluated = evaluate(database, gold, k=1, minimum_questions=1)
+    assert evaluated["trace"][0]["complete_evidence"] is False
+    assert evaluated["trace"][0]["failure_class"] == "target_page_retrieved_incomplete_evidence"
     assert metrics["all_evidence_pages_at_k"] == 0
     assert metrics["complete_evidence_at_k"] == 0
     assert metrics["evidence_item_recall_at_k"] == 0.5

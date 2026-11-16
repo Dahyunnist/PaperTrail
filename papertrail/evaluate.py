@@ -20,6 +20,16 @@ def _validate_k(k: int) -> None:
         raise ValueError("k must be >= 1")
 
 
+def _failure_class(page_hit: bool, document_hit: bool, complete_evidence: bool) -> str:
+    if complete_evidence:
+        return "complete_evidence_retrieved"
+    if page_hit:
+        return "target_page_retrieved_incomplete_evidence"
+    if not document_hit:
+        return "target_document_not_retrieved"
+    return "target_document_retrieved_wrong_page"
+
+
 def evaluate(database: Path, gold_path: Path, k: int = 5,
              minimum_questions: int = 30) -> dict[str, Any]:
     _validate_k(k)
@@ -47,6 +57,14 @@ def evaluate(database: Path, gold_path: Path, k: int = 5,
         document_hit = bool(expected_hashes.intersection(retrieved_hashes))
         unique_document_hit = bool(expected_hashes.intersection({r["sha256"] for r in documents}))
         all_pages = bool(expected_pages) and expected_pages.issubset(retrieved_pages)
+        selected_pages = {(r["sha256"], r["pdf_page"]) for r in pages}
+        evidence_matches = [any(
+            pointer["pdf_page"] == row["pdf_page"] and pointer["sha256"] == row["sha256"]
+            and (row["sha256"], row["pdf_page"]) in selected_pages
+            and _normalize_excerpt(pointer["quote"]) in _normalize_excerpt(row.get("text", ""))
+            for row in results
+        ) for pointer in item["evidence"]]
+        complete_evidence = bool(evidence_matches) and all(evidence_matches)
         page_hits += page_hit
         document_hits += document_hit
         complete_multi_page += all_pages
@@ -56,8 +74,8 @@ def evaluate(database: Path, gold_path: Path, k: int = 5,
             "page_hit_at_k": page_hit, "chunk_page_hit_at_k": chunk_page_hit,
             "document_hit_at_k": document_hit, "unique_document_hit_at_k": unique_document_hit,
             "all_evidence_pages_at_k": all_pages,
-            "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
-                              else "target_document_retrieved_wrong_page"),
+            "complete_evidence": complete_evidence,
+            "failure_class": _failure_class(page_hit, document_hit, complete_evidence),
             "chunk_results": [_trace_row(r) for r in chunk_top],
             "page_results": [_trace_row(r) for r in pages],
         })
@@ -248,8 +266,7 @@ def compare_modes(database: Path, gold_path: Path, k: int = 5,
                           "expected_pages": sorted([list(page) for page in expected_pages]),
                           "page_hit": page_hit, "chunk_page_hit": chunk_page_hit,
                           "document_hit": document_hit, "unique_document_hit": unique_document_hit,
-                          "failure_class": ("hit" if page_hit else "target_document_not_retrieved" if not document_hit
-                                            else "target_document_retrieved_wrong_page"),
+                          "failure_class": _failure_class(page_hit, document_hit, complete_evidence),
                           "all_evidence_pages": all_pages,
                           "complete_evidence": complete_evidence,
                           "evidence_items_found": sum(evidence_matches),
