@@ -84,3 +84,19 @@ def test_legacy_index_jobs_migrate_to_local_dev_owner(tmp_path):
     job = jobs.get_job(database, "legacy-job", "local-dev")
     assert job["owner_id"] == "local-dev"
     assert jobs.get_job(database, "legacy-job", "user-a") is None
+
+
+def test_recover_jobs_emits_only_for_running_to_queued_transition(tmp_path, monkeypatch):
+    import json
+    target = tmp_path / "trace.jsonl"
+    monkeypatch.setenv("PAPERTRAIL_TRACE_JSONL", str(target))
+    database = tmp_path / "resume.sqlite3"
+    with jobs._connect(database) as conn:
+        conn.execute("INSERT INTO index_jobs VALUES(?,?,?,?,?,?,?,?,?)",
+                     ("running-job", "running", "{}", "{}", 1, None, "now", "now", "local-dev"))
+    assert jobs.recover_jobs(database) == 1
+    assert jobs.recover_jobs(database) == 0
+    rows = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
+    assert len(rows) == 1
+    assert rows[0]["event_name"] == "checkpoint_resume"
+    assert rows[0]["resumed_count"] == 1

@@ -2,6 +2,8 @@ import json
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+import pytest
+
 from papertrail.local_llm import ModelResponseTruncated, chat_json
 
 
@@ -36,6 +38,24 @@ def test_local_chat_client_uses_loopback_ollama_json_api(monkeypatch):
     assert seen["path"] == "/api/chat"
     assert seen["payload"]["model"] == "local-test-model"
     assert seen["payload"]["format"] == "json"
+
+
+def test_timeout_and_budget_guards_emit_trace_without_network(tmp_path, monkeypatch):
+    import json
+    import papertrail.local_llm as llm
+    from papertrail.local_llm import model_turn_budget
+
+    target = tmp_path / "trace.jsonl"
+    monkeypatch.setenv("PAPERTRAIL_TRACE_JSONL", str(target))
+    monkeypatch.setattr(llm, "urlopen", lambda *_args, **_kwargs: (_ for _ in ()).throw(TimeoutError()))
+    with pytest.raises(RuntimeError):
+        llm.chat_json("synthetic-model", "system", "prompt")
+    with model_turn_budget() as budget:
+        budget["calls"] = budget["max_calls"]
+        with pytest.raises(RuntimeError):
+            llm._reserve_turn_call("system", "prompt")
+    rows = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
+    assert [row["event_name"] for row in rows] == ["timeout", "budget_exceeded"]
 
 
 def test_ollama_json_contract_with_injected_transport(monkeypatch):

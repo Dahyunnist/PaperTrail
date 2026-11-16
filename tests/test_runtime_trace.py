@@ -31,3 +31,19 @@ def test_trace_writer_does_nothing_without_explicit_path(tmp_path, monkeypatch):
     monkeypatch.delenv("PAPERTRAIL_TRACE_JSONL", raising=False)
     trace.emit("human.reviewed", label="supports")
     assert list(tmp_path.iterdir()) == []
+
+
+def test_new_lifecycle_events_match_manifest_schema(tmp_path, monkeypatch):
+    from papertrail.run_manifest import validate_trace_event
+
+    target = tmp_path / "trace.jsonl"
+    monkeypatch.setenv("PAPERTRAIL_TRACE_JSONL", str(target))
+    trace.emit("timeout", operation="model_request", provider="ollama", path="private")
+    trace.emit("retry", operation="claim_generation", attempt=2)
+    trace.emit("budget_exceeded", budget_type="model_calls", limit=16)
+    trace.emit("checkpoint_resume", component="index_jobs", resumed_count=1)
+    rows = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
+    assert [row["event_name"] for row in rows] == [
+        "timeout", "retry", "budget_exceeded", "checkpoint_resume"]
+    assert all(validate_trace_event(row) == [] for row in rows)
+    assert all("path" not in row for row in rows)

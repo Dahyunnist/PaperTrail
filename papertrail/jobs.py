@@ -40,7 +40,11 @@ def _connect(database: Path) -> sqlite3.Connection:
 def recover_jobs(database: Path) -> int:
     with _connect(database) as conn:
         cursor = conn.execute("UPDATE index_jobs SET state='queued',updated_at=? WHERE state='running'", (_now(),))
-        return cursor.rowcount
+        resumed_count = cursor.rowcount
+    if resumed_count:
+        from .trace import emit
+        emit("checkpoint_resume", component="index_jobs", resumed_count=resumed_count)
+    return resumed_count
 
 
 def enqueue_index(database: Path, sources: Path, selection: Path,

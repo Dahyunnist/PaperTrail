@@ -7,7 +7,7 @@ from typing import Any
 
 EVENT_NAMES = {"retrieval.completed", "rerank.completed", "generation.completed",
                "citation.validated", "access.checked", "human.reviewed", "evaluation.failed",
-               "evaluation.usage"}
+               "evaluation.usage", "timeout", "retry", "budget_exceeded", "checkpoint_resume"}
 FORBIDDEN_KEYS = {"prompt", "raw_prompt", "full_text", "document_text", "api_key", "secret", "token", "path", "absolute_path"}
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -88,6 +88,30 @@ def validate_trace_event(row: dict[str, Any]) -> list[str]:
         from .trace import _ALLOWED
         allowed = {"run_id", "trace_id", "span_id", "event_name", "timestamp"} | _ALLOWED[row["event_name"]]
         issues.extend(f"unsupported_field:{key}" for key in sorted(row.keys() - allowed))
+        specs = {
+            "timeout": ("operation", "provider"),
+            "retry": ("operation", "attempt"),
+            "budget_exceeded": ("budget_type", "limit"),
+            "checkpoint_resume": ("component", "resumed_count"),
+        }
+        if row["event_name"] in specs:
+            first, second = specs[row["event_name"]]
+            if not isinstance(row.get(first), str) or not row[first].strip():
+                issues.append(f"invalid:{first}")
+            value = row.get(second)
+            if row["event_name"] == "retry":
+                if type(value) is not int or value < 2:
+                    issues.append("invalid:attempt")
+            elif row["event_name"] == "budget_exceeded":
+                if (not isinstance(value, (int, float, str)) or isinstance(value, bool)
+                        or (isinstance(value, (int, float)) and value <= 0)
+                        or (isinstance(value, str) and not value)):
+                    issues.append("invalid:limit")
+            elif row["event_name"] == "checkpoint_resume":
+                if type(value) is not int or value < 1:
+                    issues.append("invalid:resumed_count")
+            elif not isinstance(value, str) or not value.strip():
+                issues.append("invalid:provider")
         if row["event_name"] == "evaluation.usage":
             if (type(row.get("request_count")) is not int or row["request_count"] != 0
                     or type(row.get("response_count")) is not int or row["response_count"] != 0

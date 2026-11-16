@@ -391,8 +391,9 @@ def test_exact_serial_question_requires_a_cited_serial_value():
     assert not qa._exact_serial_not_found("Which GPU model did they use?", [])
 
 
-def test_empty_generation_gets_one_cited_retry(monkeypatch):
+def test_empty_generation_gets_one_cited_retry(tmp_path, monkeypatch):
     import papertrail.qa as qa
+    import json
 
     outputs = iter([
         {"claims": [], "_usage": {"prompt_eval_count": 10}},
@@ -402,6 +403,8 @@ def test_empty_generation_gets_one_cited_retry(monkeypatch):
          "coverage_complete": True, "coverage_requirements": ["calibration"], "coverage_gaps": [],
          "_usage": {"prompt_eval_count": 14}},
     ])
+    trace_path = tmp_path / "retry-trace.jsonl"
+    monkeypatch.setenv("PAPERTRAIL_TRACE_JSONL", str(trace_path))
     monkeypatch.setattr(qa, "chat_json", lambda *_args, **_kwargs: next(outputs))
     result = qa._synthesize_local("What does the method use?", [{
         "quote": "The method uses calibration to assess uncertainty.",
@@ -409,6 +412,9 @@ def test_empty_generation_gets_one_cited_retry(monkeypatch):
     assert result["generation_retry_used"] is True
     assert result["claims"][0]["support"] == "supported"
     assert result["usage"]["prompt_eval_count"] == 36
+    event = json.loads(trace_path.read_text(encoding="utf-8"))
+    assert (event["event_name"], event["operation"], event["attempt"]) == (
+        "retry", "claim_generation", 2)
 
 
 def test_truncated_generation_gets_one_compact_retry_and_counts_both_calls(monkeypatch):

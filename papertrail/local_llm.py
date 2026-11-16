@@ -46,16 +46,19 @@ def model_turn_budget():
 
 
 def _reserve_turn_call(system: str, prompt: str) -> None:
+    from .trace import emit
     budget = _turn_budget.get()
     if budget is None:
         return
     calls = budget["calls"]
     if calls >= _TURN_MAX_CALLS:
+        emit("budget_exceeded", budget_type="model_calls", limit=_TURN_MAX_CALLS)
         raise RuntimeError("QA turn model-call budget reached; request blocked before sending")
     hosted = os.environ.get("PAPERTRAIL_LLM_PROVIDER") == "openai-compatible"
     reserve = (_max_request_cost(len(system) + len(prompt) + len("\nReturn a valid JSON object only."))
                if hosted else 0.0)
     if budget["reserved_usd"] + reserve > _TURN_MAX_COST_USD:
+        emit("budget_exceeded", budget_type="turn_cost_usd", limit=_TURN_MAX_COST_USD)
         raise RuntimeError("QA turn model-cost budget reached; request blocked before sending")
     budget["calls"] += 1
     budget["reserved_usd"] = round(budget["reserved_usd"] + reserve, 8)
@@ -79,6 +82,9 @@ def chat_json(model: str, system: str, prompt: str, *, thinking: bool | None = N
         with urlopen(request, timeout=float(os.environ.get("PAPERTRAIL_LLM_TIMEOUT", "45"))) as response:
             result = json.loads(response.read())
     except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+        if isinstance(exc, TimeoutError) or isinstance(getattr(exc, "reason", None), TimeoutError):
+            from .trace import emit
+            emit("timeout", operation="model_request", provider="ollama")
         raise RuntimeError(f"本机模型调用失败：{type(exc).__name__}") from exc
     try:
         content = json.loads(result["message"]["content"])
@@ -137,9 +143,11 @@ def _record_usage(model: str, prompt_chars: int, usage: dict[str, Any], reserved
 
 def _openai_compatible_json(model: str, system: str, prompt: str,
                             *, thinking: bool | None = None) -> dict[str, Any]:
+    from .trace import emit
     system = system + "\nReturn a valid JSON object only."
     prompt_chars = len(system) + len(prompt)
     if prompt_chars > _MAX_PROMPT_CHARS:
+        emit("budget_exceeded", budget_type="prompt_chars", limit=_MAX_PROMPT_CHARS)
         raise RuntimeError("Hosted prompt exceeds 2,400-character safety limit")
     reserved = _max_request_cost(prompt_chars)
     cap = min(_MAX_BUDGET_USD, float(os.environ.get("PAPERTRAIL_LLM_BUDGET_USD", _MAX_BUDGET_USD)))
@@ -149,6 +157,7 @@ def _openai_compatible_json(model: str, system: str, prompt: str,
         _assert_budget_ledger_allows_calls(data)
         spent = float(data.get("spent_upper_bound_usd", 0.0))
     if spent + reserved > cap:
+        emit("budget_exceeded", budget_type="hosted_cost_usd", limit=cap)
         raise RuntimeError("Hosted model budget cap reached; request blocked before sending")
     key_name = os.environ.get("PAPERTRAIL_OPENAI_API_KEY_ENV", "DEEPSEEK_API_KEY")
     api_key = os.environ.get(key_name)
@@ -181,6 +190,9 @@ def _openai_compatible_json(model: str, system: str, prompt: str,
         suffix = f": {detail}" if detail else ""
         raise RuntimeError(f"OpenAI-compatible model request failed: HTTP {exc.code}{suffix}") from None
     except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+        if isinstance(exc, TimeoutError) or isinstance(getattr(exc, "reason", None), TimeoutError):
+            from .trace import emit
+            emit("timeout", operation="model_request", provider="openai-compatible")
         raise RuntimeError(f"OpenAI-compatible model request failed: {type(exc).__name__}") from exc
     usage = result.get("usage", {})
     cost_data = _record_usage(model, prompt_chars, usage, reserved)

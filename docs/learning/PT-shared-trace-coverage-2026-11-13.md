@@ -14,3 +14,9 @@
 现有 `trace.emit` 仅接受 retrieval、rerank、generation、citation、access 和 human review 事件。私有 query、路径、全文、prompt 不进入允许字段。此次不扩展事件协议；先将覆盖边界留档，避免把离线合成测试误报成实跑事件。
 
 本次仅运行 `tests/test_runtime_trace.py`，结果见提交记录；没有模型请求、私人材料读取或运行时异常事件触发。
+
+## 生命周期事件离线补充（2026-11-16）
+
+Trace allowlist 与 manifest validator 新增 `timeout`、`retry`、`budget_exceeded`、`checkpoint_resume` 及标量字段校验。发射点只放在模型客户端捕获超时、QA 启动一次真实修复重试、预算守卫拒绝请求、索引任务从 running 恢复为 queued 的状态转移处。`recover_jobs` 仅在更新行数大于零时发出恢复事件。
+
+合成回归使用 stub 生成器和临时 SQLite；22 项通过，1 项本机 loopback Ollama 测试按选择器排除。没有模型请求或服务端运行记录。`unsafe_action_blocked` 暂无对应危险动作执行/拦截业务路径；`cancel` 暂无任务取消状态转移；二者仍未覆盖，不伪造事件。
